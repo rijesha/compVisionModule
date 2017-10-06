@@ -95,13 +95,15 @@ if __name__ == '__main__':
 
     h, w, img_points, obj_points, foundArray = getPoints(cam1images)
     # calculate camera distortion
-    rms, camera_matrix, dist_coefs, rvecs, tvecs = cv2.calibrateCamera(obj_points, img_points, (w, h), None, None)
+    rms, camera_matrix_1, dist_coefs_1, rvecs, tvecs = cv2.calibrateCamera(obj_points, img_points, (w, h), None, None)
+
+  
 
     print("\nRMS:", rms)
-    print("camera matrix:\n", camera_matrix)
-    print("distortion coefficients: ", dist_coefs.ravel())
+    print("camera matrix:\n", camera_matrix_1)
+    print("distortion coefficients: ", dist_coefs_1.ravel())
 
-
+    
 
     h, w, img_points, obj_points, foundArray= getPoints(cam2images)
     # calculate camera distortion
@@ -110,6 +112,12 @@ if __name__ == '__main__':
     print("\nRMS:", rms)
     print("camera matrix:\n", camera_matrix)
     print("distortion coefficients: ", dist_coefs.ravel())
+
+    data = {"camera_matrix_1": camera_matrix_1.tolist(), "dist_coeff_1": dist_coefs_1.tolist(), "camera_matrix_2": camera_matrix.tolist(), "dist_coeff_2": dist_coefs.tolist()}
+    fname = "cameracalibrationparameters.json"
+    import json
+    with open(fname, "w") as f:
+        json.dump(data, f)
 
     j = 0
     for img in foundArray:
@@ -121,9 +129,9 @@ if __name__ == '__main__':
         # crop and save the image
         x, y, w, h = roi
         dst = dst[y:y+h, x:x+w]
-        outfile = str(j) + '_undistorted.png'
+        outfile = 'output/' +  str(j) + '_undistorted.png'
         print('Undistorted image written to: %s' % outfile)
         cv2.imwrite(outfile, dst)
-        cv2.imwrite(str(j) + '.png', img)
+        cv2.imwrite('output/' + str(j) + '.png', img)
 
     cv2.destroyAllWindows()

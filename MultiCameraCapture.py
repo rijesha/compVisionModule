@@ -28,14 +28,12 @@ class MultiCameraCapture():
 
         self.lastframe = [None, None, None, None]
 
-        print("Making Threads")
         self.cam1TH = threading.Thread(target=self.runner, args=[cam1ID, self.cam1])
         self.cam2TH = threading.Thread(target=self.runner, args=[cam2ID, self.cam2])
 
-        print("starting Threads")
         self.cam1TH.start()
         self.cam2TH.start()
-        print("finished Starting THreads")
+        print("MultiCameraCapture Started")
 
 
     def runner(self, camID, cam):
@@ -55,10 +53,10 @@ class MultiCameraCapture():
         f1 = self.lastframe[self.cam1ID]
         f2 = self.lastframe[self.cam2ID]
         self.lastFrameLock.clear()
-        return (f1, f2)
+        return [f1, f2]
 
 if __name__ == "__main__":
-    dev = MultiCameraCapture(2,1)
+    dev = MultiCameraCapture(1,2)
     time.sleep(2)
     while True:
         frames = dev.getLastFrames()
