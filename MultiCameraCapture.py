@@ -80,6 +80,7 @@ class MultiCameraCapture():
 
         self.leftTH.start()
         self.rightTH.start()
+        time.sleep(2)
 
 
     def runner(self, camID, cam):
