@@ -6,14 +6,11 @@ from contour_utils import *
 from point_utils import *
 import numpy as np
 import cv2
-import codecs, json 
-from tqdm import tqdm, trange
-import math
 from math import *
 from camera_capture import CameraCapture
 from calibrate import *
+
 import time
-from matplotlib import pyplot as plt
 import random
 
 text_file = open("Output.csv", "w")
@@ -31,27 +28,11 @@ def averageXYZcoord(coordslst):
         range = range + math.sqrt(coord[0]*coord[0] + coord[1]*coord[1] + coord[2]*coord[2])
     return range/len(coordslst)
 
-def process_2d_points(pts):
-    if len(pts) != 0:
-        avg_width, top_width, bottom_width = get_pixel_width(pts)
-        avg_height, left_height, right_height = get_pixel_height(pts)
 
-        print((avg_width, avg_height))
-        #get angles
-        hor_ang, vet_ang, expected_width, expected_height = get_angles(avg_width, avg_height, 0.70)
-        depths = get_depths(avg_width, avg_height)
-
-        depth = choose_accurate_depth(depths, hor_ang, vet_ang)
-
-        pts3d = get_3d_points_from_2d_depth(depth, pts)
-
-        return pts3d, hor_ang, vet_ang
-
-
-def click_and_crop(event, x, y, flags, param):
+def get_color_of_frame(event, x, y, flags, param):
     print(frame[y][x])
 
-def click_and_crop3(event, x, y, flags, param):
+def get_color_of_frame3(event, x, y, flags, param):
     if x > 1280:
         x = x -1280
     elif x > 640:
@@ -112,11 +93,11 @@ if __name__ == "__main__":
     cv2.createTrackbar('HighUpperV','control',255,255,nothing)
 
     cv2.namedWindow("cam")
-    cv2.setMouseCallback("cam", click_and_crop)
+    cv2.setMouseCallback("cam", get_color_of_frame)
     cv2.namedWindow("mask")
-    cv2.setMouseCallback("mask", click_and_crop3)
+    cv2.setMouseCallback("mask", get_color_of_frame3)
     cv2.namedWindow("maskmult")
-    cv2.setMouseCallback("maskmult", click_and_crop)
+    cv2.setMouseCallback("maskmult", get_color_of_frame)
 
     while True:
         frame = dev.getLastFrames()[0]
@@ -189,26 +170,37 @@ if __name__ == "__main__":
             pts = order_pts(pts)
             
             #Get points and angles
-            pts3d_from_2d, hor_angle_2d, vert_angle_2d = process_2d_points(pts)
-            #Get depths and distances
-            depth_2d = avg_depth_from_3d(pts3d_from_2d)
-            print(depth_2d)
+            avg_width, top_width, bottom_width = get_pixel_width(pts)
+            avg_height, left_height, right_height = get_pixel_height(pts)
 
-            distance_2d = avg_distance_from_3d(pts3d_from_2d)
+            #get angles
+            horizontal_angle, vertical_angle, expected_width, expected_height, horizontal_ratio, vertical_ratio = get_angles(avg_width, avg_height, 0.70)
+
+            depth_from_width = pixel_length_to_depth(avg_width, 86.5, fitted_m=1.0207, fitted_b=-0.0172)
+            depth_from_height = pixel_length_to_depth(avg_height, 59.5, fitted_m=1.0207, fitted_b=-0.0172)
+            
+            left_distance = pixel_length_to_depth(left_height, 59.5, fitted_m=1.0207, fitted_b=-0.0172)
+            right_distance = pixel_length_to_depth(right_height, 59.5, fitted_m=1.0207, fitted_b=-0.0172)
+
+            horizontal_ratio = get_horizontal_ratio(left_distance, right_distance)
+            
+            depth = depth_from_height
+            pts3d = get_3d_points_from_2d_depth(depth, pts)
+
+            distance = avg_distance_from_3d(pts3d)
             
             #get translations
-            translations_2d = get_avg_translations_from_3d(pts3d_from_2d)
+            translations = get_avg_translations_from_3d(pts3d)
             
             #print(translations_2d, translations_pers, translations_man)
             #get tilt
             tilt = get_2d_tilt(pts)
             
-            experdata = [tilt,  depth_2d, translations_2d[0], translations_2d[1], distance_2d, hor_angle_2d, vert_angle_2d ]
+            experdata = [tilt,  depth, translations[0], translations[1], distance, horizontal_angle, vertical_angle ]
             #print(tilt)
 
 
         cv2.imshow("cam",contourframe)
-        #print(frame[240][320])
         if cv2.waitKey(30) & 0xFF == ord('q'):
             break
         pass
@@ -217,12 +209,11 @@ if __name__ == "__main__":
         if experdata != []:
             saveData = input("Save Data? (yes, YES, y, Y, Yes) \n")
             if saveData in ['yes', 'Yes', 'YES', 'y', 'Y']:
-                setTilt = input("Tilt")
-                setdepth = input("set_depth")
-                setx = input("set_x")
-                sety = input("set_y")
-                horz_rot = input("horz_rot")
-                vert_rot = input("vert_rot")
+                setTilt = input("Tilt?")
+                setdepth = input("depth of target?")
+                setx = input("translations - x?")
+                sety = input("translations - y?")
+                horz_rot = input("horizontal_angle?")
                 userdata = [setdepth, setx, sety, setTilt, horz_rot, vert_rot]
                 strexperdata = ['{:.6f}'.format(x) for x in experdata]
                 csv = ",".join(userdata + strexperdata)
@@ -232,5 +223,5 @@ if __name__ == "__main__":
 
 
 
-    
+    dev.shutdown()
     text_file.close()

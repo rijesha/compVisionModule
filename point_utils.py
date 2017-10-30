@@ -20,7 +20,6 @@ def convert_contour_into_points(contour):
     else :
         return []
     
-
 def swap_smaller_point_left(pts, ind1, ind2, direction,rec = True):
     if pts[ind2][direction] < pts[ind1][direction]:
         temp = pts[ind1]
@@ -78,36 +77,13 @@ def get_pixel_width(ordered_pts):
     avg_width = (top_width + bottom_width)/2
     return avg_width, top_width, bottom_width
 
-def get_angles(avg_width, avg_height, height_to_width_ratio):
-    expected_height = avg_width*height_to_width_ratio
-    expected_width = avg_height/height_to_width_ratio
+def pixel_length_to_depth(pixel_length, one_meter_pixels, fitted_m=1, fitted_b=0):
+    return ((one_meter_pixels / pixel_length) - fitted_b) / fitted_m
 
-    hor_ratio = avg_width/expected_width
-    vert_ratio = avg_height/expected_height
+def get_horizontal_ratio(left_distance, right_distance, physical_width=0.147):
+    return (left_distance - right_distance)/physical_width
 
-    #print("width")
-    #print((avg_width, expected_width))
-    #print(hor_ratio)
-    #print("height")
-    #print((avg_height, expected_height))
-    #print(vert_ratio)
-
-    horizontal_angle = acos(bind_number(hor_ratio,-1,1))
-    veritcal_angle = acos(bind_number(vert_ratio,-1,1))
-
-    return degrees(horizontal_angle), degrees(veritcal_angle), expected_width, expected_height
-
-def get_depths(avg_width, avg_height):
-    data = (120.0/avg_width, 85.0/avg_height)
-    return data
-
-def choose_accurate_depth(depths, hor_angle, vert_angle):
-    if abs(hor_angle) > abs(vert_angle):
-        return depths[1]
-    else:
-        return depths[0]
-
-def get_3d_points_from_2d_depth(depth, pts, cx = 320, cy = 240):
+def get_3d_points_from_2d_depth(depth, pts, cx=320, cy=240):
     pts_3d = []
     for p in pts:
         px = (p[0]-cx)*.002466*depth
@@ -115,75 +91,11 @@ def get_3d_points_from_2d_depth(depth, pts, cx = 320, cy = 240):
         pts_3d.append((px,py,depth))
     return pts_3d
 
-
-def calc_coordinates_from_points(leftpts, rightpts):
-    fx = 677.85791904
-    fy = 677.85791904
-    cx = 356.74900547
-    cy = 231.07630461
-    b = .060
-
-    out = []
-    for i in range(0, len(leftpts)):
-        delta = leftpts[i][0] - rightpts[i][0]
-        z = fx*b/delta
-        x = (leftpts[i][0] - cx)*z/fx
-        y = (leftpts[i][1] - cy)*z/fy
-        out.append((x,y,z))
-    return out
-
-def calc_disparity_from_points(leftpts, rightpts):
-    out = []
-    for i in range(0, len(leftpts)):
-        delta = leftpts[i][0] - rightpts[i][0]
-        out.append([leftpts[i][0],leftpts[i][1],delta])
-
-    return np.array(out, dtype=np.float32)
-
-def avg_depth_from_3d(pts3d):
-    out = 0
-    for i in range(0,len(pts3d)):
-        out = out + pts3d[i][2]
-    return out/len(pts3d)
-
 def avg_distance_from_3d(pts3d):
     out = 0
     for i in range(0,len(pts3d)):
         out = out + sqrt(pow(pts3d[i][0],2) + pow(pts3d[i][1],2) + pow(pts3d[i][2],2))
     return out/len(pts3d)
-
-def get_plane_from_3d_pts(pts3d):
-    #https://stackoverflow.com/questions/12299540/plane-fitting-to-4-or-more-xyz-points
-    xs = []
-    ys = []
-    zs = []
-    i = 0
-    for e in pts3d:
-        xs.append(e[0])
-        ys.append(e[1])
-        zs.append(e[2])
-        i = i + 1
-    
-    xs = np.array(xs, dtype='float')
-    ys = np.array(ys, dtype='float')
-    zs = np.array(zs, dtype='float')
-
-    tmp_A = []
-    tmp_b = []
-
-    for i in range(len(xs)):
-        tmp_A.append([xs[i], ys[i], 1])
-        tmp_b.append(zs[i])
-
-    b = np.matrix(tmp_b).T
-    A = np.matrix(tmp_A)
-    
-    fit = (A.T * A).I * A.T * b
-    #print("%f x + %f y + %f = z" % (fit[0], fit[1], fit[2]))
-    return fit
-
-def get_angles_from_plane(plane):
-    return degrees(atan(plane[0])), degrees(atan(plane[1]))
 
 def get_avg_translations_from_3d(pts3d):
     x = 0
