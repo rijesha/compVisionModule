@@ -24,7 +24,6 @@ class CameraCapture():
         self.lastFrameLock = threading.Event()
         self.lastFrameLock.clear()
 
-        self.output_folder = None
         self.camID = camID
         
         self.replay = False
@@ -51,7 +50,6 @@ class CameraCapture():
 
             if self.shutdown_flag:
                 break
-        
 
     def startCamera(self):
         self.cam = cv2.VideoCapture(self.camID)
@@ -82,7 +80,6 @@ class CameraCapture():
         self.shutdown_flag = True
 
     def getLastFrames(self):
-        
         if self.replay:
             validFrame = False
             while not validFrame:
@@ -98,9 +95,19 @@ class CameraCapture():
             f1 = self.lastframe[self.camID]
             self.lastFrameLock.clear()
             if self.saveImages:
-                cv2.imwrite(self.output_folder + "/" + str(self.framenum) + ".jpg", f1 );
-                self.framenum = self.framenum + 1
+                self.saveFrame()
+                
         return [f1]
+
+    def saveLastFrame(self):
+        self.lastFrameLock.set()
+        f1 = self.lastframe[self.camID]
+        self.lastFrameLock.clear()
+        
+        print(self.output_folder)
+        print(self.framenum)
+        cv2.imwrite(self.output_folder + "/" + str(self.framenum) + ".jpg", f1 )
+        self.framenum = self.framenum + 1
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="MultiCamera caputre device "

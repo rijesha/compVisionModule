@@ -85,6 +85,9 @@ class Calibration_Data():
         self.h = h
         self.rvecs = rvecs
         self.tvecs = tvecs
+        if camera_matrix is not None:
+            self.cx = camera_matrix[0][2]
+            self.cy = camera_matrix[1][2]
 
     def load_data(self, filepath):
         return pickle.load( open( filepath, "rb" ) )

@@ -41,3 +41,9 @@ def getContourXYcoordinates(cnt):
         y.append(pnt[0][1])
 
     return x, y
+
+def averageContourList(contourList):
+    out = contourList[0]
+    for i in range(1, len(contourList)):
+        out = contourList[i] + out
+    return (out/len(contourList)).astype(int)

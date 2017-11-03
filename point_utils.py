@@ -20,25 +20,12 @@ def convert_contour_into_points(contour):
     else :
         return []
     
-def swap_smaller_point_left(pts, ind1, ind2, direction,rec = True):
-    if pts[ind2][direction] < pts[ind1][direction]:
-        temp = pts[ind1]
-        pts[ind1] = pts[ind2]
-        pts[ind2] = temp
-
-        if ind1 != 0 and rec == True:
-            pts = swap_smaller_point_left(pts, ind1-1,ind2-1, direction)
-    return pts
-
 def order_pts(pts):
-    #order coordinates by x
-    pts = swap_smaller_point_left(pts,0,1,0)
-    pts = swap_smaller_point_left(pts,1,2,0)
-    pts = swap_smaller_point_left(pts,2,3,0)
- 
-    #order coordinates by x and y
-    pts = swap_smaller_point_left(pts,0,1,1, False)
-    pts = swap_smaller_point_left(pts,3,2,1, False)
+    #sort from highest to lowest y value
+    pts.sort(key = lambda x: x[1], reverse=True)
+
+    pts[0:2] = sorted(pts[0:2])
+    pts[2:4] = sorted(pts[2:4],reverse=True)
 
     return pts
 
@@ -51,29 +38,29 @@ def get_2d_tilt(pts):
     n.append((pts[0][0] - pts[3][0], pts[0][1] - pts[3][1]))
     m =[]
     p = n[0]
-    m.append(degrees(-atan(p[0]/p[1])))
+    m.append(degrees(-atan(p[1]/p[0])))
     p = n[1]
-    m.append(degrees(atan(p[1]/p[0])))
+    m.append(degrees(atan(p[0]/p[1])))
     p = n[2]
-    m.append(degrees(-atan(p[0]/p[1])))
+    m.append(degrees(-atan(p[1]/p[0])))
     p = n[3]
-    m.append(degrees(atan(p[1]/p[0])))
-
+    m.append(degrees(atan(p[0]/p[1])))
     m = sum(m)/len(m)
+
     return m
 
 def get_distance_between_2_points(p1, p2):
     return sqrt(pow(p1[0]-p2[0],2) + pow(p1[1]-p2[1],2))
 
 def get_pixel_height(ordered_pts):
-    left_height = get_distance_between_2_points(ordered_pts[0], ordered_pts[1])
-    right_height = get_distance_between_2_points(ordered_pts[2], ordered_pts[3])
+    left_height = get_distance_between_2_points(ordered_pts[0], ordered_pts[3])
+    right_height = get_distance_between_2_points(ordered_pts[1], ordered_pts[2])
     avg_height = (left_height + right_height)/2
     return avg_height, left_height, right_height
 
 def get_pixel_width(ordered_pts):
-    top_width = get_distance_between_2_points(ordered_pts[2], ordered_pts[1])
-    bottom_width = get_distance_between_2_points(ordered_pts[0], ordered_pts[3])
+    top_width = get_distance_between_2_points(ordered_pts[2], ordered_pts[3])
+    bottom_width = get_distance_between_2_points(ordered_pts[0], ordered_pts[1])
     avg_width = (top_width + bottom_width)/2
     return avg_width, top_width, bottom_width
 
@@ -83,11 +70,14 @@ def pixel_length_to_depth(pixel_length, one_meter_pixels, fitted_m=1, fitted_b=0
 def get_horizontal_ratio(left_distance, right_distance, physical_width=0.147):
     return (left_distance - right_distance)/physical_width
 
-def get_3d_points_from_2d_depth(depth, pts, cx=320, cy=240):
+def pixel_length_to_meters(pixel_length, depth, meters_per_pixel):
+    return pixel_length*depth*meters_per_pixel
+
+def get_3d_points_from_2d_depth(depth, pts, meters_per_pixel=0.001699422, cx=320, cy=240):
     pts_3d = []
     for p in pts:
-        px = (p[0]-cx)*.002466*depth
-        py = (p[1]-cy)*.002466*depth
+        px = pixel_length_to_meters(p[0]-cx, depth, meters_per_pixel)
+        py = pixel_length_to_meters(p[1]-cy, depth, meters_per_pixel)
         pts_3d.append((px,py,depth))
     return pts_3d
 

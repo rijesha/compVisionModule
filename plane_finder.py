@@ -13,21 +13,10 @@ from calibrate import *
 import time
 import random
 
-text_file = open("Output.csv", "w")
-
-csvHeader = "inputdepth, inputx, inputy, tilt, horz_rot, vert_rot, calc_tilt, depth2d, depthpers, depthman, x2d, xpers, xman, y2d, ypers, yman, range2d, rangepers, rangeman, hor2d, horpers, horman, vert2d, vertpers, vertman\n"
-text_file.write(csvHeader)
 
 frame = None
-    
-def averageXYZcoord(coordslst):
-    range = 0
-    if len(coordslst) == 0:
-        return
-    for coord in coordslst:
-        range = range + math.sqrt(coord[0]*coord[0] + coord[1]*coord[1] + coord[2]*coord[2])
-    return range/len(coordslst)
-
+text_file = None
+contour_buffer = []
 
 def get_color_of_frame(event, x, y, flags, param):
     print(frame[y][x])
@@ -48,6 +37,8 @@ if __name__ == "__main__":
     parser.add_argument("--devices", type=int, nargs=1, help="Device numbers "
                         "for the cameras that should be accessed in order "
                         " (left, right).")
+    parser.add_argument("--acquire_user_data", action='store_true', help="prompts user for ground truth "
+                        "references and saves data to timestamped csv ")
     parser.add_argument("--output_folder",
                         help="Folder to write output images to.")
     parser.add_argument("--input_folder",
@@ -61,7 +52,8 @@ if __name__ == "__main__":
     if args.devices:
         d1 = args.devices[0]
 
-    dev = CameraCapture(d1)
+    
+    dev = CameraCapture(d1, output_folder="output")
 
     calib_data = Calibration_Data().load_data('calibration.p')
     print(calib_data)
@@ -77,7 +69,7 @@ if __name__ == "__main__":
     cv2.createTrackbar('HighUpperH','Hue Ranges',20,30,nothing)
     
 
-    cv2.createTrackbar('LowLowerS','control',160,255,nothing)
+    cv2.createTrackbar('LowLowerS','control',255,255,nothing)
     cv2.createTrackbar('LowUpperS','control',255,255,nothing)
     cv2.createTrackbar('LowLowerV','control',40,255,nothing)
     cv2.createTrackbar('LowUpperV','control',255,255,nothing)
@@ -149,21 +141,40 @@ if __name__ == "__main__":
         maskmult = cv2.bitwise_or(cv2.bitwise_or(lowmask, midmask), highmask)
         notused, contours, left_hierarchy = cv2.findContours(maskmult,cv2.RETR_LIST,cv2.CHAIN_APPROX_SIMPLE)
         
-        
         maskmult = cv2.cvtColor(maskmult, cv2.COLOR_GRAY2BGR)
         maskmult = cv2.drawContours(maskmult, contours, -1, (0,255,0), 3)
         cv2.imshow("maskmult",maskmult)
         
         contours = findRectangles(contours)
-        contours, area = get_largest_contour(contours)
-        if len(contours) == 0:
-            contours = contours
+        contour, area = get_largest_contour(contours)
+        if len(contour) == 0:
+            contour = contour
             pts = None
+            contourframe = cv2.drawContours(original, contour, -1, (0,255,0), 3)
         else:
-            contours = [contours]
-            pts = convert_contour_into_points(contours[0])
+            pts = convert_contour_into_points(contour)
+            pts = order_pts(pts)
+            
+            contour[0] = np.resize(np.array(list(pts[0])),(1,2))
+            contour[1] = np.resize(np.array(list(pts[1])),(1,2))
+            contour[2] = np.resize(np.array(list(pts[2])),(1,2))
+            contour[3] = np.resize(np.array(list(pts[3])),(1,2))
 
-        contourframe = cv2.drawContours(original, contours, -1, (0,255,0), 3)
+            contour_buffer.append(contour)
+            if len(contour_buffer) == 2:
+                contour = averageContourList(contour_buffer)
+                contour_buffer.pop(0)
+            pts = convert_contour_into_points(contour)
+            pts = order_pts(pts)
+            
+            contour = [contour]
+            contourframe = cv2.drawContours(original, contour, -1, (0,255,0), 3)
+            contourframe = cv2.circle(contourframe,pts[0],5, (0,0,255), 3)
+            contourframe = cv2.circle(contourframe,pts[1],5, (0,255,0), 3)
+            contourframe = cv2.circle(contourframe,pts[2],5, (255,0,0), 3)
+            
+
+        
 
         experdata = []
         if pts != None and len(pts) == 4 :
@@ -172,9 +183,6 @@ if __name__ == "__main__":
             #Get points and angles
             avg_width, top_width, bottom_width = get_pixel_width(pts)
             avg_height, left_height, right_height = get_pixel_height(pts)
-
-            #get angles
-            horizontal_angle, vertical_angle, expected_width, expected_height, horizontal_ratio, vertical_ratio = get_angles(avg_width, avg_height, 0.70)
 
             depth_from_width = pixel_length_to_depth(avg_width, 86.5, fitted_m=1.0207, fitted_b=-0.0172)
             depth_from_height = pixel_length_to_depth(avg_height, 59.5, fitted_m=1.0207, fitted_b=-0.0172)
@@ -185,43 +193,49 @@ if __name__ == "__main__":
             horizontal_ratio = get_horizontal_ratio(left_distance, right_distance)
             
             depth = depth_from_height
-            pts3d = get_3d_points_from_2d_depth(depth, pts)
-
-            distance = avg_distance_from_3d(pts3d)
+            #print(depth)
+            pts3d = get_3d_points_from_2d_depth(depth, pts, cx=calib_data.camera_matrix[0][2],cy=calib_data.camera_matrix[1][2])
+            #pixel_length_to_meters(avg_height, depth, meters_per_pixel=0.0017478992)
             
+            distance = avg_distance_from_3d(pts3d)
             #get translations
             translations = get_avg_translations_from_3d(pts3d)
             
-            #print(translations_2d, translations_pers, translations_man)
             #get tilt
             tilt = get_2d_tilt(pts)
-            
-            experdata = [tilt,  depth, translations[0], translations[1], distance, horizontal_angle, vertical_angle ]
+            experdata = [tilt,  depth, translations[0], translations[1], distance, horizontal_ratio]
             #print(tilt)
-
+            
 
         cv2.imshow("cam",contourframe)
         if cv2.waitKey(30) & 0xFF == ord('q'):
             break
         pass
 
-        experdata = []
-        if experdata != []:
+        if experdata != [] and args.acquire_user_data:
             saveData = input("Save Data? (yes, YES, y, Y, Yes) \n")
             if saveData in ['yes', 'Yes', 'YES', 'y', 'Y']:
+                if text_file is None:
+                    timestr = time.strftime("%Y%m%d-%H%M%S") + ".csv"
+                    text_file = open(timestr, "w")
+
+                    csvHeader = "setdepth, setx, sety, setTilt, sethorz_rot, tilt,  depth, translations[0], translations[1], distance, horizontal_ratio, pts\n"
+                    text_file.write(csvHeader)
+
+                dev.saveLastFrame()
                 setTilt = input("Tilt?")
                 setdepth = input("depth of target?")
                 setx = input("translations - x?")
                 sety = input("translations - y?")
                 horz_rot = input("horizontal_angle?")
-                userdata = [setdepth, setx, sety, setTilt, horz_rot, vert_rot]
+                userdata = [setdepth, setx, sety, setTilt, horz_rot]
                 strexperdata = ['{:.6f}'.format(x) for x in experdata]
-                csv = ",".join(userdata + strexperdata)
+                csv = ",".join(userdata + strexperdata + [str(pts)])
                 print(csv)
                 text_file.write(csv)
                 text_file.write("\n")
 
 
-
     dev.shutdown()
-    text_file.close()
+    if text_file is not None:
+        text_file.close()
