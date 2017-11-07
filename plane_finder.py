@@ -203,7 +203,7 @@ if __name__ == "__main__":
             
             #get tilt
             tilt = get_2d_tilt(pts)
-            experdata = [tilt,  depth, translations[0], translations[1], distance, horizontal_ratio]
+            experdata = [tilt,  depth, translations[0], translations[1], distance, horizontal_ratio, area]
             #print(tilt)
             
 
@@ -219,7 +219,7 @@ if __name__ == "__main__":
                     timestr = time.strftime("%Y%m%d-%H%M%S") + ".csv"
                     text_file = open(timestr, "w")
 
-                    csvHeader = "setdepth, setx, sety, setTilt, sethorz_rot, tilt,  depth, translations[0], translations[1], distance, horizontal_ratio, pts\n"
+                    csvHeader = "setdepth, setx, sety, setTilt, sethorz_rot, tilt,  depth, translations[0], translations[1], distance, horizontal_ratio, area, pts\n"
                     text_file.write(csvHeader)
 
                 dev.saveLastFrame()
