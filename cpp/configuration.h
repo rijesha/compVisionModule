@@ -1,0 +1,13 @@
+#ifndef CONFIGURATION_H
+#define CONFIGURATION_H
+#include <opencv2/opencv.hpp>
+
+Scalar MASK_1_LOWER_BOUND(1 , 255, 40 );
+Scalar MASK_1_UPPER_BOUND(6 , 255, 255);
+Scalar MASK_2_LOWER_BOUND(5 , 105, 130);
+Scalar MASK_2_UPPER_BOUND(10, 255, 255);
+Scalar MASK_3_LOWER_BOUND(10, 60 , 191);
+Scalar MASK_3_UPPER_BOUND(20, 255, 255);
+
+
+#endif /* CONFIGURATION_H */
