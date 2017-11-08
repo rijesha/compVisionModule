@@ -1,7 +1,9 @@
 #ifndef CONFIGURATION_H
 #define CONFIGURATION_H
+
 #include <opencv2/opencv.hpp>
 
+#define DISPLAY_IMAGE
 
 Scalar MASK_1_LOWER_BOUND(1 , 255, 40 );
 Scalar MASK_1_UPPER_BOUND(6 , 255, 255);

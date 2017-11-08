@@ -51,8 +51,10 @@ int main(int argc, char** argv )
         if (pts.size() > 0)
             Target t(pts);
 
+        #ifdef DISPLAY_IMAGE
         namedWindow("Display Image", WINDOW_AUTOSIZE );
         imshow("Display Image", dstImg);
+        #endif
         
     
         char c = waitKey(30);

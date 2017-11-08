@@ -1,6 +1,9 @@
 #include <cmath>
 #include "target_processor.h"
 
+//#define DEBUG_HEIGHT
+#define PRINT_POSITION
+
 Target::Target(){}
 
 bool Target::sortPointByX (Point i, Point j) { return (i.x < j.x); }
@@ -74,8 +77,12 @@ double Target::getTilt(vector<Point> pts){
 Target::Target(vector<Point> pts){
     sortPoints(pts);
     PixelHeight ph = getPixelHeight(pts);
-    cout << ph.averageHeight << " " << ph.leftHeight << " " <<ph.rightHeight << " " << endl;
     double depth = pixelLengthToDepth(ph.averageHeight, 59.5,        1.0207, -0.0172);
+    
+    #ifdef DEBUG_HEIGHT
+    cout << ph.averageHeight << " " << ph.leftHeight << " " <<ph.rightHeight << " " << endl;
+    #endif
+
     double left_distance = pixelLengthToDepth(ph.leftHeight, 59.5,   1.0207, -0.0172);
     double right_distance = pixelLengthToDepth(ph.rightHeight, 59.5, 1.0207, -0.0172);
 
@@ -88,4 +95,8 @@ Target::Target(vector<Point> pts){
     double areaRatio = actualArea/expectedArea;
     double angle = -117.83* pow(areaRatio,2) + 70.472*areaRatio + 48.863;
     this->angle = ((left_distance > right_distance) ? angle : -angle);
+
+    #ifdef PRINT_POSITION
+    cout << depth << " " << translation.xTranslation << " " << translation.yTranslation << " " << angle << endl;
+    #endif
 }
