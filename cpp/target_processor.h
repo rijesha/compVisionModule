@@ -37,6 +37,8 @@ public:
     vector<Point> pts;
     vector<Point3d> pts3d;
     Translation translation;
+    double angle;
+    double time;
 };
 
 #endif /* TARGETPROCESSOR_H */

@@ -72,7 +72,6 @@ double Target::getTilt(vector<Point> pts){
 }
 
 Target::Target(vector<Point> pts){
-    cout << "New Points" << endl;
     sortPoints(pts);
     PixelHeight ph = getPixelHeight(pts);
     cout << ph.averageHeight << " " << ph.leftHeight << " " <<ph.rightHeight << " " << endl;
@@ -80,9 +79,13 @@ Target::Target(vector<Point> pts){
     double left_distance = pixelLengthToDepth(ph.leftHeight, 59.5,   1.0207, -0.0172);
     double right_distance = pixelLengthToDepth(ph.rightHeight, 59.5, 1.0207, -0.0172);
 
-    double largest = ((left_distance > right_distance) ? 1 : -1);
     vector<Point3d> pts3d = get3DPoints(depth, pts, 0.001699422, 320, 240);
     Translation translation = getTranslation(pts3d);
     this->pts3d = pts3d;
     this->translation = translation;
+    double expectedArea = 5124.4528445*pow(depth,-2.022765);
+    double actualArea = contourArea(pts);
+    double areaRatio = actualArea/expectedArea;
+    double angle = -117.83* pow(areaRatio,2) + 70.472*areaRatio + 48.863;
+    this->angle = ((left_distance > right_distance) ? angle : -angle);
 }
