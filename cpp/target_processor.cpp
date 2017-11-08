@@ -79,7 +79,7 @@ Target::Target(vector<Point> pts){
     double left_distance = pixelLengthToDepth(ph.leftHeight, 59.5,   1.0207, -0.0172);
     double right_distance = pixelLengthToDepth(ph.rightHeight, 59.5, 1.0207, -0.0172);
 
-    vector<Point3d> pts3d = get3DPoints(depth, pts, 0.001699422, 320, 240);
+    vector<Point3d> pts3d = get3DPoints(depth, pts, 0.001699422, 324.16405438, 246.27208573);
     Translation translation = getTranslation(pts3d);
     this->pts3d = pts3d;
     this->translation = translation;
