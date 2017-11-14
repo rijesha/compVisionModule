@@ -132,7 +132,7 @@ if __name__ == '__main__':
     args, img_mask = getopt.getopt(sys.argv[1:], '', ['debug=', 'square_size='])
     args = dict(args)
     args.setdefault('--debug', './output/')
-    args.setdefault('--square_size', 1.0)
+    args.setdefault('--square_size', 3.1)
     
 
     debug_dir = args.get('--debug')
@@ -161,7 +161,7 @@ if __name__ == '__main__':
                 calib_data = calib_params.calibrate(print_raw_results = False)
                 print(calib_data.rms)
                 i = i + 1
-                if calib_data.rms < 4 and i > 20:
+                if calib_data.rms < 4 and i > 30:
                     keep_looping = False
             
             lastupdatetime = getCurrentMillis()

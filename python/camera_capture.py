@@ -58,6 +58,11 @@ class CameraCapture():
         if (self.cam.isOpened()== False): 
             print("Error Cam failed to open")
             exit()
+        width = 1280;
+        height = 960;
+
+        self.cam.set(3,width)
+        self.cam.set(4,height)
 
         self.lastframe = [None, None, None, None]
 
