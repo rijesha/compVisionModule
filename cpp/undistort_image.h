@@ -21,7 +21,7 @@ private:
 public:
     UndistortImage();
     UndistortImage(CameraParameters camparams);
-    void undistortAcquiredImage(Mat img, Mat dstImg);
+    Mat undistortAcquiredImage(Mat img, Mat dstImg);
 };
 
 #endif /* UNDISTORTIMAGE_H */
