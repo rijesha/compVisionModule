@@ -89,6 +89,22 @@ class Calibration_Data():
             self.cx = camera_matrix[0][2]
             self.cy = camera_matrix[1][2]
 
+    def write_header_file(self):
+        cm = tuple(self.camera_matrix.flatten().tolist())
+        dc = tuple(self.dist_coefs.flatten().tolist())
+
+        camline = 'Mat CAMPARAMS_CAMERA_MATRIX = (Mat_<double>(3,3) << {}, {}, {}, {}, {}, {}, {}, {}, {});\n'.format(*cm)
+        print(camline)
+        dcline = 'Mat CAMPARAMS_DIST_COEFS = (Mat_<double>(1,5) << {},  {}, {}, {}, {});\n'.format(*dc)
+        print(dcline)
+        
+        text_file = open("camParams.h", "w")
+        text_file.write('//CameraParameters for width = {}, height = {}, with pixel rms = {} \n'.format(self.w, self.h, self.rms))
+        text_file.write(camline)
+        text_file.write(dcline)
+        text_file.close()
+        
+
     def load_data(self, filepath):
         return pickle.load( open( filepath, "rb" ) )
 
@@ -146,7 +162,7 @@ if __name__ == '__main__':
 
     camimages = []
     keep_looping = True
-    calib_params = Find_Calibration_Parameters()
+    calib_params = Find_Calibration_Parameters(square_size = square_size)
     lastupdatetime = getCurrentMillis()
     i = 0
 
@@ -154,10 +170,12 @@ if __name__ == '__main__':
         img = dev.getLastFrames()[0]
         cv2.imshow("cam",img)
 
-        if (getCurrentMillis() - lastupdatetime) > 1000:
+        if (getCurrentMillis() - lastupdatetime) > 2500:
+            cv2.imwrite("calibrationImages/" + str(i) + ".jpg", img)
             ret = calib_params.process_new_image(img)
             if ret is not None:
                 cv2.imshow("cam",ret)
+                cv2.imwrite("calibrationImages/" + str(i) + "_chessboard.jpg", ret)
                 calib_data = calib_params.calibrate(print_raw_results = False)
                 print(calib_data.rms)
                 i = i + 1
@@ -171,6 +189,7 @@ if __name__ == '__main__':
 
 
     print(calib_data)
+    calib_data.write_header_file()
     undistorter = Undistort_Image(calib_data)
 
     while True:
