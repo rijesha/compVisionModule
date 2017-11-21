@@ -1,5 +1,6 @@
 #include "aruco_processor.h"
 
+ArUcoProcessor::ArUcoProcessor(){}
 
 ArUcoProcessor::ArUcoProcessor(CameraParameters camparams, float targetSize, PREDEFINED_DICTIONARY_NAME dictionaryName){
     this->dictionary = getPredefinedDictionary(dictionaryName);
@@ -61,14 +62,24 @@ void ArUcoProcessor::calcEulerAngles(){
                                eulersAngles);
 }
 
-void ArUcoProcessor::drawMarkersAndAxis(Mat image, bool alsoDrawAxis){
+string ArUcoProcessor::getInfoString(){
+    stringstream output;
+    output << tvecs[0][0] << ',' << tvecs[0][1] << ',' << tvecs[0][2] << ',';
+    output << eulersAngles[0] << ',' << eulersAngles[1] << ',' << eulersAngles[2] << ',';
+    output << worldPos.at<double>(0) << ',' << worldPos.at<double>(1) << ',' << worldPos.at<double>(2) << endl;
+    return output.str();
+}
+
+Mat ArUcoProcessor::drawMarkersAndAxis(Mat image, bool alsoDrawAxis){
+    Mat out = image.clone();
     if (foundMarkers){
-        drawDetectedMarkers(image, markerCorners, markerIds);
+        drawDetectedMarkers(out, markerCorners, markerIds);
         if (alsoDrawAxis){
             for(size_t i=0; i<markerIds.size(); i++)
-                drawAxis(image, camparams.camera_matrix, camparams.dist_coefs, rvecs[i], tvecs[i], targetSize);
+                drawAxis(out, camparams.camera_matrix, camparams.dist_coefs, rvecs[i], tvecs[i], targetSize);
         }
     }
+    return out;
 }
 
 

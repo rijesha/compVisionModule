@@ -23,14 +23,16 @@ private:
     float targetSize;
     void calcEulerAngles();
 public:
+    ArUcoProcessor();
     ArUcoProcessor(CameraParameters camparams, float targetSize, PREDEFINED_DICTIONARY_NAME dictionaryName = DEFAULT_DICTIONARY_NAME);
     ArUcoProcessor(CameraParameters camparams, float targetSize, Ptr<DetectorParameters> detectorParameters, PREDEFINED_DICTIONARY_NAME dictionaryName = DEFAULT_DICTIONARY_NAME);
 
     void processFrame(Mat image);
     void calculatePose();
-    void drawMarkersAndAxis(Mat image, bool drawAxis = true);
+    Mat drawMarkersAndAxis(Mat image, bool drawAxis = true);
     Mat getMarker(int markerNumber = 19,int markerpixels = 600);
-    
+
+    string getInfoString();
 
     vector< int > markerIds;
     vector< vector<Point2f> > markerCorners, rejectedCandidates;
