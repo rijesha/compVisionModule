@@ -12,8 +12,10 @@
 
 using namespace cv;
 
-ofstream testFile;
+ofstream testFile, timingFile;
 string testFileFolder;
+
+clock_t imageAcquisitionTime, markerDetectionTime, posecalculationTime, drawingImageTime, savingImageTime;
 
 VideoCapture vCap;
 UndistortImage ui;
@@ -25,14 +27,18 @@ ArUcoProcessor arProc;
 void processImage(){
     arProc.foundMarkers = false;
     vCap.read(original);
+    imageAcquisitionTime = clock();
     if ( !original.data )
     {
         printf("No image data \n");
     }
 
     arProc.processFrame(original);
+    markerDetectionTime = clock();
     arProc.calculatePose();
+    posecalculationTime = clock();
     image = arProc.drawMarkersAndAxis(original);
+    drawingImageTime = clock();
 }
 
 int main(int argc, const char** argv )
@@ -43,32 +49,54 @@ int main(int argc, const char** argv )
     parser.addArgument("-o", "--output", 1, true);
     parser.addArgument("-w", "--withoutCornerSubPixel", 1, true);
     parser.addArgument("-s", "--saveData", 1, true);
+    parser.addArgument("-t", "--debugTiming", 1, true);
+    parser.addArgument("-q", "--quiet", 1, true);
     parser.parse(argc, argv);
 
     bool runWithoutSubPixel = false;
     string defaultDP = parser.retrieve<string>("w");
     if (defaultDP.length() != 0)
-        runWithoutSubPixel = (stoi( parser.retrieve<string>("w")) == 1);
+        runWithoutSubPixel = (stoi(defaultDP) == 1);
 
     int deviceID = 1;
     string devicestring = parser.retrieve<string>("d");
     if (devicestring.length() != 0)
-        deviceID =stoi( parser.retrieve<string>("d"));
+        deviceID =stoi(devicestring);
     
     bool saveData = false;
     string saveDatastr = parser.retrieve<string>("s");
     if (saveDatastr.length() != 0)
-        saveData =(stoi( parser.retrieve<string>("s")) == 1);
+        saveData =(stoi(saveDatastr) == 1);
+    
+    bool saveTiming = false;
+    string saveTimingstr = parser.retrieve<string>("t");
+    if (saveTimingstr.length() != 0)
+        saveTiming =(stoi(saveTimingstr) == 1);
 
-    testFileFolder = parser.retrieve<string>("output");
-    testFile = ofstream("TestData.csv", ofstream::out);
-    testFile << "imgnum, count, depth, x, y, azimuth, elevation, tvec1, tvec2, tvec3, rvec1, rvec2, rvec3, wpos1, wpos2, wpos3" << endl;
+    bool quiet = false;
+    string quietstr = parser.retrieve<string>("q");
+    if (quietstr.length() != 0)
+        quiet =(stoi(quietstr) == 1);
+
+
+    if (saveData){
+        testFile = ofstream("TestData.csv", ofstream::out);
+        testFile << "imgnum, count, depth, x, y, azimuth, elevation, tvec1, tvec2, tvec3, rvec1, rvec2, rvec3, wpos1, wpos2, wpos3" << endl;
+    }
+    if (saveTiming){
+        timingFile = ofstream("timeData.csv", ofstream::out);
+        timingFile << "veryoverallCout, overallCount, foundMarker, savedImage, markerDetectionTime, posecalculationTime, drawingImageTime, savingImageTime" << endl;
+    }
+    
 
     vCap = VideoCapture(deviceID);
+    vCap.set(CV_CAP_PROP_FRAME_WIDTH,CAM_WIDTH);
+    vCap.set(CV_CAP_PROP_FRAME_HEIGHT,CAM_HEIGHT);
+
 
     CameraParameters camparams;
-    camparams.width = CAMPARAMS_WIDTH;
-    camparams.height = CAMPARAMS_HEIGHT;
+    camparams.width = CAM_WIDTH;
+    camparams.height = CAM_HEIGHT;
     camparams.camera_matrix = CAMPARAMS_CAMERA_MATRIX;
     camparams.dist_coefs = CAMPARAMS_DIST_COEFS;
 
@@ -85,31 +113,23 @@ int main(int argc, const char** argv )
     vCap.read(image);
     Mat dstImg = image.clone();
 
-    vCap.set(CV_CAP_PROP_FRAME_WIDTH,CAM_WIDTH);
-    vCap.set(CV_CAP_PROP_FRAME_HEIGHT,CAM_HEIGHT);
-    
-/*
-    clock_t t1,t2;
-    t1=clock();
-    t2 = clock(); 
-    cout << "seconds : " << ((float)t2-(float)t1) / CLOCKS_PER_SEC << endl;
-    t1=clock();
-    t2=clock(); 
-*/
     string userinput;
     int count = 100;
     int smallcount = 0;
     bool targetReady = false;
     int clearBuffer = 0;
-    int overallCount = 0;
+    int overallCount = 1410;
+    int veryoverallCout = 0;
 
     while(1) {
         processImage();
 
         #ifdef DISPLAY_IMAGE
         namedWindow("Display Image", WINDOW_AUTOSIZE );
-        Mat out;
-        image = ui.undistortAcquiredImage(image, out);
+        if (!saveTiming){
+            Mat out;
+            image = ui.undistortAcquiredImage(image, out);
+        }
         imshow("Display Image", image);
         #endif
 
@@ -117,7 +137,7 @@ int main(int argc, const char** argv )
         if (c == 27 || c == 113){
             break;
         }
-        if (!saveData && arProc.foundMarkers){
+        if (!saveData && arProc.foundMarkers && !quiet){
             cout << arProc.getInfoString();
         }
 
@@ -132,6 +152,7 @@ int main(int argc, const char** argv )
             clearBuffer++;
 
             if (!targetReady) {
+                cout << arProc.getInfoString();
                 cout << "Save current Data? (y/n) or (u) to reinput userdata" << endl;
                 char progress;
                 cin >> progress;
@@ -155,10 +176,29 @@ int main(int argc, const char** argv )
                 cout << "SAVING measurement : " << count << endl;
                 imwrite( "testData/raw/" + to_string(overallCount) + ".jpg", original );
                 imwrite( "testData/undistorted/" + to_string(overallCount) + ".jpg", image );
+                savingImageTime = clock();
                 if (smallcount == 10) {
                     targetReady = false;
                 }
             }
+        }
+
+        if (saveTiming ){
+            veryoverallCout++;
+            if (!saveData){
+                imwrite( "testData/timing/" + to_string(veryoverallCout) + ".jpg", original );
+                savingImageTime = clock();
+            }
+            float mdTime = markerDetectionTime - imageAcquisitionTime;
+            float pcTime = posecalculationTime - markerDetectionTime ;
+            float diTime = drawingImageTime - posecalculationTime;
+            float siTime = savingImageTime - drawingImageTime;
+            
+            stringstream timingData;
+            timingData << arProc.foundMarkers << ','  << (arProc.foundMarkers && saveData)  << ',' << mdTime /CLOCKS_PER_SEC  << ',' ;
+            timingData << pcTime /CLOCKS_PER_SEC << ',' <<  diTime/CLOCKS_PER_SEC << ',' << siTime/CLOCKS_PER_SEC << endl;
+            cout << timingData.str();
+            timingFile << veryoverallCout << ',' << overallCount << ',' << timingData.str();
         }
     }
     

@@ -7,7 +7,7 @@ ArUcoProcessor::ArUcoProcessor(CameraParameters camparams, float targetSize, PRE
 
     this->detectorParameters = new aruco::DetectorParameters;
     detectorParameters->cornerRefinementMethod = CORNER_REFINE_SUBPIX;
-    detectorParameters->cornerRefinementWinSize = 15;  
+    detectorParameters->cornerRefinementWinSize = 5; 
     detectorParameters->cornerRefinementMinAccuracy = .01;
     detectorParameters->cornerRefinementMaxIterations = 200;
 
