@@ -160,11 +160,17 @@ if __name__ == '__main__':
     dev = CameraCapture(1)
     time.sleep(2)
 
+    cv2.namedWindow('cam', cv2.WINDOW_NORMAL)
+    cv2.resizeWindow('cam', 800,600)
+
+
+
     camimages = []
     keep_looping = True
     calib_params = Find_Calibration_Parameters(square_size = square_size)
     lastupdatetime = getCurrentMillis()
     i = 0
+    imgarr = []
 
     while keep_looping:
         img = dev.getLastFrames()[0]
@@ -174,12 +180,13 @@ if __name__ == '__main__':
             cv2.imwrite("calibrationImages/" + str(i) + ".jpg", img)
             ret = calib_params.process_new_image(img)
             if ret is not None:
+                imgarr.append(img)
                 cv2.imshow("cam",ret)
                 cv2.imwrite("calibrationImages/" + str(i) + "_chessboard.jpg", ret)
                 calib_data = calib_params.calibrate(print_raw_results = False)
                 print(calib_data.rms)
                 i = i + 1
-                if calib_data.rms < 4 and i > 30:
+                if calib_data.rms < 4 and i > 15:
                     keep_looping = False
             
             lastupdatetime = getCurrentMillis()
@@ -191,6 +198,14 @@ if __name__ == '__main__':
     print(calib_data)
     calib_data.write_header_file()
     undistorter = Undistort_Image(calib_data)
+
+    cv2.namedWindow("undistorted", cv2.WINDOW_NORMAL)
+    cv2.resizeWindow("undistorted", 800,600)
+
+    i = 0
+    for e in imgarr:
+        cv2.imwrite("calibrationImages/" + str(i) + "_undistorted.jpg", undistorter.crop_and_undistort(e))
+        i = i + 1
 
     while True:
         img = dev.getLastFrames()[0]

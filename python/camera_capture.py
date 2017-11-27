@@ -58,11 +58,11 @@ class CameraCapture():
         if (self.cam.isOpened()== False): 
             print("Error Cam failed to open")
             exit()
-        width = 1280;
-        height = 960;
+        width = 2592;
+        height = 1944;
 
-        self.cam.set(3,width)
-        self.cam.set(4,height)
+        #self.cam.set(3,width)
+        #self.cam.set(4,height)
 
         self.lastframe = [None, None, None, None]
 
@@ -134,9 +134,11 @@ if __name__ == "__main__":
 
     dev = CameraCapture(d1, input_folder=args.input_folder, output_folder=args.output_folder)
     time.sleep(2)
+    cv2.namedWindow('image', cv2.WINDOW_NORMAL)
+    cv2.resizeWindow('image', 800,600)
     while True:
         frames = dev.getLastFrames()
-        cv2.imshow("left",frames[0])
+        cv2.imshow("image",frames[0])
 
         if cv2.waitKey(args.interval) & 0xFF == ord('q'):
             break
