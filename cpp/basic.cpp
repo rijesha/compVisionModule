@@ -9,6 +9,7 @@
 //#include <iostream.h>
 #include <time.h>
 #include "aruco_processor.h"
+#include <unistd.h>
 
 using namespace cv;
 
@@ -85,7 +86,7 @@ int main(int argc, const char** argv )
     }
     if (saveTiming){
         timingFile = ofstream("timeData.csv", ofstream::out);
-        timingFile << "veryoverallCout, overallCount, foundMarker, savedImage, markerDetectionTime, posecalculationTime, drawingImageTime, savingImageTime" << endl;
+        timingFile << "veryoverallCout, overallCount, foundMarker, savedImage, markerDetectionTime, posecalculationTime, drawingImageTime, savingImageTime, depth" << endl;
     }
     
 
@@ -183,7 +184,7 @@ int main(int argc, const char** argv )
             }
         }
 
-        if (saveTiming ){
+        if (saveTiming && arProc.foundMarkers){
             veryoverallCout++;
             if (!saveData){
                 imwrite( "testData/timing/" + to_string(veryoverallCout) + ".jpg", original );
@@ -196,7 +197,7 @@ int main(int argc, const char** argv )
             
             stringstream timingData;
             timingData << arProc.foundMarkers << ','  << (arProc.foundMarkers && saveData)  << ',' << mdTime /CLOCKS_PER_SEC  << ',' ;
-            timingData << pcTime /CLOCKS_PER_SEC << ',' <<  diTime/CLOCKS_PER_SEC << ',' << siTime/CLOCKS_PER_SEC << endl;
+            timingData << pcTime /CLOCKS_PER_SEC << ',' <<  diTime/CLOCKS_PER_SEC << ',' << siTime/CLOCKS_PER_SEC << ',' << arProc.tvecs[0][2] << endl;
             cout << timingData.str();
             timingFile << veryoverallCout << ',' << overallCount << ',' << timingData.str();
         }
