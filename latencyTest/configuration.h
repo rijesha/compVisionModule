@@ -1,0 +1,10 @@
+#ifndef CONFIGURATION_H
+#define CONFIGURATION_H
+
+#define CAM_WIDTH 1280
+#define CAM_HEIGHT 960
+
+#define DEVICE_ID 0
+#define CONSOLESLEEP_SECONDS .005
+
+#endif /* CONFIGURATION_H */
