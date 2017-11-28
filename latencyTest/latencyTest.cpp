@@ -26,15 +26,23 @@ void displayTimeToConsole()
     uint sleeptime = 1000000 * CONSOLESLEEP_SECONDS;
     while (!shutdown){
         usleep(sleeptime);
-        cout << getTimeSinceStart() << endl;
+        cout << getTimeSinceStart() << '\r';
     }
 }
 
 int main(int argc, const char** argv )
 {   
-    thread t1(displayTimeToConsole);
+    
     
     vCap = VideoCapture(DEVICE_ID);
+    //vCap = VideoCapture("v4l2src device=/dev/video1 ! video/x-raw, framerate=30/1, width=640, height=480, format=RGB ! videoconvert ! appsink");
+    
+    if (!vCap.isOpened()){
+        return -1;
+    }
+    system("setterm -cursor off");
+    thread t1(displayTimeToConsole);
+    
     vCap.set(CV_CAP_PROP_FRAME_WIDTH,CAM_WIDTH);
     vCap.set(CV_CAP_PROP_FRAME_HEIGHT,CAM_HEIGHT);
 
@@ -44,10 +52,16 @@ int main(int argc, const char** argv )
         vCap.read(image);
         float currenttime = getTimeSinceStart();
         imwrite( "testImages/" + to_string(currenttime) + ".jpg", image );
-        usleep(250000);
+        int count = 0;
+        while (count < 15){
+            vCap.read(image);
+            count++;
+            
+        }
     }
+    
     shutdown = false;
-    t1.join();
+    //t1.join();
 
     return 0;
 }
