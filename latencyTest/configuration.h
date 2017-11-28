@@ -16,6 +16,6 @@
 */
 
 #define DEVICE_ID 0
-#define CONSOLESLEEP_SECONDS .005
+#define CONSOLESLEEP_SECONDS .0001
 
 #endif /* CONFIGURATION_H */
