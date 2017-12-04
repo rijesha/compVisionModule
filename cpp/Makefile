@@ -1,23 +1,29 @@
 # General
 CC = g++
 
+#t slotted framing
 # Names and flags
 INC_DIR = .
 CSOURCES = $(wildcard *.c )
-CPPSOURCES += $(wildcard *.cpp)
-
-OBJECTS = $(CSOURCES:.c=.o) $(CPPSOURCES:.cpp=.o)
-EXECUTABLE = basic
+CPPSOURCES += aruco_processor.cpp undistort_image.cpp
+COMMON_OBJECTS = $(CSOURCES:.c=.o) $(CPPSOURCES:.cpp=.o)
+IMAGECOLLECTOR_SOURCES = test_data_collection.cpp
+FOLDER_ANALYZER_SOURCES = folder_analyzer.cpp
+EXECUTABLES = test_data_collection folderAnalyzer
 CFLAGS = -c -Wall -g -I$(INC_DIR) -g -DSTANDALONE
-OPENCV = `pkg-config opencv --cflags --libs`
+OPENCV = `pkg-config opencv --cflags --libs `
 LIBS = $(OPENCV)
+LIBS +=  -lboost_system -lboost_filesystem
 
 
 # Targets
-all: $(CSOURCES) $(CPPSOURCES) $(EXECUTABLE)
+all: $(CSOURCES) $(CPPSOURCES) $(EXECUTABLES)
 
-$(EXECUTABLE): $(OBJECTS)
-	$(CC) -pthread $(OBJECTS) -o $@ $(LIBS)
+folderAnalyzer: $(COMMON_OBJECTS) $(FOLDER_ANALYZER_SOURCES)
+	$(CC) -pthread -std=c++11  $(COMMON_OBJECTS) $(FOLDER_ANALYZER_SOURCES) -o $@ $(LIBS) 
+
+test_data_collection: $(COMMON_OBJECTS) $(IMAGECOLLECTOR_SOURCES)
+	$(CC) -pthread -std=c++11 $(COMMON_OBJECTS) $(IMAGECOLLECTOR_SOURCES) -o $@ $(LIBS)
 
 .c.o:
 	$(CC) $(CFLAGS) $(INCLUDES) $< -o $@
@@ -26,5 +32,5 @@ $(EXECUTABLE): $(OBJECTS)
 	$(CC) $(CFLAGS) -std=c++11 $(INCLUDES) $< -o $@
 
 clean:
-	@echo $OBJECTS = $(OBJECTS)
-	rm -rf $(OBJECTS) $(EXECUTABLE)
+	@echo $COMMON_OBJECTS = $(COMMON_OBJECTS)
+	rm -rf $(COMMON_OBJECTS) $(EXECUTABLE)

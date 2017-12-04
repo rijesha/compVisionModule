@@ -93,7 +93,7 @@ int main(int argc, const char** argv )
     vCap = VideoCapture(deviceID);
     vCap.set(CV_CAP_PROP_FRAME_WIDTH,CAM_WIDTH);
     vCap.set(CV_CAP_PROP_FRAME_HEIGHT,CAM_HEIGHT);
-
+    //vCap = VideoCapture("v4l2src device=/dev/video1 ! video/x-raw, framerate=30/1, width=640, height=480, format=YUYV ! videoconvert ! appsink");
 
     CameraParameters camparams;
     camparams.width = CAM_WIDTH;
@@ -119,7 +119,7 @@ int main(int argc, const char** argv )
     int smallcount = 0;
     bool targetReady = false;
     int clearBuffer = 0;
-    int overallCount = 1410;
+    int overallCount = 3300;
     int veryoverallCout = 0;
 
     while(1) {
@@ -129,7 +129,7 @@ int main(int argc, const char** argv )
         namedWindow("Display Image", WINDOW_AUTOSIZE );
         if (!saveTiming){
             Mat out;
-            image = ui.undistortAcquiredImage(image, out);
+            //image = ui.undistortAcquiredImage(image, out);
         }
         imshow("Display Image", image);
         #endif
@@ -144,6 +144,7 @@ int main(int argc, const char** argv )
 
         if (saveData && arProc.foundMarkers){
             if (count == 100){
+                testFile.flush();
                 userinput.clear();
                 cout << "Current Location input as: depth,x,y,azimuth,elevation" << endl;
                 cin >> userinput;

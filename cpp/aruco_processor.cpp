@@ -34,6 +34,17 @@ void ArUcoProcessor::processFrame(Mat image){
 
 void ArUcoProcessor::calculatePose(){
     if (foundMarkers){
+        if (markerIds.size() > 0){
+            vector<Point2f> correctMarker;
+            for (int i = 0; i < markerIds.size(); i++){
+                if (markerIds[i] == 21){
+                    correctMarker = markerCorners[i];
+                    markerCorners.clear();
+                    markerCorners.push_back(correctMarker);
+                }
+            }
+        }
+        
         aruco::estimatePoseSingleMarkers(markerCorners, targetSize, camparams.camera_matrix, camparams.dist_coefs, rvecs, tvecs);
         Rodrigues(rvecs[0],rotMat);
         calcEulerAngles();
@@ -64,6 +75,9 @@ void ArUcoProcessor::calcEulerAngles(){
 
 string ArUcoProcessor::getInfoString(){
     stringstream output;
+    output << std::fixed;
+    output << std::setprecision(5);
+
     output << tvecs[0][0] << ',' << tvecs[0][1] << ',' << tvecs[0][2] << ',';
     output << eulersAngles[0] << ',' << eulersAngles[1] << ',' << eulersAngles[2] << ',';
     output << worldPos.at<double>(0) << ',' << worldPos.at<double>(1) << ',' << worldPos.at<double>(2) << endl;

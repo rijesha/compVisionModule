@@ -6,6 +6,7 @@
 //#define DISPLAY_IMAGE
 
 #define TARGET_WIDTH 0.150
+#define MARKER_ID 21
 
 
 #define CAM_WIDTH 640
