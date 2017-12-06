@@ -16,3 +16,12 @@ cpp/old/
 cpp/testData
 cpp/timeData.csv
 data/
+src/deploy
+src/aruco/timeData.csv
+src/aruco/translations/
+5mpz/
+folderAnalyzer
+lots of data/
+old/
+testData/
+test_data_collection

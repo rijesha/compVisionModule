@@ -3,7 +3,6 @@
 
 #include <iostream>
 #include <stdio.h>
-#include "configuration.h"
 #include <ctime>
 #include <chrono>
 #include <cstring>
@@ -24,43 +23,43 @@ public:
     bool E(void);
     bool F(void);
     static int zzz;
-    virtual bool ComputeDesiredPosition(bool);
-    virtual bool returnNextState();
+    virtual bool ComputeDesiredPosition(bool) = 0;
+    virtual NavigationalState * returnNextState() = 0;
 };
 
-class AutoPilotState : NavigationalState
+class AutoPilotState : public NavigationalState
 {
 public:
     bool ComputeDesiredPosition(bool);
-    NavigationalState returnNextState();
-}
+    NavigationalState * returnNextState();
+};
 
-class InitialApproach : NavigationalState
+class InitialApproach : public NavigationalState
 {
 public:
     bool ComputeDesiredPosition(bool);
-    NavigationalState returnNextState();
-}
+    NavigationalState * returnNextState();
+};
 
-class FinalApproach : NavigationalState
+class FinalApproach : public NavigationalState
 {
 public:
     bool ComputeDesiredPosition(bool);
-    NavigationalState returnNextState();
-}
+    NavigationalState * returnNextState();
+};
 
-class DataAcquisitionState : NavigationalState
+class DataAcquisitionState : public NavigationalState
 {
 public:
     bool ComputeDesiredPosition(bool);
-    NavigationalState returnNextState();
-}
+    NavigationalState * returnNextState();
+};
 
-class PullOutState : NavigationalState
+class PullOutState : public NavigationalState
 {
 public:
     bool ComputeDesiredPosition(bool);
-    NavigationalState returnNextState();
-}
+    NavigationalState * returnNextState();
+};
 
 #endif /* NAVIGATIONAL_STATE_H */

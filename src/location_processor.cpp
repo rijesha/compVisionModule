@@ -50,5 +50,6 @@ bool LocationProcessor::switchToCloseInProcessing(bool closeIn){
         arProc.changeCornerRefinementWindowSize(15);
     else
         arProc.changeCornerRefinementWindowSize(5);
-        
+    
+    return true;
 }
