@@ -12,7 +12,6 @@
 
 using namespace std;
 
-
 class NavigationalState
 {
 public:
@@ -24,7 +23,7 @@ public:
     bool F(void);
     static int zzz;
     virtual bool ComputeDesiredPosition(bool) = 0;
-    virtual NavigationalState * returnNextState() = 0;
+    virtual NavigationalState * returnNextState() = 0;  
 };
 
 class AutoPilotState : public NavigationalState

@@ -20,6 +20,7 @@ bool LocationProcessor::LocationProcessingThread(void){
     while (!shutdownFlag){
         processImage();
     }
+    return true;
 }
 
 void LocationProcessor::Stop(void){

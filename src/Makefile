@@ -1,11 +1,12 @@
 # General
 CC = g++
+MAKEFLAGS += -j
 
 # Names and flags
 INC_DIR = .
 CSOURCES = $(wildcard *.c )
 CPPSOURCES += $(wildcard *.cpp)
-CPPSOURCES += ../aruco/aruco_processor.cpp ../aruco/undistort_image.cpp
+CPPSOURCES += aruco/aruco_processor.cpp aruco/undistort_image.cpp
 
 OBJECTS = $(CSOURCES:.c=.o) $(CPPSOURCES:.cpp=.o)
 EXECUTABLE = deploy

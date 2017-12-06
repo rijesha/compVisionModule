@@ -20,6 +20,8 @@ bool NavigationalState::F(void){
     return false;
 }
 
+int NavigationalState::zzz = 21;// = 21;
+
 NavigationalState * AutoPilotState::returnNextState(){
     return new AutoPilotState();
 }

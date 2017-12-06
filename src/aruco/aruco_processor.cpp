@@ -40,7 +40,7 @@ void ArUcoProcessor::calculatePose(){
     if (foundMarkers){
         if (markerIds.size() > 0){
             vector<Point2f> correctMarker;
-            for (int i = 0; i < markerIds.size(); i++){
+            for (uint i = 0; i < markerIds.size(); i++){
                 if (markerIds[i] == 21){
                     correctMarker = markerCorners[i];
                     markerCorners.clear();
