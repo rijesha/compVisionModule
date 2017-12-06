@@ -24,6 +24,10 @@ ArUcoProcessor::ArUcoProcessor(CameraParameters camparams, float targetSize, Ptr
     foundMarkers = false;
 }
 
+void ArUcoProcessor::changeCornerRefinementWindowSize(int size){
+    detectorParameters->cornerRefinementWinSize = size; 
+}
+
 void ArUcoProcessor::processFrame(Mat image){
     foundMarkers = false;
     vecsUpdated = false;

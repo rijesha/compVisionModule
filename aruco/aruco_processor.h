@@ -27,6 +27,7 @@ public:
     ArUcoProcessor(CameraParameters camparams, float targetSize, PREDEFINED_DICTIONARY_NAME dictionaryName = DEFAULT_DICTIONARY_NAME);
     ArUcoProcessor(CameraParameters camparams, float targetSize, Ptr<DetectorParameters> detectorParameters, PREDEFINED_DICTIONARY_NAME dictionaryName = DEFAULT_DICTIONARY_NAME);
 
+    void changeCornerRefinementWindowSize(int);
     void processFrame(Mat image);
     void calculatePose();
     Mat drawMarkersAndAxis(Mat image, bool drawAxis = true);
