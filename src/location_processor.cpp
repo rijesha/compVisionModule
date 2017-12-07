@@ -9,9 +9,9 @@ LocationProcessor::LocationProcessor(){
     CameraParameters camparams;
     camparams.width = CAM_WIDTH;
     camparams.height = CAM_HEIGHT;
-    camparams.camera_matrix = CAMPARAMS_CAMERA_MATRIX;
-    camparams.dist_coefs = CAMPARAMS_DIST_COEFS;
-
+    camparams.camera_matrix = (Mat_<double>(3,3) << CM_0, CM_1, CM_2, CM_3, CM_4, CM_5, CM_6, CM_7, CM_8);
+    camparams.dist_coefs = (Mat_<double>(1,5) << DC_0, DC_1, DC_2, DC_3, DC_4);
+    cout << camparams.camera_matrix << endl;
     arProc = ArUcoProcessor(camparams, TARGET_WIDTH);
 }
 
