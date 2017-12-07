@@ -28,12 +28,14 @@ private:
     Mat original;
     ArUcoProcessor arProc;
     bool processImage(void);
-    bool shutdownFlag;
-    void Stop(void);
+
+    
 public:
     LocationProcessor();
-    bool LocationProcessingThread(void);
+    void LocationProcessingThread(void);
     bool switchToCloseInProcessing(bool);
+    void Stop(void);
+    bool shutdownFlag;
 };
 
 #endif /* ARUCO_PROCESSOR_H */

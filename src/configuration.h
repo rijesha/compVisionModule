@@ -5,6 +5,7 @@
 using namespace cv;
 
 //#define DISPLAY_IMAGE
+#define PRINT_INFO_STRING
 
 #define DEVICE_ID 0
 
