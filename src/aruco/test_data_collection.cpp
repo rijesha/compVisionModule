@@ -89,7 +89,7 @@ int main(int argc, const char** argv )
 
     if (saveData){
         testFile = ofstream("TestData.csv", ofstream::out);
-        testFile << "imgnum, count, depth, x, y, azimuth, elevation, tvec1, tvec2, tvec3, rvec1, rvec2, rvec3, wpos1, wpos2, wpos3" << endl;
+        testFile << "imgnum, count, depth, azimuth, camera azimuth, tvec1, tvec2, tvec3, rvec1, rvec2, rvec3, wpos1, wpos2, wpos3" << endl;
     }
     if (saveTiming){
         timingFile = ofstream("timeData.csv", ofstream::out);
@@ -161,7 +161,7 @@ int main(int argc, const char** argv )
             if (count == 100){
                 testFile.flush();
                 userinput.clear();
-                cout << "Current Location input as: depth,x,y,azimuth,elevation" << endl;
+                cout << "Current Location input as: depth,azimuth, cameraazimuth" << endl;
                 cin >> userinput;
                 count = 0;
             }
