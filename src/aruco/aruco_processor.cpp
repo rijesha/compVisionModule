@@ -1,4 +1,5 @@
 #include "aruco_processor.h"
+#include <stdlib.h>     /* abs */
 
 ArUcoProcessor::ArUcoProcessor(){}
 
@@ -8,20 +9,28 @@ ArUcoProcessor::ArUcoProcessor(CameraParameters camparams, float targetSize, PRE
     this->detectorParameters = new aruco::DetectorParameters;
     detectorParameters->cornerRefinementMethod = CORNER_REFINE_SUBPIX;
     detectorParameters->cornerRefinementWinSize = 5; 
-    detectorParameters->cornerRefinementMinAccuracy = .01;
-    detectorParameters->cornerRefinementMaxIterations = 200;
+    detectorParameters->cornerRefinementMinAccuracy = .001;
+    detectorParameters->cornerRefinementMaxIterations = 2000;
+    detectorParameters->minMarkerDistanceRate = .001;
+    detectorParameters->adaptiveThreshWinSizeMin = 7;
+    detectorParameters->adaptiveThreshWinSizeMax = 7;
 
     this->camparams = camparams;
     this->targetSize = targetSize;
     foundMarkers = false;
+    lastMarkerTime = clock();
 }
 
 ArUcoProcessor::ArUcoProcessor(CameraParameters camparams, float targetSize, Ptr<DetectorParameters> detectorParameters, PREDEFINED_DICTIONARY_NAME dictionaryName){
     this->dictionary = getPredefinedDictionary(dictionaryName);
     this->detectorParameters = detectorParameters;
+    //detectorParameters->minMarkerDistanceRate = .01;
+    //detectorParameters->adaptiveThreshWinSizeMax = 3;
+    //detectorParameters->adaptiveThreshWinSizeMin = 23;
     this->camparams = camparams;
     this->targetSize = targetSize;
     foundMarkers = false;
+    lastMarkerTime = clock();
 }
 
 void ArUcoProcessor::changeCornerRefinementWindowSize(int size){
@@ -33,29 +42,53 @@ void ArUcoProcessor::processFrame(Mat image){
     vecsUpdated = false;
 
     detectMarkers(image, dictionary, markerCorners, markerIds, detectorParameters);
-    foundMarkers = (markerIds.size() > 0);
-}
-
-void ArUcoProcessor::calculatePose(){
-    if (foundMarkers){
-        if (markerIds.size() > 0){
-            vector<Point2f> correctMarker;
-            for (uint i = 0; i < markerIds.size(); i++){
-                if (markerIds[i] == 21){
-                    correctMarker = markerCorners[i];
-                    markerCorners.clear();
-                    markerCorners.push_back(correctMarker);
-                }
+    if (markerIds.size() > 0){
+        vector<Point2f> correctMarker;
+        for (uint i = 0; i < markerIds.size(); i++){
+            if (markerIds[i] == 21){
+                correctMarker = markerCorners[i];
+                markerCorners.clear();
+                markerCorners.push_back(correctMarker);
+                foundMarkers = true;
             }
         }
-        
-        aruco::estimatePoseSingleMarkers(markerCorners, targetSize, camparams.camera_matrix, camparams.dist_coefs, rvecs, tvecs);
-        Rodrigues(rvecs[0],rotMat);
-        calcEulerAngles();
+        markerIds.clear();
+        markerIds.push_back(21);
+    }
+ }
 
-        Mat invRotMat;
-        transpose(rotMat, invRotMat);
-        worldPos = -invRotMat * Mat(tvecs[0]);
+int sign(int x) {
+    return (x > 0) - (x < 0);
+}
+void ArUcoProcessor::calculatePose(){
+    if (foundMarkers){
+        bool useExtrinsic = true;
+        if (((float) (clock() - lastMarkerTime) > RESET_TIME*CLOCKS_PER_SEC) || (abs(eulersAngles[1]) > 55) || (abs(eulersAngles[0]) < 150) || (abs(eulersAngles[3]) > 30) ){
+            useExtrinsic = false;
+            //cout << "NOT USING EXTRINSIC" << endl;
+        }
+        lastMarkerTime = clock();
+            
+        
+        bool badData = true;
+        do {
+            aruco::estimatePoseSingleMarkers(markerCorners, targetSize, camparams.camera_matrix, camparams.dist_coefs, rvecs, tvecs, useExtrinsic);
+            Rodrigues(rvecs[0],rotMat);
+            calcEulerAngles();
+
+            Mat invRotMat;
+            transpose(rotMat, invRotMat);
+            worldPos = -invRotMat * Mat(tvecs[0]);
+            if ( tvecs[0][2] > 0){
+                badData = false;
+            }
+            else {
+                useExtrinsic = false;
+                cout << getInfoString();
+                cout << "FAILED FAILED FAILED" << endl;
+            }
+        }
+        while (badData);
     }
 }
 
@@ -90,13 +123,19 @@ string ArUcoProcessor::getInfoString(){
 
 Mat ArUcoProcessor::drawMarkersAndAxis(Mat image, bool alsoDrawAxis){
     Mat out = image.clone();
-    if (foundMarkers){
-        drawDetectedMarkers(out, markerCorners, markerIds);
-        if (alsoDrawAxis){
-            for(size_t i=0; i<markerIds.size(); i++)
-                drawAxis(out, camparams.camera_matrix, camparams.dist_coefs, rvecs[i], tvecs[i], targetSize);
+    try{
+        if (foundMarkers){
+            drawDetectedMarkers(out, markerCorners, markerIds);
+            if (alsoDrawAxis){
+                for(size_t i=0; i<markerIds.size(); i++)
+                    drawAxis(out, camparams.camera_matrix, camparams.dist_coefs, rvecs[i], tvecs[i], targetSize);
+            }
         }
+    } catch (...)
+    {
+
     }
+    
     return out;
 }
 

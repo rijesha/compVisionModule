@@ -19,6 +19,7 @@ string testFileFolder;
 clock_t imageAcquisitionTime, markerDetectionTime, posecalculationTime, drawingImageTime, savingImageTime;
 
 VideoCapture vCap;
+VideoWriter writer;
 UndistortImage ui;
 Mat image;
 Mat original;
@@ -50,6 +51,7 @@ int main(int argc, const char** argv )
     parser.addArgument("-o", "--output", 1, true);
     parser.addArgument("-w", "--withoutCornerSubPixel", 1, true);
     parser.addArgument("-s", "--saveData", 1, true);
+    parser.addArgument("-v", "--saveVideo", 1, true);
     parser.addArgument("-t", "--debugTiming", 1, true);
     parser.addArgument("-q", "--quiet", 1, true);
     parser.parse(argc, argv);
@@ -68,6 +70,11 @@ int main(int argc, const char** argv )
     string saveDatastr = parser.retrieve<string>("s");
     if (saveDatastr.length() != 0)
         saveData =(stoi(saveDatastr) == 1);
+
+    bool saveVideo = false;
+    string saveVideostr = parser.retrieve<string>("v");
+    if (saveVideostr.length() != 0)
+        saveVideo =(stoi(saveVideostr) == 1);
     
     bool saveTiming = false;
     string saveTimingstr = parser.retrieve<string>("t");
@@ -88,6 +95,7 @@ int main(int argc, const char** argv )
         timingFile = ofstream("timeData.csv", ofstream::out);
         timingFile << "veryoverallCout, overallCount, foundMarker, savedImage, markerDetectionTime, posecalculationTime, drawingImageTime, savingImageTime, depth" << endl;
     }
+    
     
 
     vCap = VideoCapture(deviceID);
@@ -114,6 +122,10 @@ int main(int argc, const char** argv )
     vCap.read(image);
     Mat dstImg = image.clone();
 
+    if (saveVideo){
+        writer = cv::VideoWriter("out.avi", VideoWriter::fourcc('M','J','P','G'), 24, image.size());
+    }
+
     string userinput;
     int count = 100;
     int smallcount = 0;
@@ -124,6 +136,9 @@ int main(int argc, const char** argv )
 
     while(1) {
         processImage();
+        if (saveVideo){
+            writer << image;
+        }
 
         #ifdef DISPLAY_IMAGE
         namedWindow("Display Image", WINDOW_AUTOSIZE );
@@ -205,5 +220,6 @@ int main(int argc, const char** argv )
     }
     
     testFile.close();
+    writer.release();
     return 0;
 }

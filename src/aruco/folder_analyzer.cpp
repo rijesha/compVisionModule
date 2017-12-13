@@ -34,6 +34,7 @@ void processImage(Mat fun){
     arProc.processFrame(fun);
     
     
+    
     if (arProc.markerIds.size() > 1){
         cout << "MULTIPLE MARKERS: " <<  arProc.markerIds.size() << endl;
         cout << arProc.markerIds[0] <<' ' << arProc.markerIds[1] << endl;
@@ -44,7 +45,8 @@ void processImage(Mat fun){
     }
     
     //
-    //image = arProc.drawMarkersAndAxis(original);
+    arProc.calculatePose();
+    image = arProc.drawMarkersAndAxis(fun);
 }
 
 int main(int argc, const char** argv )
@@ -93,18 +95,20 @@ int main(int argc, const char** argv )
         if (is_regular_file(itr->path())) {
             current_file = itr->path().string();
             Mat fun = imread(current_file, CV_LOAD_IMAGE_COLOR);
+            cout << current_file << endl;
             if(! fun.data )                              // Check for invalid input
             {
                 cout <<  "Could not open or find the image" << std::endl ;
             }
             processImage(fun);
 
-            /*
-            imshow( "Display window", original );
-            char c = waitKey(10);
+            
+            imshow( "Display window", fun);
+            imshow( "Display window2", image);
+            char c = waitKey(10000);
             if (c == 27 || c == 113){
                 break;
-            }*/
+            }
             //cout << current_file << endl;
         }
     }
