@@ -186,6 +186,8 @@ int main(int argc, char *argv[]) {
         inputVideo.open(DEVICE_ID);
         inputVideo.set(CV_CAP_PROP_FRAME_WIDTH,CAM_WIDTH);
         inputVideo.set(CV_CAP_PROP_FRAME_HEIGHT,CAM_HEIGHT);
+        cout << CAM_WIDTH << endl;
+        cout << CAM_HEIGHT << endl;
         waitTime = 10;
     }
 

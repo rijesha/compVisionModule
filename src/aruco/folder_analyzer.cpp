@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <opencv2/opencv.hpp>
 #include "undistort_image.h"
-#include "aruco_configuration.h"
+#include "../configuration.h"
 #include "argparse/argparse.hpp"
 #include <ctime>
 #include <chrono>
@@ -54,6 +54,7 @@ int main(int argc, const char** argv )
      // make a new ArgumentParser
     ArgumentParser parser;
     parser.addArgument("-i", "--input_folder", 1, false);
+    parser.addArgument("-c", "--calib_file", 1, false);
     parser.addArgument("-d", "--devices", 1, true);
     parser.addArgument("-o", "--output", 1, true);
     parser.addArgument("-w", "--withoutCornerSubPixel", 1, true);
@@ -65,19 +66,32 @@ int main(int argc, const char** argv )
     string folderpath = parser.retrieve<string>("i");
     cout << folderpath << endl;
 
+    string calib_file_path = parser.retrieve<string>("c");
+    cout << calib_file_path << endl;
+
     bool runWithoutSubPixel = false;
     string defaultDP = parser.retrieve<string>("w");
     if (defaultDP.length() != 0)
         runWithoutSubPixel = (stoi(defaultDP) == 1);
+    
+    FileStorage fs(calib_file_path, FileStorage::READ);
+    Mat cameraMatrix2, distCoeffs2; 
+    int width, height;
+    fs["cameraMatrix"] >> cameraMatrix2;
+    fs["distCoeffs"] >> distCoeffs2;
+    fs["image_width"] >> width;
+    fs["image_height"] >> height;
+    
 
     CameraParameters camparams;
-    camparams.width = CAM_WIDTH;
-    camparams.height = CAM_HEIGHT;
-    camparams.camera_matrix = CAMPARAMS_CAMERA_MATRIX;
-    camparams.dist_coefs = CAMPARAMS_DIST_COEFS;
 
-    cout << CAMPARAMS_CAMERA_MATRIX <<endl;
-    cout << CAMPARAMS_DIST_COEFS << endl;
+    camparams.width = width;
+    camparams.height = height;
+    camparams.camera_matrix = cameraMatrix2;
+    camparams.dist_coefs = distCoeffs2;
+
+    cout << camparams.camera_matrix <<endl;
+    cout << camparams.dist_coefs << endl;
 
     ui = UndistortImage(camparams);
     arProc = ArUcoProcessor(camparams, TARGET_WIDTH);

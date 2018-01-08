@@ -5,6 +5,7 @@
 #include <opencv2/opencv.hpp>
 #include <opencv2/aruco.hpp>
 #include "undistort_image.h"
+#include "../configuration.h"
 #include <ctime>
 #include <chrono>
 
@@ -12,8 +13,6 @@ using namespace std;
 using namespace cv;
 using namespace aruco;
 
-
-#define DEFAULT_DICTIONARY_NAME PREDEFINED_DICTIONARY_NAME::DICT_6X6_250
 #define RESET_TIME 1 //seconds
 
 class ArUcoProcessor

@@ -6,15 +6,24 @@ import os
 import numpy as np
 import cv2
 from time import sleep
+import sys
+
 
 
 if __name__ == '__main__':
+    try:
+        print(sys.argv[1])
+        imgname, extension = os.path.splitext(sys.argv[1])
 
-    img = cv2.imread('3305.jpg')
+    except:
+        print("did not pass file name")
+        exit()
+    
+    img = cv2.imread(imgname + extension)
     img2 = img
     img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
     cv2.imshow("cam",img)
-    cv2.imwrite("3343_bw.jpg",img)
+    cv2.imwrite(imgname + "_bw.jpg",img)
     sleep(1)
     
 
@@ -40,8 +49,8 @@ if __name__ == '__main__':
         istr = i.__str__()
         cv2.imshow(i.__str__(),temp)
         cv2.imshow(i.__str__() + "contoured",temp2)
-        cv2.imwrite("3343_thresh_"+ i.__str__() +".jpg",temp)
-        cv2.imwrite("3343_thresh_"+ i.__str__() +"_contoured.jpg",temp2)
+        cv2.imwrite(imgname +  "_thresh_"+ i.__str__() +".jpg",temp)
+        cv2.imwrite(imgname +  "_thresh_"+ i.__str__() +"_contoured.jpg",temp2)
     
     
     while True:

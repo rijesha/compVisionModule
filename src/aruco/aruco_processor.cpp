@@ -11,9 +11,9 @@ ArUcoProcessor::ArUcoProcessor(CameraParameters camparams, float targetSize, PRE
     detectorParameters->cornerRefinementWinSize = 5; 
     detectorParameters->cornerRefinementMinAccuracy = .001;
     detectorParameters->cornerRefinementMaxIterations = 2000;
-    detectorParameters->minMarkerDistanceRate = .001;
-    detectorParameters->adaptiveThreshWinSizeMin = 7;
-    detectorParameters->adaptiveThreshWinSizeMax = 7;
+    //detectorParameters->minMarkerDistanceRate = .001;
+    detectorParameters->adaptiveThreshWinSizeMin = 17;
+    detectorParameters->adaptiveThreshWinSizeMax = 17;
 
     this->camparams = camparams;
     this->targetSize = targetSize;
@@ -45,7 +45,7 @@ void ArUcoProcessor::processFrame(Mat image){
     if (markerIds.size() > 0){
         vector<Point2f> correctMarker;
         for (uint i = 0; i < markerIds.size(); i++){
-            if (markerIds[i] == 21){
+            if (markerIds[i] == MARKER_ID){
                 correctMarker = markerCorners[i];
                 markerCorners.clear();
                 markerCorners.push_back(correctMarker);
@@ -53,7 +53,7 @@ void ArUcoProcessor::processFrame(Mat image){
             }
         }
         markerIds.clear();
-        markerIds.push_back(21);
+        markerIds.push_back(MARKER_ID);
     }
  }
 

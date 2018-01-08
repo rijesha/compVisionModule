@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <opencv2/opencv.hpp>
 #include "undistort_image.h"
-#include "aruco_configuration.h"
+#include "../configuration.h"
 #include "argparse/argparse.hpp"
 #include <ctime>
 #include <chrono>
@@ -47,6 +47,7 @@ int main(int argc, const char** argv )
 {   
      // make a new ArgumentParser
     ArgumentParser parser;
+    parser.addArgument("-c", "--calib_file", 1, false);
     parser.addArgument("-d", "--devices", 1, true);
     parser.addArgument("-o", "--output", 1, true);
     parser.addArgument("-w", "--withoutCornerSubPixel", 1, true);
@@ -55,6 +56,9 @@ int main(int argc, const char** argv )
     parser.addArgument("-t", "--debugTiming", 1, true);
     parser.addArgument("-q", "--quiet", 1, true);
     parser.parse(argc, argv);
+
+    string calib_file_path = parser.retrieve<string>("c");
+    cout << calib_file_path << endl;
 
     bool runWithoutSubPixel = false;
     string defaultDP = parser.retrieve<string>("w");
@@ -95,22 +99,34 @@ int main(int argc, const char** argv )
         timingFile = ofstream("timeData.csv", ofstream::out);
         timingFile << "veryoverallCout, overallCount, foundMarker, savedImage, markerDetectionTime, posecalculationTime, drawingImageTime, savingImageTime, depth" << endl;
     }
+
+    FileStorage fs(calib_file_path, FileStorage::READ);
+    Mat cameraMatrix2, distCoeffs2; 
+    int width, height;
+    fs["camera_matrix"] >> cameraMatrix2;
+    fs["distortion_coefficients"] >> distCoeffs2;
+    fs["image_width"] >> width;
+    fs["image_height"] >> height;
     
-    
+    cout << width;
+    cout << height;
 
     vCap = VideoCapture(deviceID);
-    vCap.set(CV_CAP_PROP_FRAME_WIDTH,CAM_WIDTH);
-    vCap.set(CV_CAP_PROP_FRAME_HEIGHT,CAM_HEIGHT);
+    vCap.set(CV_CAP_PROP_FRAME_WIDTH,width);
+    vCap.set(CV_CAP_PROP_FRAME_HEIGHT,height);
     //vCap = VideoCapture("v4l2src device=/dev/video1 ! video/x-raw, framerate=30/1, width=640, height=480, format=YUYV ! videoconvert ! appsink");
 
     CameraParameters camparams;
-    camparams.width = CAM_WIDTH;
-    camparams.height = CAM_HEIGHT;
-    camparams.camera_matrix = CAMPARAMS_CAMERA_MATRIX;
-    camparams.dist_coefs = CAMPARAMS_DIST_COEFS;
 
-    cout << CAMPARAMS_CAMERA_MATRIX <<endl;
-    cout << CAMPARAMS_DIST_COEFS << endl;
+    camparams.width = width;
+    camparams.height = height;
+    camparams.camera_matrix = cameraMatrix2;
+    camparams.dist_coefs = distCoeffs2;
+
+    cout << camparams.camera_matrix <<endl;
+    cout << camparams.dist_coefs << endl;
+    cout << cameraMatrix2 <<endl;
+    cout << distCoeffs2 << endl;
 
     ui = UndistortImage(camparams);
     arProc = ArUcoProcessor(camparams, TARGET_WIDTH);
@@ -131,7 +147,7 @@ int main(int argc, const char** argv )
     int smallcount = 0;
     bool targetReady = false;
     int clearBuffer = 0;
-    int overallCount = 3300;
+    int overallCount = 10900;
     int veryoverallCout = 0;
 
     while(1) {
@@ -172,14 +188,17 @@ int main(int argc, const char** argv )
                 cout << arProc.getInfoString();
                 cout << "Save current Data? (y/n) or (u) to reinput userdata" << endl;
                 char progress;
-                cin >> progress;
-                cout << progress << endl;
-                if ( !cin.fail() && progress=='y' && progress!='n' ){
+                int prog = cin.get();
+                //cin >> progress;
+                cout << prog << endl;
+                if ( !cin.fail() && (prog=='y' || prog=='\n')&& prog!='n' ){
                     targetReady = true;
-                } else if(progress=='u'){
+                } else if(prog=='u'){
                     count = 100;
                 }
-                
+                if (prog!='\n'){
+                    cin.get();
+                }
                 smallcount = 0;
                 clearBuffer = 0;
             }
@@ -214,7 +233,7 @@ int main(int argc, const char** argv )
             stringstream timingData;
             timingData << arProc.foundMarkers << ','  << (arProc.foundMarkers && saveData)  << ',' << mdTime /CLOCKS_PER_SEC  << ',' ;
             timingData << pcTime /CLOCKS_PER_SEC << ',' <<  diTime/CLOCKS_PER_SEC << ',' << siTime/CLOCKS_PER_SEC << ',' << arProc.tvecs[0][2] << endl;
-            cout << timingData.str();
+            //cout << timingData.str();
             timingFile << veryoverallCout << ',' << overallCount << ',' << timingData.str();
         }
     }

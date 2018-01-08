@@ -1,5 +1,6 @@
 # General
 CC = g++
+MAKEFLAGS += -j
 
 #t slotted framing
 # Names and flags
