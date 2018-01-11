@@ -160,7 +160,7 @@ int main(int argc, const char** argv )
         namedWindow("Display Image", WINDOW_AUTOSIZE );
         if (!saveTiming){
             Mat out;
-            //image = ui.undistortAcquiredImage(image, out);
+            image = ui.undistortAcquiredImage(image, out);
         }
         imshow("Display Image", image);
         #endif
@@ -233,7 +233,7 @@ int main(int argc, const char** argv )
             stringstream timingData;
             timingData << arProc.foundMarkers << ','  << (arProc.foundMarkers && saveData)  << ',' << mdTime /CLOCKS_PER_SEC  << ',' ;
             timingData << pcTime /CLOCKS_PER_SEC << ',' <<  diTime/CLOCKS_PER_SEC << ',' << siTime/CLOCKS_PER_SEC << ',' << arProc.tvecs[0][2] << endl;
-            //cout << timingData.str();
+            cout << timingData.str();
             timingFile << veryoverallCout << ',' << overallCount << ',' << timingData.str();
         }
     }

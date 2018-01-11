@@ -1,16 +1,26 @@
 #include "location_processor.hpp"
 
 LocationProcessor::LocationProcessor(){
+    
+    FileStorage fs("calib_file_path", FileStorage::READ);
+    Mat cameraMatrix2, distCoeffs2; 
+    int width, height;
+    fs["camera_matrix"] >> cameraMatrix2;
+    fs["distortion_coefficients"] >> distCoeffs2;
+    fs["image_width"] >> width;
+    fs["image_height"] >> height;
+    
     vCap = VideoCapture(DEVICE_ID);
-    vCap.set(CV_CAP_PROP_FRAME_WIDTH,CAM_WIDTH);
-    vCap.set(CV_CAP_PROP_FRAME_HEIGHT,CAM_HEIGHT);
-    //vCap = VideoCapture("v4l2src device=/dev/video1 ! video/x-raw, framerate=30/1, width=640, height=480, format=YUYV ! videoconvert ! appsink");
-    usleep(100);
+    vCap.set(CV_CAP_PROP_FRAME_WIDTH,width);
+    vCap.set(CV_CAP_PROP_FRAME_HEIGHT,height);
+    
     CameraParameters camparams;
-    camparams.width = CAM_WIDTH;
-    camparams.height = CAM_HEIGHT;
-    camparams.camera_matrix = (Mat_<double>(3,3) << CM_0, CM_1, CM_2, CM_3, CM_4, CM_5, CM_6, CM_7, CM_8);
-    camparams.dist_coefs = (Mat_<double>(1,5) << DC_0, DC_1, DC_2, DC_3, DC_4);
+
+    camparams.width = width;
+    camparams.height = height;
+    camparams.camera_matrix = cameraMatrix2;
+    camparams.dist_coefs = distCoeffs2;
+
     arProc = ArUcoProcessor(camparams, TARGET_WIDTH);
 }
 

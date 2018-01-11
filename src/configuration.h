@@ -8,7 +8,7 @@ using namespace cv;
 //#define DISPLAY_IMAGE
 #define PRINT_INFO_STRING
 
-#define DEVICE_ID 1
+#define DEVICE_ID 0
 #define DISPLAY_IMAGE 1
 
 #define TARGET_WIDTH 0.150
