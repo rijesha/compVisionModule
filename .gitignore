@@ -27,5 +27,4 @@ testData/
 test_data_collection
 src/aruco/python/*.jpg
 src/aruco/*.avi
-calibrate
 TestData.csv
