@@ -1,3 +1,4 @@
+#include "cvm_argument_parser.hpp"
 #include "navigational_state.hpp"
 #include "location_processor.hpp"
 #include <thread>
@@ -6,10 +7,11 @@ void looper(LocationProcessor * lp){
     lp->LocationProcessingThread();
 }
 
-int main(void ){
+int main(int argc, const char** argv){
+    CVMArgumentParser ap(argc, argv, true, false, false);
 
     AutoPilotState a;
-    cout << a.zzz;// = 19;
+    cout << a.zzz;// = 21;
     a.zzz = 19;
 
     cout << a.zzz;
@@ -23,7 +25,7 @@ int main(void ){
     cout << " ";
     cout << a.zzz << endl;
 
-    LocationProcessor lp = LocationProcessor();
+    LocationProcessor lp = LocationProcessor(ap.calib_file_path, ap.deviceID);
     thread t1(looper, &lp);
 
     int count = 0;

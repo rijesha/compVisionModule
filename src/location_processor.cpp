@@ -1,8 +1,8 @@
 #include "location_processor.hpp"
 
-LocationProcessor::LocationProcessor(){
-    
-    FileStorage fs("calib_file_path", FileStorage::READ);
+LocationProcessor::LocationProcessor(string calib_file_path, int device_id){
+        
+    FileStorage fs(calib_file_path, FileStorage::READ);
     Mat cameraMatrix2, distCoeffs2; 
     int width, height;
     fs["camera_matrix"] >> cameraMatrix2;
@@ -10,7 +10,7 @@ LocationProcessor::LocationProcessor(){
     fs["image_width"] >> width;
     fs["image_height"] >> height;
     
-    vCap = VideoCapture(DEVICE_ID);
+    vCap = VideoCapture(device_id);
     vCap.set(CV_CAP_PROP_FRAME_WIDTH,width);
     vCap.set(CV_CAP_PROP_FRAME_HEIGHT,height);
     

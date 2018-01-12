@@ -6,7 +6,7 @@ MAKEFLAGS += -j
 # Names and flags
 INC_DIR = .
 CSOURCES = $(wildcard *.c )
-CPPSOURCES += aruco_processor.cpp undistort_image.cpp
+CPPSOURCES += aruco_processor.cpp undistort_image.cpp ../cvm_argument_parser.cpp
 COMMON_OBJECTS = $(CSOURCES:.c=.o) $(CPPSOURCES:.cpp=.o)
 IMAGECOLLECTOR_SOURCES = test_data_collection.cpp
 FOLDER_ANALYZER_SOURCES = folder_analyzer.cpp

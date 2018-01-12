@@ -2,7 +2,7 @@
 #include <opencv2/opencv.hpp>
 #include "undistort_image.h"
 #include "../configuration.h"
-#include "argparse/argparse.hpp"
+#include "../cvm_argument_parser.hpp"
 #include <ctime>
 #include <chrono>
 #include <cstring>
@@ -51,30 +51,9 @@ void processImage(Mat fun){
 
 int main(int argc, const char** argv )
 {   
-     // make a new ArgumentParser
-    ArgumentParser parser;
-    parser.addArgument("-i", "--input_folder", 1, false);
-    parser.addArgument("-c", "--calib_file", 1, false);
-    parser.addArgument("-d", "--devices", 1, true);
-    parser.addArgument("-o", "--output", 1, true);
-    parser.addArgument("-w", "--withoutCornerSubPixel", 1, true);
-    parser.addArgument("-s", "--saveData", 1, true);
-    parser.addArgument("-t", "--debugTiming", 1, true);
-    parser.addArgument("-q", "--quiet", 1, true);
-    parser.parse(argc, argv);
-
-    string folderpath = parser.retrieve<string>("i");
-    cout << folderpath << endl;
-
-    string calib_file_path = parser.retrieve<string>("c");
-    cout << calib_file_path << endl;
-
-    bool runWithoutSubPixel = false;
-    string defaultDP = parser.retrieve<string>("w");
-    if (defaultDP.length() != 0)
-        runWithoutSubPixel = (stoi(defaultDP) == 1);
+    CVMArgumentParser ap(argc, argv, true, false, true);
     
-    FileStorage fs(calib_file_path, FileStorage::READ);
+    FileStorage fs(ap.calib_file_path, FileStorage::READ);
     Mat cameraMatrix2, distCoeffs2; 
     int width, height;
     fs["cameraMatrix"] >> cameraMatrix2;
@@ -96,12 +75,8 @@ int main(int argc, const char** argv )
     ui = UndistortImage(camparams);
     arProc = ArUcoProcessor(camparams, TARGET_WIDTH);
 
-    if (runWithoutSubPixel)
-        arProc = ArUcoProcessor(camparams, TARGET_WIDTH, new DetectorParameters);
-    
-
     cout << "Iterating" << endl;
-    path p(folderpath);
+    path p(ap.folderpath);
     directory_iterator end_itr;
 
     for (directory_iterator itr(p); itr != end_itr; ++itr)

@@ -11,7 +11,6 @@ ArUcoProcessor::ArUcoProcessor(CameraParameters camparams, float targetSize, PRE
     detectorParameters->cornerRefinementWinSize = 5; 
     detectorParameters->cornerRefinementMinAccuracy = .001;
     detectorParameters->cornerRefinementMaxIterations = 2000;
-    //detectorParameters->minMarkerDistanceRate = .001;
     detectorParameters->adaptiveThreshWinSizeMin = 17;
     detectorParameters->adaptiveThreshWinSizeMax = 17;
 
@@ -24,9 +23,6 @@ ArUcoProcessor::ArUcoProcessor(CameraParameters camparams, float targetSize, PRE
 ArUcoProcessor::ArUcoProcessor(CameraParameters camparams, float targetSize, Ptr<DetectorParameters> detectorParameters, PREDEFINED_DICTIONARY_NAME dictionaryName){
     this->dictionary = getPredefinedDictionary(dictionaryName);
     this->detectorParameters = detectorParameters;
-    //detectorParameters->minMarkerDistanceRate = .01;
-    //detectorParameters->adaptiveThreshWinSizeMax = 3;
-    //detectorParameters->adaptiveThreshWinSizeMin = 23;
     this->camparams = camparams;
     this->targetSize = targetSize;
     foundMarkers = false;
@@ -60,6 +56,7 @@ void ArUcoProcessor::processFrame(Mat image){
 int sign(int x) {
     return (x > 0) - (x < 0);
 }
+
 void ArUcoProcessor::calculatePose(){
     if (foundMarkers){
         bool useExtrinsic = true;

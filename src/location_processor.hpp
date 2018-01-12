@@ -6,7 +6,6 @@
 #include <opencv2/opencv.hpp>
 #include "aruco/undistort_image.h"
 #include "configuration.h"
-#include "aruco/argparse/argparse.hpp"
 #include <ctime>
 #include <chrono>
 #include <cstring>
@@ -31,7 +30,7 @@ private:
 
     
 public:
-    LocationProcessor();
+    LocationProcessor(string calib_file_path, int device_id);
     void LocationProcessingThread(void);
     bool switchToCloseInProcessing(bool);
     void Stop(void);
