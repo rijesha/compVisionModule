@@ -9,8 +9,9 @@ void looper(LocationProcessor * lp){
 
 int main(int argc, const char** argv){
     CVMArgumentParser ap(argc, argv, true, false, false);
-
+    
     AutoPilotState a;
+    
     cout << a.zzz;// = 21;
     a.zzz = 19;
 
@@ -27,6 +28,25 @@ int main(int argc, const char** argv){
 
     LocationProcessor lp = LocationProcessor(ap.calib_file_path, ap.deviceID);
     thread t1(looper, &lp);
+
+    cout << " " << endl;
+    NavigationalState *ns = &a; 
+    cout << ns->currentState() << " ";
+    ns = ns->returnNextState();
+    cout << ns->currentState() << " ";
+    ns = ns->returnNextState();
+    cout << ns->currentState() << " ";
+    ns = ns->returnNextState();
+    cout << ns->currentState() << " ";
+    ns = ns->returnNextState();
+    cout << ns->currentState() << " ";
+    ns = ns->returnNextState();
+    cout << ns->currentState() << " ";
+    ns = ns->returnNextState();
+    cout << ns->currentState() << " ";
+    ns = ns->returnNextState();
+    
+    cout << ns->zzz << endl;
 
     int count = 0;
     while (count < 8){

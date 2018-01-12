@@ -15,6 +15,7 @@ using namespace std;
 class NavigationalState
 {
 public:
+    enum State {BASE, AP, IP, FP, DA, PO};
     bool A(void);
     bool B(void);
     bool C(void);
@@ -22,42 +23,53 @@ public:
     bool E(void);
     bool F(void);
     static int zzz;
-    virtual bool ComputeDesiredPosition(bool) = 0;
-    virtual NavigationalState * returnNextState() = 0;  
+    virtual State currentState() const = 0;
+    virtual bool computeDesiredPosition(bool) = 0;
+    virtual NavigationalState * returnNextState() = 0;
+    static NavigationalState * ap;
+    static NavigationalState * ip;
+    static NavigationalState * fp;
+    static NavigationalState * da;
+    static NavigationalState * po;
 };
 
 class AutoPilotState : public NavigationalState
 {
 public:
-    bool ComputeDesiredPosition(bool);
+    State currentState() const override {return AP;}
+    bool computeDesiredPosition(bool);
     NavigationalState * returnNextState();
 };
 
 class InitialApproach : public NavigationalState
 {
 public:
-    bool ComputeDesiredPosition(bool);
+    State currentState() const override {return IP;}
+    bool computeDesiredPosition(bool);
     NavigationalState * returnNextState();
 };
 
 class FinalApproach : public NavigationalState
 {
 public:
-    bool ComputeDesiredPosition(bool);
+    State currentState() const override {return FP;}
+    bool computeDesiredPosition(bool);
     NavigationalState * returnNextState();
 };
 
 class DataAcquisitionState : public NavigationalState
 {
 public:
-    bool ComputeDesiredPosition(bool);
+    State currentState() const override {return DA;}
+    bool computeDesiredPosition(bool);
     NavigationalState * returnNextState();
 };
 
 class PullOutState : public NavigationalState
 {
 public:
-    bool ComputeDesiredPosition(bool);
+    State currentState() const override {return PO;}
+    bool computeDesiredPosition(bool);
     NavigationalState * returnNextState();
 };
 

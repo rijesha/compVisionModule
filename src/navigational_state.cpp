@@ -2,62 +2,95 @@
 
 
 bool NavigationalState::A(void){
+    //Target Detection Failed for X seconds
     return false;
 }
 bool NavigationalState::B(void){
+    //Target Within 6 m depth
     return false;
 }
 bool NavigationalState::C(void){
+    //Target Azimuthal Angle <60 deg
     return false;
 }
 bool NavigationalState::D(void){
+    //Within 2m depth and Target zimuthal angle < 10 deg
     return false;
 }
 bool NavigationalState::E(void){
+    //Sensor Contact
     return false;
 }
 bool NavigationalState::F(void){
+    //Data Acquisition Complete
     return false;
 }
 
 int NavigationalState::zzz = 21;// = 21;
+NavigationalState * NavigationalState::ap = new AutoPilotState();
+NavigationalState * NavigationalState::ip = new InitialApproach();
+NavigationalState * NavigationalState::fp = new FinalApproach();
+NavigationalState * NavigationalState::da = new DataAcquisitionState();
+NavigationalState * NavigationalState::po = new PullOutState();
 
 NavigationalState * AutoPilotState::returnNextState(){
-    return new AutoPilotState();
+    if (A() || !B() || F())
+        return ap;
+
+    if (!A() && B() && C() && !F())
+        return ip;
 }
 
 NavigationalState * InitialApproach::returnNextState(){
-        return new InitialApproach();
+    if (!A() && B() && C() && !D())
+        return ip;
+    if (!A() && D())
+        return fp;
+    if (!A() || !B() || !C())
+        return ap;
 }
 
 NavigationalState * FinalApproach::returnNextState(){
-        return new FinalApproach();
+    if (!A() && D() && !E())
+        return fp;
+    if (!A() && D() && E())
+        return da;
+    if (!A() && !D() && !E())
+        return ip;
+    if (A())
+        return ap;
 }
 
 NavigationalState * DataAcquisitionState::returnNextState(){
-        return new DataAcquisitionState();
+    if (!A() && !F())
+        return da;
+    if (A() || !E() || F())
+        return po;
 }
 
 NavigationalState * PullOutState::returnNextState(){
-    return new FinalApproach();
+    if (!A() && B())
+        return po;
+    if (A() || !B())
+        return ap;
 }
 
-bool AutoPilotState::ComputeDesiredPosition(bool){
+bool AutoPilotState::computeDesiredPosition(bool){
     return false;
 }
 
-bool InitialApproach::ComputeDesiredPosition(bool){
+bool InitialApproach::computeDesiredPosition(bool){
 return false;
 }
 
-bool FinalApproach::ComputeDesiredPosition(bool){
+bool FinalApproach::computeDesiredPosition(bool){
 return false;
 }
 
-bool DataAcquisitionState::ComputeDesiredPosition(bool){
+bool DataAcquisitionState::computeDesiredPosition(bool){
 return false;
 }
 
-bool PullOutState::ComputeDesiredPosition(bool){
+bool PullOutState::computeDesiredPosition(bool){
 return false;
 }
