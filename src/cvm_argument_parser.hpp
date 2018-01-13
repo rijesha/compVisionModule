@@ -13,14 +13,17 @@ class CVMArgumentParser
 private:
  
 public:
-    CVMArgumentParser(int argc, const char** argv, bool requireCalib, bool requireOutputFile, bool requireInputFile);
+    CVMArgumentParser(int argc, const char** argv, bool requireCalib, bool requireOutputFile, bool requireInputFile, bool requireSize);
     int deviceID;
+    int height;
+    int width;
     bool saveData;
     bool saveVideo;
     bool saveTiming;
     bool quiet;
     string calib_file_path;
-    string folderpath;
+    string inputpath;
+    string outputpath;
 };
 
 #endif /* CVM_ARGUMENT_PARSER_H */

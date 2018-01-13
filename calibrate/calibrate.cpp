@@ -45,6 +45,8 @@ the use of this software, even if advised of the possibility of such damage.
 #include <iostream>
 #include <ctime>
 #include "../src/configuration.h"
+#include "../src/cvm_argument_parser.hpp"
+
 
 using namespace std;
 using namespace cv;
@@ -145,25 +147,34 @@ static bool saveCameraParams(const string &filename, Size imageSize, float aspec
     return true;
 }
 
+Ptr<aruco::CharucoBoard> charucoboard;
+Ptr<aruco::Board> board;
+void makeCharucoBoard(){
 
+    Ptr<aruco::Dictionary> dictionary = aruco::getPredefinedDictionary(DEFAULT_DICTIONARY_NAME);
+
+    // create charuco board object
+    charucoboard = aruco::CharucoBoard::create(22, 16, 4, 2.5, dictionary);
+    board = charucoboard.staticCast<aruco::Board>();
+
+    cv::Mat boardImage; 
+    charucoboard->draw(cv::Size(2400, 1800), boardImage, 20, 1 );
+    imwrite("charuco.png", boardImage);
+}
 
 /**
  */
-int main(int argc, char *argv[]) {
-    /*CommandLineParser parser(argc, argv, keys);
-    parser.about(about);
+int main(int argc, const char** argv) { 
 
-    if(argc < 7) {
-        parser.printMessage();
-        return 0;
-    }*/
+    CVMArgumentParser ap(argc, argv, false, true, false, false);
 
+    makeCharucoBoard();
     int squaresX = 22;
     int squaresY = 16;
     float squareLength = 4;
     float markerLength = 2.5;
-    string outputFile = "funnest";
-
+    string outputFile = ap.outputpath;
+    cout << ap.outputpath;
     bool showChessboardCorners = true;
 
     int calibrationFlags = 0;
@@ -173,7 +184,6 @@ int main(int argc, char *argv[]) {
     Ptr<aruco::DetectorParameters> detectorParams = aruco::DetectorParameters::create();
 
     bool refindStrategy = false;
-    int camId = 1;
     String video;
 
 
@@ -183,11 +193,11 @@ int main(int argc, char *argv[]) {
         inputVideo.open(video);
         waitTime = 0;
     } else {
-        inputVideo.open(DEVICE_ID);
-        inputVideo.set(CV_CAP_PROP_FRAME_WIDTH,CAM_WIDTH);
-        inputVideo.set(CV_CAP_PROP_FRAME_HEIGHT,CAM_HEIGHT);
-        cout << CAM_WIDTH << endl;
-        cout << CAM_HEIGHT << endl;
+        inputVideo.open(ap.deviceID);
+        inputVideo.set(CV_CAP_PROP_FRAME_WIDTH,ap.width);
+        inputVideo.set(CV_CAP_PROP_FRAME_HEIGHT,ap.height);
+        cout << ap.width << endl;
+        cout << ap.height << endl;
         waitTime = 10;
     }
 

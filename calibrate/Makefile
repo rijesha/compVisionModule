@@ -6,6 +6,7 @@ MAKEFLAGS += -j
 INC_DIR = .
 CSOURCES = $(wildcard *.c )
 CPPSOURCES += $(wildcard *.cpp)
+CPPSOURCES +=  ../src/cvm_argument_parser.cpp
 
 OBJECTS = $(CSOURCES:.c=.o) $(CPPSOURCES:.cpp=.o)
 EXECUTABLE = calibrate
