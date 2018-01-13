@@ -8,7 +8,7 @@ void looper(LocationProcessor * lp){
 }
 
 int main(int argc, const char** argv){
-    CVMArgumentParser ap(argc, argv, true, false, false);
+    CVMArgumentParser ap(argc, argv, true, false, false, false);
     
     AutoPilotState a;
     

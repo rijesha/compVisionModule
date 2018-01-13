@@ -29,7 +29,7 @@ void LocationProcessor::LocationProcessingThread(void){
     while (!shutdownFlag){
         if (processImage()){
             #ifdef PRINT_INFO_STRING
-                cout << arProc.getInfoString();
+                //cout << p.getInfoString();
             #endif
         }
     }
@@ -50,7 +50,7 @@ bool LocationProcessor::processImage(void){
     }
     arProc.processFrame(original);
     markerDetectionTime = clock();
-    arProc.calculatePose();
+    Position p = arProc.calculatePose();
     posecalculationTime = clock();
     image = arProc.drawMarkersAndAxis(original);
     drawingImageTime = clock();

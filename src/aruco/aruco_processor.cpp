@@ -57,7 +57,8 @@ int sign(int x) {
     return (x > 0) - (x < 0);
 }
 
-void ArUcoProcessor::calculatePose(){
+Position ArUcoProcessor::calculatePose(){
+    Position p;
     if (foundMarkers){
         bool useExtrinsic = true;
         if (((float) (clock() - lastMarkerTime) > RESET_TIME*CLOCKS_PER_SEC) || (abs(eulersAngles[1]) > 55) || (abs(eulersAngles[0]) < 150) || (abs(eulersAngles[3]) > 30) ){
@@ -70,27 +71,37 @@ void ArUcoProcessor::calculatePose(){
         bool badData = true;
         do {
             aruco::estimatePoseSingleMarkers(markerCorners, targetSize, camparams.camera_matrix, camparams.dist_coefs, rvecs, tvecs, useExtrinsic);
-            Rodrigues(rvecs[0],rotMat);
-            calcEulerAngles();
-
-            Mat invRotMat;
-            transpose(rotMat, invRotMat);
-            worldPos = -invRotMat * Mat(tvecs[0]);
             if ( tvecs[0][2] > 0){
                 badData = false;
             }
             else {
                 useExtrinsic = false;
-                cout << getInfoString();
+                cout << p.getInfoString();
                 cout << "FAILED FAILED FAILED" << endl;
             }
+            Position p(rvecs, tvecs);
+            eulersAngles = p.eulersAngles;
         }
         while (badData);
+        return p;
     }
+    return p;
 }
 
-void ArUcoProcessor::calcEulerAngles(){
+Position::Position(){
+    emptyPosition = true;
+}
+Position::Position(vector< Vec3d > rvecs, vector< Vec3d > tvecs) : rvecs(rvecs), tvecs(tvecs){
+    emptyPosition = false;
+    Rodrigues(rvecs[0],rotMat);
+    calcEulerAngles();
+    Mat invRotMat;
+    transpose(rotMat, invRotMat);
+    worldPos = -invRotMat * Mat(tvecs[0]);
+}
 
+void Position::calcEulerAngles(){
+    
     Mat cameraMatrix,rotMatrix,transVect,rotMatrixX,rotMatrixY,rotMatrixZ;
     double* _r = rotMat.ptr<double>();
     double projMatrix[12] = {_r[0],_r[1],_r[2],0,
@@ -107,7 +118,7 @@ void ArUcoProcessor::calcEulerAngles(){
                                eulersAngles);
 }
 
-string ArUcoProcessor::getInfoString(){
+string Position::getInfoString(){
     stringstream output;
     output << std::fixed;
     output << std::setprecision(5);
@@ -135,7 +146,6 @@ Mat ArUcoProcessor::drawMarkersAndAxis(Mat image, bool alsoDrawAxis){
     
     return out;
 }
-
 
 Mat ArUcoProcessor::getMarker(int markerNumber,int markerpixels){
     Mat markerImage;

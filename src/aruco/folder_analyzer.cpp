@@ -28,30 +28,28 @@ Mat original;
 ArUcoProcessor arProc;
 int multipleMarkerCount = 0;
 string current_file;
+Position p;
 
 void processImage(Mat fun){
     arProc.foundMarkers = false;
     arProc.processFrame(fun);
     
-    
-    
     if (arProc.markerIds.size() > 1){
         cout << "MULTIPLE MARKERS: " <<  arProc.markerIds.size() << endl;
         cout << arProc.markerIds[0] <<' ' << arProc.markerIds[1] << endl;
         cout << current_file << endl;
-        arProc.calculatePose();
-        cout << arProc.getInfoString();
-        
+        p = arProc.calculatePose();
+        cout << p.getInfoString();
     }
     
     //
-    arProc.calculatePose();
+    Position p = arProc.calculatePose();
     image = arProc.drawMarkersAndAxis(fun);
 }
 
 int main(int argc, const char** argv )
 {   
-    CVMArgumentParser ap(argc, argv, true, false, true);
+    CVMArgumentParser ap(argc, argv, true, false, true, false);
     
     FileStorage fs(ap.calib_file_path, FileStorage::READ);
     Mat cameraMatrix2, distCoeffs2; 
@@ -76,7 +74,7 @@ int main(int argc, const char** argv )
     arProc = ArUcoProcessor(camparams, TARGET_WIDTH);
 
     cout << "Iterating" << endl;
-    path p(ap.folderpath);
+    path p(ap.inputpath);
     directory_iterator end_itr;
 
     for (directory_iterator itr(p); itr != end_itr; ++itr)

@@ -25,6 +25,7 @@ Mat image;
 Mat original;
 
 ArUcoProcessor arProc;
+Position p;
 
 void processImage(){
     arProc.foundMarkers = false;
@@ -37,7 +38,7 @@ void processImage(){
 
     arProc.processFrame(original);
     markerDetectionTime = clock();
-    arProc.calculatePose();
+    p = arProc.calculatePose();
     posecalculationTime = clock();
     image = arProc.drawMarkersAndAxis(original);
     drawingImageTime = clock();
@@ -45,7 +46,7 @@ void processImage(){
 
 int main(int argc, const char** argv )
 {   
-    CVMArgumentParser ap(argc, argv, true, false, false);
+    CVMArgumentParser ap(argc, argv, true, false, false, false);
 
     if (ap.saveData){
         testFile = ofstream("TestData.csv", ofstream::out);
@@ -123,7 +124,7 @@ int main(int argc, const char** argv )
             break;
         }
         if (!ap.saveData && arProc.foundMarkers && !ap.quiet){
-            cout << arProc.getInfoString();
+            cout << p.getInfoString();
         }
 
         if (ap.saveData && arProc.foundMarkers){
@@ -138,7 +139,7 @@ int main(int argc, const char** argv )
             clearBuffer++;
 
             if (!targetReady) {
-                cout << arProc.getInfoString();
+                cout << p.getInfoString();
                 cout << "Save current Data? (y/n) or (u) to reinput userdata" << endl;
                 char progress;
                 int prog = cin.get();
@@ -161,7 +162,7 @@ int main(int argc, const char** argv )
                 count++;
                 overallCount++;
                 testFile << overallCount << ',' << count << ',' << userinput << ',';
-                testFile << arProc.getInfoString();
+                testFile << p.getInfoString();
                 cout << "SAVING measurement : " << count << endl;
                 imwrite( "testData/raw/" + to_string(overallCount) + ".jpg", original );
                 imwrite( "testData/undistorted/" + to_string(overallCount) + ".jpg", image );

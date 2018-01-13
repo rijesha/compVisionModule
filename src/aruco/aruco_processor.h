@@ -15,6 +15,20 @@ using namespace aruco;
 
 #define RESET_TIME 1 //seconds
 
+class Position
+{
+public:
+    Position();
+    Position(vector< Vec3d > rvecs, vector< Vec3d > tvecs);
+    void calcEulerAngles();
+    bool emptyPosition = false;
+    vector< Vec3d > rvecs, tvecs;
+    Vec3d eulersAngles;
+    Mat rotMat;
+    Mat worldPos;
+    string getInfoString();
+};
+
 class ArUcoProcessor
 {
 private:
@@ -23,7 +37,6 @@ private:
     bool vecsUpdated;
     CameraParameters camparams;
     float targetSize;
-    void calcEulerAngles();
     clock_t lastMarkerTime;
 public:
     ArUcoProcessor();
@@ -32,18 +45,14 @@ public:
 
     void changeCornerRefinementWindowSize(int);
     void processFrame(Mat image);
-    void calculatePose();
+    Position calculatePose();
     Mat drawMarkersAndAxis(Mat image, bool drawAxis = true);
     Mat getMarker(int markerNumber = 19,int markerpixels = 600);
-
-    string getInfoString();
 
     vector< int > markerIds;
     vector< vector<Point2f> > markerCorners, rejectedCandidates;
     vector< Vec3d > rvecs, tvecs;
     Vec3d eulersAngles;
-    Mat rotMat;
-    Mat worldPos;
     bool foundMarkers;
 };
 
