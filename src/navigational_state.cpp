@@ -53,6 +53,9 @@ Position AutoPilotState::computeDesiredPosition(Position p){
 }
 
 Position InitialApproach::computeDesiredPosition(Position p){
+    double x = p.x;
+    double y = p.y;
+
 return Position();
 }
 
@@ -61,9 +64,9 @@ return Position();
 }
 
 Position DataAcquisitionState::computeDesiredPosition(Position p){
-return Position();
+    return Position(p.x, p.y, p.depth, p.azi);
 }
 
 Position PullOutState::computeDesiredPosition(Position p){
-return Position();
+    return Position(0,0,6.5,0);
 }

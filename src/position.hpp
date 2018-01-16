@@ -19,13 +19,16 @@ private:
     static clock_t last_creation_time;
 public:
     Position();
+    Position(double x, double y, double depth, double yaw);
     Position(vector< Vec3d > rvecs, vector< Vec3d > tvecs);
     bool emptyPosition = false;
+    bool isDesiredPosition = false;
     vector< Vec3d > rvecs, tvecs;
     Vec3d eulersAngles;
     Mat rotMat;
     Mat worldPos;
     string getInfoString();
+    string getBasicString();
     clock_t creation_time;
     clock_t time_since_last_positon;
     

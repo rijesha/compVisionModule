@@ -8,6 +8,14 @@ Position::Position(){
     emptyPosition = true;
 }
 
+Position::Position(double x, double y, double depth, double yaw){
+    isDesiredPosition = true;
+    this->x = x;
+    this->y = y;
+    this->depth = depth;
+    this->azi = yaw;
+}
+
 Position::Position(vector< Vec3d > rvecs, vector< Vec3d > tvecs) : rvecs(rvecs), tvecs(tvecs){
     creation_time = clock();
     time_since_last_positon = creation_time - last_creation_time;
@@ -53,6 +61,15 @@ string Position::getInfoString(){
     output << x << ',' << y << ',' << depth << ',';
     output << ele << ',' << azi << ',' << tilt << ',';
     output << worldPos.at<double>(0) << ',' << worldPos.at<double>(1) << ',' << worldPos.at<double>(2) << endl;
+    return output.str();
+}
+
+string Position::getBasicString(){
+    stringstream output;
+    output << std::fixed;
+    output << std::setprecision(5);
+
+    output << x << ',' << y << ',' << depth << ',' << azi << endl;
     return output.str();
 }
 
