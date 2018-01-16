@@ -4,58 +4,47 @@
 #include <thread>
 
 void looper(LocationProcessor * lp){
-    lp->LocationProcessingThread();
+    while (true){
+        lp->processImage();
+    }
 }
 
 int main(int argc, const char** argv){
     CVMArgumentParser ap(argc, argv, true, false, false, false);
     
-    AutoPilotState a;
     
-    cout << a.zzz;// = 21;
-    a.zzz = 19;
-
-    cout << a.zzz;
-    
-    PullOutState p;
-    cout << p.zzz;
-
-    //NavigationalState n;
-    //cout << n.zzz;
-    p.zzz = 235;
-    cout << " ";
-    cout << a.zzz << endl;
 
     LocationProcessor lp = LocationProcessor(ap.calib_file_path, ap.deviceID);
-    thread t1(looper, &lp);
+    //thread t1(looper, &lp);
 
     cout << " " << endl;
-    NavigationalState *ns = &a; 
+    NavigationalState *ns = new AutoPilotState(); 
     cout << ns->currentState() << " ";
-    ns = ns->returnNextState();
+    ns = ns->returnNextState(Position());
     cout << ns->currentState() << " ";
-    ns = ns->returnNextState();
+    ns = ns->returnNextState(Position());
     cout << ns->currentState() << " ";
-    ns = ns->returnNextState();
+    ns = ns->returnNextState(Position());
     cout << ns->currentState() << " ";
-    ns = ns->returnNextState();
+    ns = ns->returnNextState(Position());
     cout << ns->currentState() << " ";
-    ns = ns->returnNextState();
+    ns = ns->returnNextState(Position());
     cout << ns->currentState() << " ";
-    ns = ns->returnNextState();
+    ns = ns->returnNextState(Position());
     cout << ns->currentState() << " ";
-    ns = ns->returnNextState();
+    ns = ns->returnNextState(Position());
     
-    cout << ns->zzz << endl;
-
+    
     int count = 0;
+    Position current_position;
+    Position desired_position;
     while (count < 8){
-        if (count == 5)
-            lp.Stop();
-        this_thread::sleep_for(chrono::milliseconds(1000));
-        count ++;
+        current_position = lp.processImage();
+        //Send position to Mavlink Queue
+        ns = ns->returnNextState(current_position);
+        desired_position = ns->computeDesiredPosition(current_position);
+        count++;
     }
-    t1.join();
 
     return -1;
 }

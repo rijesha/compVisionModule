@@ -6,6 +6,7 @@
 #include <opencv2/aruco.hpp>
 #include "undistort_image.h"
 #include "../configuration.h"
+#include "../position.hpp"
 #include <ctime>
 #include <chrono>
 
@@ -14,20 +15,6 @@ using namespace cv;
 using namespace aruco;
 
 #define RESET_TIME 1 //seconds
-
-class Position
-{
-public:
-    Position();
-    Position(vector< Vec3d > rvecs, vector< Vec3d > tvecs);
-    void calcEulerAngles();
-    bool emptyPosition = false;
-    vector< Vec3d > rvecs, tvecs;
-    Vec3d eulersAngles;
-    Mat rotMat;
-    Mat worldPos;
-    string getInfoString();
-};
 
 class ArUcoProcessor
 {

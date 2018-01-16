@@ -26,15 +26,10 @@ private:
     Mat image;
     Mat original;
     ArUcoProcessor arProc;
-    bool processImage(void);
-
     
 public:
     LocationProcessor(string calib_file_path, int device_id);
-    void LocationProcessingThread(void);
-    bool switchToCloseInProcessing(bool);
-    void Stop(void);
-    bool shutdownFlag;
+    Position processImage(void);
 };
 
 #endif /* ARUCO_PROCESSOR_H */

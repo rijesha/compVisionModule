@@ -24,44 +24,17 @@ LocationProcessor::LocationProcessor(string calib_file_path, int device_id){
     arProc = ArUcoProcessor(camparams, TARGET_WIDTH);
 }
 
-void LocationProcessor::LocationProcessingThread(void){
-    shutdownFlag = false;
-    while (!shutdownFlag){
-        if (processImage()){
-            #ifdef PRINT_INFO_STRING
-                //cout << p.getInfoString();
-            #endif
-        }
-    }
-}
-
-void LocationProcessor::Stop(void){
-    shutdownFlag = true;
-    cout << "SETTING SHUTDOWN FLAG: " << shutdownFlag << endl;
-}
-
-bool LocationProcessor::processImage(void){
+Position LocationProcessor::processImage(void){
     arProc.foundMarkers = false;
     vCap.read(original);
     imageAcquisitionTime = clock();
     if ( !original.data )
     {
-        return false;
+        return Position();
     }
     arProc.processFrame(original);
     markerDetectionTime = clock();
     Position p = arProc.calculatePose();
     posecalculationTime = clock();
-    image = arProc.drawMarkersAndAxis(original);
-    drawingImageTime = clock();
-    return arProc.foundMarkers;
-}
-
-bool LocationProcessor::switchToCloseInProcessing(bool closeIn){
-    if (closeIn)
-        arProc.changeCornerRefinementWindowSize(15);
-    else
-        arProc.changeCornerRefinementWindowSize(5);
-    
-    return true;
+    return p;
 }
