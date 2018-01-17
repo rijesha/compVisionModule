@@ -25,6 +25,7 @@ class MessageQueue
     MessageQueue<T>();
     void push(T const &, int timeout = 0);
     T pop(int timeout = 0);
+    void shutdown();
 };
 
 template <class T>
@@ -52,6 +53,13 @@ template <class T>
 void MessageQueue<T>::push(T const &elem, int timeout) {
     queueLockMtx.lock();
     elements.push(elem);
+    newDataInQueue.notify_all();
+    queueLockMtx.unlock();
+}
+
+template <class T>
+void MessageQueue<T>::shutdown() {
+    elements.push(T());
     newDataInQueue.notify_all();
     queueLockMtx.unlock();
 }

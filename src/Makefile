@@ -3,20 +3,19 @@ CC = g++
 MAKEFLAGS += -j
 
 # Names and flags
-INC_DIR = .
-CSOURCES = $(wildcard *.c )
-CPPSOURCES += $(wildcard *.cpp)
-CPPSOURCES += aruco/aruco_processor.cpp aruco/undistort_image.cpp
+INC_DIR = -I. -I../libs/mavlink/
+CPPSOURCES += $(wildcard *.cpp) $(wildcard mavlink_control/*.cpp)
+CPPSOURCES += aruco/aruco_processor.cpp aruco/undistort_image.cpp 
 
-OBJECTS = $(CSOURCES:.c=.o) $(CPPSOURCES:.cpp=.o)
+OBJECTS = $(CPPSOURCES:.cpp=.o)
 EXECUTABLE = deploy
-CFLAGS = -c -Wall -g -I$(INC_DIR) 
+CFLAGS = -c -Wall -g $(INC_DIR)  
 OPENCV = `pkg-config opencv --cflags --libs `
 LIBS = $(OPENCV)
 
 
 # Targets
-all: $(CSOURCES) $(CPPSOURCES) $(EXECUTABLE)
+all: $(CPPSOURCES) $(EXECUTABLE)
 
 $(EXECUTABLE): $(OBJECTS)
 	$(CC) -pthread $(OBJECTS) -o $@ $(LIBS)
