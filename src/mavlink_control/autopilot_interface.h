@@ -258,6 +258,7 @@ public:
 	mavlink_set_position_target_local_ned_t initial_position;
 
 	void update_setpoint(mavlink_set_position_target_local_ned_t setpoint);
+	void update_position(mavlink_vision_position_estimate_t position);
 	void read_messages();
 	int  write_message(mavlink_message_t message);
 
@@ -283,6 +284,7 @@ private:
 	pthread_t write_tid;
 
 	mavlink_set_position_target_local_ned_t current_setpoint;
+	mavlink_vision_position_estimate_t current_position;
 
 	void read_thread();
 	void write_thread(void);

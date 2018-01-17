@@ -82,8 +82,8 @@ extern Autopilot_Interface *api;
 // ------------------------------------------------------------------------------
 int top(char *uart_name, int baudrate);
 
-int initialize_mavlink(char *uart_name, int baudrate);
-int release_mavlink();
+void initialize_mavlink(char *uart_name, int baudrate);
+void release_mavlink();
 
 void commands();
 void parse_commandline(int argc, char **argv, char *&uart_name, int &baudrate);

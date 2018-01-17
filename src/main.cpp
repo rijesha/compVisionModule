@@ -11,9 +11,33 @@ bool shutdown = false;
 void looper(MessageQueue<Position> *mq){
     //char *uart_name = (char*)"/dev/ttyUSB0";
     initialize_mavlink((char*)"/dev/ttyUSB0", 57600);
+    api->enable_offboard_control();
+    mavlink_set_position_target_local_ned_t sp;
+    mavlink_vision_position_estimate_t cp;
+    
     while (!shutdown){
-        mq->pop();
+        Position p = mq->pop();
+        if (p.isDesiredPosition){
+            sp.type_mask = MAVLINK_MSG_SET_POSITION_TARGET_LOCAL_NED_POSITION;
+            sp.type_mask &= MAVLINK_MSG_SET_POSITION_TARGET_LOCAL_NED_YAW_ANGLE ;
+	        sp.coordinate_frame = MAV_FRAME_LOCAL_NED;
+        
+	        sp.x   = p.x;
+	        sp.y   = p.y;
+	        sp.z   = p.depth;
+            sp.yaw  = p.azi * 3.14/180;
+            api->update_setpoint(sp);
+        }
+        else{
+            cp.usec = get_time_usec();
+            cp.x = p.x;
+	        cp.y = p.y;
+	        cp.z = p.depth;
+            cp.yaw = p.azi;
+            api->update_position(cp);
+        }
     }
+    api->disable_offboard_control();
     release_mavlink();
 }
 

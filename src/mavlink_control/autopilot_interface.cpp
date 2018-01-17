@@ -226,6 +226,13 @@ update_setpoint(mavlink_set_position_target_local_ned_t setpoint)
 	current_setpoint = setpoint;
 }
 
+void
+Autopilot_Interface::
+update_position(mavlink_vision_position_estimate_t position)
+{
+	current_position = position;
+}
+
 
 // ------------------------------------------------------------------------------
 //   Read Messages
@@ -390,61 +397,39 @@ read_messages()
 // ------------------------------------------------------------------------------
 //   Write Message
 // ------------------------------------------------------------------------------
-int
-Autopilot_Interface::
-write_message(mavlink_message_t message)
+int Autopilot_Interface:: write_message(mavlink_message_t message)
 {
-	// do the write
 	int len = serial_port->write_message(message);
-
-	// book keep
 	write_count++;
-
-	// Done!
 	return len;
 }
 
 // ------------------------------------------------------------------------------
 //   Write Setpoint Message
 // ------------------------------------------------------------------------------
-void
-Autopilot_Interface::
-write_setpoint()
+void Autopilot_Interface::write_setpoint()
 {
-	// --------------------------------------------------------------------------
-	//   PACK PAYLOAD
-	// --------------------------------------------------------------------------
-
-	// pull from position target
 	mavlink_set_position_target_local_ned_t sp = current_setpoint;
-
-	// double check some system parameters
 	if ( not sp.time_boot_ms )
 		sp.time_boot_ms = (uint32_t) (get_time_usec()/1000);
 	sp.target_system    = system_id;
 	sp.target_component = autopilot_id;
 
-
-	// --------------------------------------------------------------------------
-	//   ENCODE
-	// --------------------------------------------------------------------------
-
 	mavlink_message_t message;
 	mavlink_msg_set_position_target_local_ned_encode(system_id, companion_id, &message, &sp);
 
-
-	// --------------------------------------------------------------------------
-	//   WRITE
-	// --------------------------------------------------------------------------
-
-	// do the write
 	int len = write_message(message);
 
 	// check the write
 	if ( len <= 0 )
 		fprintf(stderr,"WARNING: could not send POSITION_TARGET_LOCAL_NED \n");
-	//	else
-	//		printf("%lu POSITION_TARGET  = [ %f , %f , %f ] \n", write_count, position_target.x, position_target.y, position_target.z);
+
+
+	mavlink_vision_position_estimate_t cp = current_position;
+	mavlink_msg_vision_position_estimate_encode(system_id, companion_id, &message, &cp);
+	
+	if ( write_message(message) <= 0 )
+		fprintf(stderr,"WARNING: could not send VISION_MESSAGE \n");
 
 	return;
 }
@@ -453,9 +438,7 @@ write_setpoint()
 // ------------------------------------------------------------------------------
 //   Start Off-Board Mode
 // ------------------------------------------------------------------------------
-void
-Autopilot_Interface::
-enable_offboard_control()
+void Autopilot_Interface::enable_offboard_control()
 {
 	// Should only send this command once
 	if ( control_status == false )
@@ -524,9 +507,7 @@ disable_offboard_control()
 // ------------------------------------------------------------------------------
 //   Toggle Off-Board Mode
 // ------------------------------------------------------------------------------
-int
-Autopilot_Interface::
-toggle_offboard_control( bool flag )
+int Autopilot_Interface::toggle_offboard_control( bool flag )
 {
 	// Prepare command for off-board mode
 	mavlink_command_long_t com = { 0 };

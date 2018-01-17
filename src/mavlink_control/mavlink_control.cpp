@@ -95,7 +95,7 @@ void commands()
 	// hires imu
 	mavlink_highres_imu_t imu = messages.highres_imu;
 	printf("Got message HIGHRES_IMU (spec: https://pixhawk.ethz.ch/mavlink/#HIGHRES_IMU)\n");
-	printf("    ap time:     %llu \n", imu.time_usec);
+	printf("    ap time:     %lu \n", imu.time_usec);
 	printf("    acc  (NED):  % f % f % f (m/s^2)\n", imu.xacc , imu.yacc , imu.zacc );
 	printf("    gyro (NED):  % f % f % f (rad/s)\n", imu.xgyro, imu.ygyro, imu.zgyro);
 	printf("    mag  (NED):  % f % f % f (Ga)\n"   , imu.xmag , imu.ymag , imu.zmag );
@@ -182,7 +182,7 @@ void quit_handler( int sig )
 
 }
 
-int initialize_mavlink(char *uart_name, int baudrate){
+void initialize_mavlink(char *uart_name, int baudrate){
 	spi = new Serial_Port(uart_name, baudrate);
 	api = new Autopilot_Interface(spi);
 
@@ -192,7 +192,7 @@ int initialize_mavlink(char *uart_name, int baudrate){
 	api->start();
 }
 
-int release_mavlink(){
+void release_mavlink(){
 	api->stop();
 	spi->stop();
 }

@@ -12,6 +12,8 @@ NavigationalState * AutoPilotState::returnNextState(Position p){
 
     if (!p.A() && p.B() && p.C() && !p.F())
         return ia;
+
+    return ap;
 }
 
 NavigationalState * InitialApproach::returnNextState(Position p){
@@ -21,6 +23,7 @@ NavigationalState * InitialApproach::returnNextState(Position p){
         return fa;
     if (!p.A() || !p.B() || !p.C())
         return ap;
+    return ia;
 }
 
 NavigationalState * FinalApproach::returnNextState(Position p){
@@ -32,6 +35,7 @@ NavigationalState * FinalApproach::returnNextState(Position p){
         return ia;
     if (p.A())
         return ap;
+    return fa;
 }
 
 NavigationalState * DataAcquisitionState::returnNextState(Position p){
@@ -39,6 +43,7 @@ NavigationalState * DataAcquisitionState::returnNextState(Position p){
         return da;
     if (p.A() || !p.E() || p.F())
         return po;
+    return po;
 }
 
 NavigationalState * PullOutState::returnNextState(Position p){
@@ -46,6 +51,7 @@ NavigationalState * PullOutState::returnNextState(Position p){
         return po;
     if (p.A() || !p.B())
         return ap;
+    return ap;
 }
 
 Position AutoPilotState::computeDesiredPosition(Position p){
@@ -53,8 +59,8 @@ Position AutoPilotState::computeDesiredPosition(Position p){
 }
 
 Position InitialApproach::computeDesiredPosition(Position p){
-    double x = p.x;
-    double y = p.y;
+    //double x = p.x;
+    //double y = p.y;
 
 return Position();
 }
