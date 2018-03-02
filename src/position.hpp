@@ -7,6 +7,7 @@
 #include "configuration.h"
 #include <ctime>
 #include <chrono>
+#include <math.h> 
 
 using namespace std;
 using namespace cv;
@@ -34,6 +35,7 @@ public:
     
     double x,y,depth;
     double ele, azi, tilt;
+    double angle_in_frame();
 
     bool A();
     bool B();

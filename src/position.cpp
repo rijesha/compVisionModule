@@ -73,6 +73,10 @@ string Position::getBasicString(){
     return output.str();
 }
 
+double Position::angle_in_frame(){
+    return atan(x/depth) * 180/3.14;
+}
+
 bool Position::A(){
     //Target Detection Failed for X seconds
     return time_since_last_positon > RESET_TIME*CLOCKS_PER_SEC;

@@ -9,6 +9,7 @@
 #include <time.h>
 #include <unistd.h>
 #include "aruco/aruco_processor.h"
+#include "mavlink-interface/position_controller.h"
 
 using namespace std;
 
@@ -24,6 +25,8 @@ public:
     static NavigationalState * fa;
     static NavigationalState * da;
     static NavigationalState * po;
+    
+    static Position_Controller * pc;
 };
 
 class AutoPilotState : public NavigationalState

@@ -5,74 +5,92 @@ NavigationalState * NavigationalState::ia = new InitialApproach();
 NavigationalState * NavigationalState::fa = new FinalApproach();
 NavigationalState * NavigationalState::da = new DataAcquisitionState();
 NavigationalState * NavigationalState::po = new PullOutState();
+Position_Controller * NavigationalState::pc = NULL;
 
-NavigationalState * AutoPilotState::returnNextState(Position p){
-    if (p.A() || !p.B() || p.F())
+NavigationalState * AutoPilotState::returnNextState(Position cp){
+    if (cp.A() || !cp.B() || cp.F())
         return ap;
 
-    if (!p.A() && p.B() && p.C() && !p.F())
+    if (!cp.A() && cp.B() && cp.C() && !cp.F()){
+        pc->toggle_offboard_control(true);
         return ia;
+    }
 
     return ap;
 }
 
-NavigationalState * InitialApproach::returnNextState(Position p){
-    if (!p.A() && p.B() && p.C() && !p.D())
+NavigationalState * InitialApproach::returnNextState(Position cp){
+    if (!cp.A() && cp.B() && cp.C() && !cp.D())
         return ia;
-    if (!p.A() && p.D())
+    if (!cp.A() && cp.D())
         return fa;
-    if (!p.A() || !p.B() || !p.C())
+    if (!cp.A() || !cp.B() || !cp.C())
         return ap;
     return ia;
 }
 
-NavigationalState * FinalApproach::returnNextState(Position p){
-    if (!p.A() && p.D() && !p.E())
+NavigationalState * FinalApproach::returnNextState(Position cp){
+    if (!cp.A() && cp.D() && !cp.E())
         return fa;
-    if (!p.A() && p.D() && p.E())
+    if (!cp.A() && cp.D() && cp.E())
         return da;
-    if (!p.A() && !p.D() && !p.E())
+    if (!cp.A() && !cp.D() && !cp.E())
         return ia;
-    if (p.A())
+    if (cp.A())
         return ap;
     return fa;
 }
 
-NavigationalState * DataAcquisitionState::returnNextState(Position p){
-    if (!p.A() && !p.F())
+NavigationalState * DataAcquisitionState::returnNextState(Position cp){
+    if (!cp.A() && !cp.F())
         return da;
-    if (p.A() || !p.E() || p.F())
+    if (cp.A() || !cp.E() || cp.F())
         return po;
     return po;
 }
 
-NavigationalState * PullOutState::returnNextState(Position p){
-    if (!p.A() && p.B())
+NavigationalState * PullOutState::returnNextState(Position cp){
+    if (!cp.A() && cp.B())
         return po;
-    if (p.A() || !p.B())
+    if (cp.A() || !cp.B())
         return ap;
     return ap;
 }
 
-Position AutoPilotState::computeDesiredPosition(Position p){
-    return Position();
+Position AutoPilotState::computeDesiredPosition(Position cp){
+    /*If (current state is offboard)
+        pc->toggle_offboard_control(false);
+    */
+    return Position(0,0,6,0);
 }
 
-Position InitialApproach::computeDesiredPosition(Position p){
-    //double x = p.x;
-    //double y = p.y;
+Position InitialApproach::computeDesiredPosition(Position cp){
+    /*If (current state is not offboard)
+        pc->toggle_offboard_control(true);
+    */
+    //Yaw Controller
+    double angle_in_frame = cp.angle_in_frame(); 
+    if (angle_in_frame > 15 && cp.azi < 60){
+
+    } else {
+
+    }
+
+    //Position Controller
+    //double x = cp.x;
+    //double y = cp.y;
 
 return Position();
 }
 
-Position FinalApproach::computeDesiredPosition(Position p){
+Position FinalApproach::computeDesiredPosition(Position cp){
 return Position();
 }
 
-Position DataAcquisitionState::computeDesiredPosition(Position p){
-    return Position(p.x, p.y, p.depth, p.azi);
+Position DataAcquisitionState::computeDesiredPosition(Position cp){
+    return Position(cp.x, cp.y, cp.depth, cp.azi);
 }
 
-Position PullOutState::computeDesiredPosition(Position p){
+Position PullOutState::computeDesiredPosition(Position cp){
     return Position(0,0,6.5,0);
 }

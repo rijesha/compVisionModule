@@ -9,71 +9,33 @@
 
 bool shutdown = false;
 
-void looper(MessageQueue<Position> *mq){
+int main(int argc, const char** argv){
+    CVMArgumentParser ap(argc, argv, true, false, false, false);
+
+    LocationProcessor lp = LocationProcessor(ap.calib_file_path, ap.deviceID);
+    NavigationalState *ns = new AutoPilotState(); 
+    
     Multithreaded_Interface mti;
     mti.start("/dev/ttyUSB0", 57600);
 
     Position_Controller pc(&mti);
-    
-    while (!shutdown){
-        Position p = mq->pop(250);
-        if (!p.emptyPosition){
-            if (p.isDesiredPosition){
-                pc.update_desired_position(p.x, p.y, p.depth, p.azi * 3.14/180);
-            }
-            else{
-                pc.update_current_position(p.x, p.y, p.depth, p.azi * 3.14/180);
-            }
-        }
-    }
-    mti.shutdown();
-}
-
-int main(int argc, const char** argv){
-    CVMArgumentParser ap(argc, argv, true, false, false, false);
-    
-    MessageQueue<Position> *mq = new MessageQueue<Position>();
-    cout <<"Hello mq";
-    Position p1(23,23,1,12);
-    cout <<"Hello post" << endl;
-    mq->push(p1);
-    cout << mq->pop().getBasicString() << endl;;
-    
-
-    LocationProcessor lp = LocationProcessor(ap.calib_file_path, ap.deviceID);
-    thread t1(looper, mq);
-
-    cout << " " << endl;
-    NavigationalState *ns = new AutoPilotState(); 
-    cout << ns->currentState() << " ";
-    ns = ns->returnNextState(Position());
-    cout << ns->currentState() << " ";
-    ns = ns->returnNextState(Position());
-    cout << ns->currentState() << " ";
-    ns = ns->returnNextState(Position());
-    cout << ns->currentState() << " ";
-    ns = ns->returnNextState(Position());
-    cout << ns->currentState() << " ";
-    ns = ns->returnNextState(Position());
-    cout << ns->currentState() << " ";
-    ns = ns->returnNextState(Position());
-    cout << ns->currentState() << " ";
-    ns = ns->returnNextState(Position());
-    
+    ns->pc = &pc;
     
     int count = 0;
+ 
     Position current_position;
     Position desired_position;
     while (count < 8){
         current_position = lp.processImage();
-        mq->push(current_position);
+        pc.update_current_position(current_position.x, current_position.y, current_position.depth, current_position.azi * 3.14/180);
+
         ns = ns->returnNextState(current_position);
+        
         desired_position = ns->computeDesiredPosition(current_position);
-        mq->push(desired_position);
+        pc.update_desired_position(desired_position.x, desired_position.y, desired_position.depth, desired_position.azi * 3.14/180);
+
         count++;
     }
-    shutdown = true;
-    t1.join();
-
+    mti.shutdown();
     return -1;
 }
