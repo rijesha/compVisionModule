@@ -181,7 +181,7 @@ int main(int argc, const char** argv) {
     float aspectRatio = 1;
 
 
-    Ptr<aruco::DetectorParameters> detectorParams = aruco::DetectorParameters::create();
+    Ptr<aruco::MarkerDetector> detectorParams = aruco::MarkerDetector::create();
 
     bool refindStrategy = false;
     String video;
@@ -193,9 +193,10 @@ int main(int argc, const char** argv) {
         inputVideo.open(video);
         waitTime = 0;
     } else {
-        inputVideo.open(ap.deviceID);
-        inputVideo.set(CV_CAP_PROP_FRAME_WIDTH,ap.width);
-        inputVideo.set(CV_CAP_PROP_FRAME_HEIGHT,ap.height);
+        //inputVideo.open(ap.deviceID);
+        //inputVideo.set(CV_CAP_PROP_FRAME_WIDTH,ap.width);
+        //inputVideo.set(CV_CAP_PROP_FRAME_HEIGHT,ap.height);
+        inputVideo.open("v4l2src device=/dev/video1 ! video/x-raw,format=GRAY8,width=1280,height=960,framerate=10/1 ! videoconvert ! appsink");
         cout << ap.width << endl;
         cout << ap.height << endl;
         waitTime = 10;

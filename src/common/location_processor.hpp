@@ -4,14 +4,14 @@
 #include <iostream>
 #include <stdio.h>
 #include <opencv2/opencv.hpp>
-#include "aruco/undistort_image.h"
+#include <common/undistort_image.h>
 #include "configuration.h"
 #include <ctime>
 #include <chrono>
 #include <cstring>
 //#include <iostream.h>
 #include <time.h>
-#include "aruco/aruco_processor.h"
+#include <common/aruco_processor.h>
 #include <unistd.h>
 
 using namespace std;

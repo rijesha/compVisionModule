@@ -3,10 +3,13 @@
 
 #include <iostream>
 #include <opencv2/opencv.hpp>
+#include "../../libs/aruco/include/aruco/aruco.h"
+
 using namespace std;
 using namespace cv;
+using namespace aruco;
 
-struct CameraParameters {
+struct CameraParametersLocal {
     int width;
     int height;
     Mat camera_matrix;

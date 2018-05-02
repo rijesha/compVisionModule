@@ -1,9 +1,6 @@
 *.pyc
 *.vscode/
 *.o
-cpp/basic
-without_corner_refinement/
-with_corner_refinement/
 python/calibrationImages/
 python/1280x960 calib data/
 python/2592x1944 calib data/
@@ -25,7 +22,7 @@ lots of data/
 old/
 testData/
 test_data_collection
-src/aruco/python/*.jpg
+python/*.jpg
 src/aruco/*.avi
 TestData.csv
 src/mavlink_control/mavlink_control

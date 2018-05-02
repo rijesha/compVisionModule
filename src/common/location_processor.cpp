@@ -14,12 +14,7 @@ LocationProcessor::LocationProcessor(string calib_file_path, int device_id){
     vCap.set(CV_CAP_PROP_FRAME_WIDTH,width);
     vCap.set(CV_CAP_PROP_FRAME_HEIGHT,height);
     
-    CameraParameters camparams;
-
-    camparams.width = width;
-    camparams.height = height;
-    camparams.camera_matrix = cameraMatrix2;
-    camparams.dist_coefs = distCoeffs2;
+    CameraParameters camparams(cameraMatrix2, distCoeffs2, Size(width, height));
 
     arProc = ArUcoProcessor(camparams, TARGET_WIDTH);
 }

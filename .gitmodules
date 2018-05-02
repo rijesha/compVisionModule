@@ -1,6 +1,3 @@
-[submodule "libs/mavlink"]
-	path = libs/mavlink
-	url = https://github.com/mavlink/c_library_v1.git
-[submodule "src/mavlink-interface"]
-	path = src/mavlink-interface
+[submodule "libs/mavlink-interface"]
+	path = libs/mavlink-interface
 	url = https://github.com/rijesha/mavlink-interface.git

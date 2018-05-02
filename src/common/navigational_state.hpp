@@ -8,8 +8,8 @@
 #include <cstring>
 #include <time.h>
 #include <unistd.h>
-#include "aruco/aruco_processor.h"
-#include "mavlink-interface/position_controller.h"
+#include <common/aruco_processor.h>
+#include "../libs/mavlink-interface/position_controller.h"
 
 using namespace std;
 

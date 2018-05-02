@@ -3,8 +3,8 @@
 
 #include <iostream>
 #include <opencv2/opencv.hpp>
-#include <opencv2/aruco.hpp>
-#include "configuration.h"
+#include "../../libs/aruco/include/aruco/aruco.h"
+//#include "configuration.h"
 #include <ctime>
 #include <chrono>
 #include <math.h> 

@@ -68,10 +68,10 @@ int main(int argc, const char** argv )
     cout << width;
     cout << height;
 
-    vCap = VideoCapture(ap.deviceID);
-    vCap.set(CV_CAP_PROP_FRAME_WIDTH,width);
-    vCap.set(CV_CAP_PROP_FRAME_HEIGHT,height);
-    //vCap = VideoCapture("v4l2src device=/dev/video1 ! video/x-raw, framerate=30/1, width=640, height=480, format=YUYV ! videoconvert ! appsink");
+    //vCap = VideoCapture(ap.deviceID);
+   // vCap.set(CV_CAP_PROP_FRAME_WIDTH,width);
+   // vCap.set(CV_CAP_PROP_FRAME_HEIGHT,height);
+    vCap = VideoCapture("v4l2src device=/dev/video1 ! video/x-raw, framerate=30/1, width=640, height=480, format=YUYV ! videoconvert ! appsink");
 
     CameraParameters camparams;
 
