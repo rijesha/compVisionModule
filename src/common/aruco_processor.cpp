@@ -48,9 +48,9 @@ void ArUcoProcessor::processFrame(Mat image ,int markerID){
     auto markers = detector->detect(image);
     for (auto m : markers){
         if (m.id == markerID){
-                correctMarker = &m;
-                foundMarkers = true;
-            }
+            correctMarker = &m;
+            foundMarkers = true;
+        }
     }
  }
 
