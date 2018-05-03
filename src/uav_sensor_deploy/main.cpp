@@ -1,11 +1,11 @@
-#include "cvm_argument_parser.hpp"
-#include "navigational_state.hpp"
-#include "location_processor.hpp"
-#include "common/position.hpp"
+#include <common/cvm_argument_parser.hpp>
+#include <common/navigational_state.hpp>
+#include <common/location_processor.hpp>
+#include <common/position.hpp>
 #include <thread>
-#include "common/msg_queue.hpp"
-#include "../libs/mavlink-interface/position_controller.h"
-#include "../libs/mavlink-interface/multithreaded_interface.h"
+#include <common/msg_queue.hpp>
+#include <mavlink-interface/position_controller.h>
+#include <mavlink-interface/multithreaded_interface.h>
 
 bool shutdown = false;
 

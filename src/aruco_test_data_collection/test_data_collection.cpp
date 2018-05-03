@@ -1,14 +1,14 @@
 #include <stdio.h>
 #include <opencv2/opencv.hpp>
-#include "undistort_image.h"
+#include <common/undistort_image.h>
 #include "../configuration.h"
-#include "../cvm_argument_parser.hpp"
+#include <common/cvm_argument_parser.hpp>
 #include <ctime>
 #include <chrono>
 #include <cstring>
 //#include <iostream.h>
 #include <time.h>
-#include "aruco_processor.h"
+#include <common/aruco_processor.h>
 #include <unistd.h>
 
 using namespace cv;
@@ -75,15 +75,15 @@ int main(int argc, const char** argv )
 
     CameraParameters camparams;
 
-    camparams.width = width;
-    camparams.height = height;
-    camparams.camera_matrix = cameraMatrix2;
-    camparams.dist_coefs = distCoeffs2;
-
-    cout << camparams.camera_matrix <<endl;
-    cout << camparams.dist_coefs << endl;
-    cout << cameraMatrix2 <<endl;
-    cout << distCoeffs2 << endl;
+    //camparams.width = width;
+    //camparams.height = height;
+    //camparams.camera_matrix = cameraMatrix2;
+    //camparams.dist_coefs = distCoeffs2;
+//
+    //cout << camparams.camera_matrix <<endl;
+    //cout << camparams.dist_coefs << endl;
+    //cout << cameraMatrix2 <<endl;
+    //cout << distCoeffs2 << endl;
 
     ui = UndistortImage(camparams);
     arProc = ArUcoProcessor(camparams, TARGET_WIDTH);

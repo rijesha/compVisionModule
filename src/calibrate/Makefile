@@ -3,14 +3,14 @@ CC = g++
 MAKEFLAGS += -j
 
 # Names and flags
-INC_DIR = .
+INC_DIR = -I. -I../../libs/argparse
 CSOURCES = $(wildcard *.c )
 CPPSOURCES += $(wildcard *.cpp)
-CPPSOURCES +=  ../src/cvm_argument_parser.cpp
+CPPSOURCES +=  ../common/cvm_argument_parser.cpp
 
 OBJECTS = $(CSOURCES:.c=.o) $(CPPSOURCES:.cpp=.o)
 EXECUTABLE = calibrate
-CFLAGS = -c -Wall -g -I$(INC_DIR) 
+CFLAGS = -c -Wall -g $(INC_DIR) 
 OPENCV = `pkg-config opencv --cflags --libs `
 LIBS = $(OPENCV)
 

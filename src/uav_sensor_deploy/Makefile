@@ -4,8 +4,8 @@ MAKEFLAGS += -j
 
 #-Imavlink-interface
 # Names and flags
-INC_DIR = -I. -I../libs/mavlink-interface/mavlink_c_library_v1 -Icommon
-CPPSOURCES += $(wildcard *.cpp) $(wildcard ../libs/mavlink-interface/*.cpp) $(wildcard common/*.cpp)
+INC_DIR = -I. -I../../libs/mavlink-interface/mavlink_c_library_v1/common -I.. -I../../libs
+CPPSOURCES += $(wildcard *.cpp) $(wildcard ../../libs/mavlink-interface/*.cpp) $(wildcard ../common/*.cpp)
 
 OBJECTS = $(CPPSOURCES:.cpp=.o)
 EXECUTABLE = deploy
@@ -14,7 +14,7 @@ OPENCV = `pkg-config opencv --cflags --libs `
 
 
 LIBS = $(OPENCV)
-LIBS += -L../libs/aruco/lib -laruco
+LIBS += -L../../libs/aruco/lib -laruco
 
 
 # Targets

@@ -44,8 +44,8 @@ the use of this software, even if advised of the possibility of such damage.
 #include <vector>
 #include <iostream>
 #include <ctime>
-#include "../src/configuration.h"
-#include "../src/cvm_argument_parser.hpp"
+#include "../configuration.h"
+#include "../common/cvm_argument_parser.hpp"
 
 
 using namespace std;

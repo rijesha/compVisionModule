@@ -1,7 +1,7 @@
 #ifndef CVM_ARGUMENT_PARSER_H
 #define CVM_ARGUMENT_PARSER_H
 
-#include "../libs/argparse/argparse.hpp"
+#include <argparse/argparse.hpp>
 #include <cstring>
 #include <string>
 #include <iostream>
