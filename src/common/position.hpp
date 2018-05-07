@@ -17,15 +17,18 @@ class Position
 {
 private:
     void calcEulerAngles();
+    void calcEulerAnglesRT();
     static clock_t last_creation_time;
 public:
     Position();
     Position(double x, double y, double depth, double yaw);
-    Position(vector< Vec3d > rvecs, vector< Vec3d > tvecs);
+    Position(Mat rvecs, Mat tvecs);
+    Position(Mat RTmatrix);
     bool emptyPosition = false;
     bool isDesiredPosition = false;
-    vector< Vec3d > rvecs, tvecs;
-    Vec3d eulersAngles;
+    Mat rvecs, tvecs, RTMatrix;
+    Mat eulersAngles;
+    
     Mat rotMat;
     Mat worldPos;
     string getInfoString();

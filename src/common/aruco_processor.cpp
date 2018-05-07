@@ -5,7 +5,8 @@ ArUcoProcessor::ArUcoProcessor(){}
 
 ArUcoProcessor::ArUcoProcessor(CameraParameters camparams, float targetSize){
     detector = new MarkerDetector();
-    detector->setDictionary("ALL_DICTS");
+    pose_tracker = new MarkerPoseTracker();
+    detector->setDictionary("ARUCO_MIP_16h3");
     MarkerDetector::Params &params= detector->getParameters();
     
     params.setDetectionMode(DM_NORMAL, 0);
@@ -31,6 +32,7 @@ ArUcoProcessor::ArUcoProcessor(CameraParameters camparams, float targetSize){
 ArUcoProcessor::ArUcoProcessor(CameraParameters camparams, float targetSize, Ptr<MarkerDetector> detectorParameters){
     //this->dictionary = getPredefinedDictionary(dictionaryName);
     //this->detectorParameters = detectorParameters;
+    pose_tracker = new MarkerPoseTracker();
     this->camparams = camparams;
     this->targetSize = targetSize;
     foundMarkers = false;
@@ -45,11 +47,11 @@ void ArUcoProcessor::processFrame(Mat image ,int markerID){
     foundMarkers = false;
     vecsUpdated = false;
 
-    auto markers = detector->detect(image);
-    for (auto m : markers){
+    detectedMarkers = detector->detect(image);
+    for (Marker m : detectedMarkers){
         if (m.id == markerID){
-            correctMarker = &m;
             foundMarkers = true;
+            m.copyTo(detectedMarker);
         }
     }
  }
@@ -61,30 +63,26 @@ int sign(int x) {
 Position ArUcoProcessor::calculatePose(){
     Position p;
     if (foundMarkers){
-        bool useExtrinsic = true;
-        if (((float) (clock() - lastMarkerTime) > RESET_TIME*CLOCKS_PER_SEC) || (abs(eulersAngles[1]) > 55) || (abs(eulersAngles[0]) < 150) || (abs(eulersAngles[3]) > 30) ){
-            useExtrinsic = false;
-            //cout << "NOT USING EXTRINSIC" << endl;
-        }
-        lastMarkerTime = clock();
-        bool badData = true;
-        do {
-            rvecs = correctMarker->Rvec;
-            tvecs = correctMarker->Tvec;
-            //aruco::estimatePoseSingleMarkers(markerCorners, targetSize, camparams.camera_matrix, camparams.dist_coefs, rvecs, tvecs, useExtrinsic);
-            if ( tvecs[0][2] > 0){
-                badData = false;
-            }
-            else {
-                useExtrinsic = false;
-                cout << p.getInfoString();
-                cout << "FAILED FAILED FAILED" << endl;
-            }
-            p = Position(rvecs, tvecs);
+        pose_tracker->estimatePose(detectedMarker,camparams, 0.12);
+        Mat RTmatrix = pose_tracker->getRTMatrix();
+        if (!RTmatrix.empty()){
+            cout << "new data" << endl;
+            cout << pose_tracker->getRTMatrix() << endl;
+            cout << pose_tracker->getRvec() << endl;
+            cout << detectedMarker.Rvec << endl;
+            cout << pose_tracker->getTvec() << endl;
+            cout << detectedMarker.Tvec << endl;
+
+            Position tempP(detectedMarker.Rvec, detectedMarker.Tvec);
+            cout << "didn't seg fault yet 98" << endl;
+            p = tempP;
+            
             eulersAngles = p.eulersAngles;
+            cout << "didn't seg fault yet 85" << endl;
+            p = Position(pose_tracker->getRTMatrix());      
         }
-        while (badData);
         return p;
+
     }
     return p;
 }
@@ -92,14 +90,11 @@ Position ArUcoProcessor::calculatePose(){
 
 Mat ArUcoProcessor::drawMarkersAndAxis(Mat image, bool alsoDrawAxis){
     Mat out = image.clone();
+    
     try{
         if (foundMarkers){
-            CvDrawingUtils::draw3dAxis(out, *correctMarker, camparams);
-            //drawDetectedMarkers(out, markerCorners, markerIds);
-            //if (alsoDrawAxis){
-            //    for(size_t i=0; i<markerIds.size(); i++)
-            //        drawAxis(out, camparams.camera_matrix, camparams.dist_coefs, rvecs[i], tvecs[i], targetSize);
-            //}
+            aruco::CvDrawingUtils::draw3dAxis(out, detectedMarker, camparams);
+            aruco::CvDrawingUtils::draw3dCube(out, detectedMarker, camparams);
         }
     } catch (...)
     {
@@ -109,10 +104,4 @@ Mat ArUcoProcessor::drawMarkersAndAxis(Mat image, bool alsoDrawAxis){
     return out;
 }
 
-Mat ArUcoProcessor::getMarker(int markerNumber,int markerpixels){
-    Mat markerImage;
-    //drawMarker(dictionary, 17, 600, markerImage, 1);
-    cout << "NOT IMPLEMENTED" << endl;
-    return markerImage;
-}
-    
+   

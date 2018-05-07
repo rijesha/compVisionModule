@@ -16,34 +16,19 @@ Position::Position(double x, double y, double depth, double yaw){
     this->azi = yaw;
 }
 
-Position::Position(vector< Vec3d > rvecs, vector< Vec3d > tvecs) : rvecs(rvecs), tvecs(tvecs){
+Position::Position(Mat RTMatrix) {
     creation_time = clock();
     time_since_last_positon = creation_time - last_creation_time;
     last_creation_time = creation_time;
     emptyPosition = false;
-    Rodrigues(rvecs[0],rotMat);
-    calcEulerAngles();
-    Mat invRotMat;
-    transpose(rotMat, invRotMat);
-    worldPos = -invRotMat * Mat(tvecs[0]);
-    x = tvecs[0][0];
-    y = tvecs[0][1];
-    depth = tvecs[0][2];
-    
-    ele  = eulersAngles[0];
-    azi  = eulersAngles[1];
-    tilt = eulersAngles[2];  
-}
 
-void Position::calcEulerAngles(){
-    
+    this->RTMatrix = RTMatrix(Range(0, 3), Range(0, 4));
+    tvecs = RTMatrix(Range(0, 3), Range(3, 4));
+    rotMat = RTMatrix(Range(0, 3), Range(0, 3));
+
     Mat cameraMatrix,rotMatrix,transVect,rotMatrixX,rotMatrixY,rotMatrixZ;
-    double* _r = rotMat.ptr<double>();
-    double projMatrix[12] = {_r[0],_r[1],_r[2],0,
-                          _r[3],_r[4],_r[5],0,
-                          _r[6],_r[7],_r[8],0};
 
-    decomposeProjectionMatrix( Mat(3,4,CV_64FC1,projMatrix),
+    decomposeProjectionMatrix( this->RTMatrix,
                                cameraMatrix,
                                rotMatrix,
                                transVect,
@@ -51,6 +36,76 @@ void Position::calcEulerAngles(){
                                rotMatrixY,
                                rotMatrixZ,
                                eulersAngles);
+
+    worldPos = -rotMat.inv() * tvecs;
+
+    float* _t = tvecs.ptr<float>();
+    x = _t[0];
+    y = _t[1];
+    depth = _t[2];
+    
+    float* _eA = eulersAngles.ptr<float>();
+    ele  = _eA[0];
+    azi  = _eA[1];
+    tilt = _eA[2];
+}
+
+Position::Position(Mat rvecs, Mat tvecs) : rvecs(rvecs), tvecs(tvecs){
+    creation_time = clock();
+    time_since_last_positon = creation_time - last_creation_time;
+    last_creation_time = creation_time;
+    emptyPosition = false;
+    Rodrigues(rvecs,rotMat);
+    
+    calcEulerAngles();
+    cout << "you didn't seg fault 25" << endl;
+    Mat invRotMat;
+    transpose(rotMat, invRotMat);
+    cout << "you didn't seg fault 32" << endl;
+    cout << invRotMat << endl;
+    cout << invRotMat.size() << endl;
+    cout << (-invRotMat) << endl;
+    cout << (-invRotMat).size() << endl;
+    cout << tvecs.size() << endl;
+    cout << invRotMat.cols << " " << tvecs.rows << endl;
+    
+    worldPos = -rotMat.inv() * tvecs.t();
+    RTMatrix = worldPos;
+    cout << "you didn't seg fault 31" << endl;
+    float* _t = tvecs.ptr<float>();
+    x = _t[0];
+    y = _t[1];
+    depth = _t[2];
+    
+    float* _eA = eulersAngles.ptr<float>();
+    ele  = _eA[0];
+    azi  = _eA[1];
+    tilt = _eA[2];
+}
+
+void Position::calcEulerAngles(){
+    
+    Mat cameraMatrix,rotMatrix,transVect,rotMatrixX,rotMatrixY,rotMatrixZ;
+
+    float* _r = rotMat.ptr<float>();
+    float projMatrix[12] = {_r[0],_r[1],_r[2],0,
+                          _r[3],_r[4],_r[5],0,
+                          _r[6],_r[7],_r[8],0};
+    //cout << _r[0] << _r[1] << _r[2] << endl << _r[3] << _r[4] << _r[5] << endl << _r[6] << _r[7] << _r[8]  << endl;
+
+    Mat test = Mat(3,4,CV_32FC1,projMatrix);
+    cout << test << endl;
+    cout << "about to seg fault" << endl;
+    decomposeProjectionMatrix( test,
+                               cameraMatrix,
+                               rotMatrix,
+                               transVect,
+                               rotMatrixX,
+                               rotMatrixY,
+                               rotMatrixZ,
+                               eulersAngles);
+
+    cout << "you didn't seg fault" << endl;
 }
 
 string Position::getInfoString(){

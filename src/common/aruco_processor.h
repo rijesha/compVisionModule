@@ -5,7 +5,6 @@
 #include <opencv2/opencv.hpp>
 #include "../../libs/aruco/include/aruco/aruco.h"
 #include "undistort_image.h"
-//#include "../../configuration.h"
 #include "position.hpp"
 #include <ctime>
 #include <chrono>
@@ -21,6 +20,7 @@ class ArUcoProcessor
 private:
     Ptr<Dictionary> dictionary;
     Ptr<MarkerDetector> detector;
+    Ptr<MarkerPoseTracker> pose_tracker;
     bool vecsUpdated;
     CameraParameters camparams;
     float targetSize;
@@ -34,7 +34,6 @@ public:
     void processFrame(Mat image, int markerID = 19);
     Position calculatePose();
     Mat drawMarkersAndAxis(Mat image, bool drawAxis = true);
-    Mat getMarker(int markerNumber = 19,int markerpixels = 600);
 
     vector< int > markerIds;
     vector< vector<Point2f> > rejectedCandidates;
@@ -42,7 +41,8 @@ public:
     Vec3d eulersAngles;
     bool foundMarkers;
 
-    Ptr<Marker> correctMarker;
+    vector<Marker> detectedMarkers;
+    Marker detectedMarker;
 };
 
 #endif /* ARUCO_PROCESSOR_H */
