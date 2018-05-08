@@ -40,7 +40,8 @@ void processImage(){
     markerDetectionTime = clock();
     p = arProc.calculatePose();
     posecalculationTime = clock();
-    image = arProc.drawMarkersAndAxis(original);
+    cvtColor(original, image, CV_GRAY2BGR );
+    image = arProc.drawMarkersAndAxis(image);
     drawingImageTime = clock();
 }
 
@@ -57,40 +58,19 @@ int main(int argc, const char** argv )
         timingFile << "veryoverallCout, overallCount, foundMarker, savedImage, markerDetectionTime, posecalculationTime, drawingImageTime, savingImageTime, depth" << endl;
     }
 
-    FileStorage fs(ap.calib_file_path, FileStorage::READ);
-    Mat cameraMatrix2, distCoeffs2; 
-    int width, height;
-    fs["camera_matrix"] >> cameraMatrix2;
-    fs["distortion_coefficients"] >> distCoeffs2;
-    fs["image_width"] >> width;
-    fs["image_height"] >> height;
+    aruco::CameraParameters CamParam;
+    CamParam.readFromXMLFile(ap.calib_file_path);
+
+    int width = CamParam.CamSize.width;
+    int height = CamParam.CamSize.height;
+
+    vCap = VideoCapture("v4l2src device=/dev/video1 ! video/x-raw,format=GRAY8,width=1280,height=960,framerate=30/1 ! videoconvert ! appsink");
+    cout << "openeded device" << endl;
     
-    cout << width;
-    cout << height;
+    ui = UndistortImage(CamParam);
+    arProc = ArUcoProcessor(CamParam, TARGET_WIDTH);
 
-    //vCap = VideoCapture(ap.deviceID);
-   // vCap.set(CV_CAP_PROP_FRAME_WIDTH,width);
-   // vCap.set(CV_CAP_PROP_FRAME_HEIGHT,height);
-    vCap = VideoCapture("v4l2src device=/dev/video1 ! video/x-raw, framerate=30/1, width=640, height=480, format=YUYV ! videoconvert ! appsink");
-
-    CameraParameters camparams;
-
-    //camparams.width = width;
-    //camparams.height = height;
-    //camparams.camera_matrix = cameraMatrix2;
-    //camparams.dist_coefs = distCoeffs2;
-//
-    //cout << camparams.camera_matrix <<endl;
-    //cout << camparams.dist_coefs << endl;
-    //cout << cameraMatrix2 <<endl;
-    //cout << distCoeffs2 << endl;
-
-    ui = UndistortImage(camparams);
-    arProc = ArUcoProcessor(camparams, TARGET_WIDTH);
-
-    //imwrite( "marker28.jpg", arProc.getMarker(28));
     vCap.read(image);
-    Mat dstImg = image.clone();
 
     if (ap.saveVideo){
         writer = cv::VideoWriter("out.avi", VideoWriter::fourcc('M','J','P','G'), 24, image.size());
@@ -104,25 +84,32 @@ int main(int argc, const char** argv )
     int overallCount = 10900;
     int veryoverallCout = 0;
 
+
+    Mat undistorted = image.clone();
     while(1) {
         processImage();
+        
         if (ap.saveVideo){
             writer << image;
         }
-
+        
         #ifdef DISPLAY_IMAGE
         namedWindow("Display Image", WINDOW_AUTOSIZE );
         if (!ap.saveTiming){
-            Mat out;
-            image = ui.undistortAcquiredImage(image, out);
+            ui.undistortAcquiredImage(image, &undistorted);
+            imshow("Display Image", undistorted);
+        } else {
+            imshow("Display Image", image);
         }
-        imshow("Display Image", image);
+        
         #endif
 
         char c = waitKey(10);
         if (c == 27 || c == 113){
             break;
         }
+        
+        
         if (!ap.saveData && arProc.foundMarkers && !ap.quiet){
             cout << p.getInfoString();
         }
@@ -190,6 +177,7 @@ int main(int argc, const char** argv )
             cout << timingData.str();
             timingFile << veryoverallCout << ',' << overallCount << ',' << timingData.str();
         }
+        
     }
     
     testFile.close();

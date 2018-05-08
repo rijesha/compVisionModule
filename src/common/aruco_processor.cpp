@@ -66,23 +66,10 @@ Position ArUcoProcessor::calculatePose(){
         pose_tracker->estimatePose(detectedMarker,camparams, 0.12);
         Mat RTmatrix = pose_tracker->getRTMatrix();
         if (!RTmatrix.empty()){
-            cout << "new data" << endl;
-            cout << pose_tracker->getRTMatrix() << endl;
-            cout << pose_tracker->getRvec() << endl;
-            cout << detectedMarker.Rvec << endl;
-            cout << pose_tracker->getTvec() << endl;
-            cout << detectedMarker.Tvec << endl;
-
-            Position tempP(detectedMarker.Rvec, detectedMarker.Tvec);
-            cout << "didn't seg fault yet 98" << endl;
-            p = tempP;
-            
-            eulersAngles = p.eulersAngles;
-            cout << "didn't seg fault yet 85" << endl;
-            p = Position(pose_tracker->getRTMatrix());      
+            p = Position(pose_tracker->getRTMatrix());    
+            eulersAngles = p.eulersAngles;  
         }
         return p;
-
     }
     return p;
 }
