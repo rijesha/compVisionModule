@@ -19,9 +19,10 @@ private:
     static clock_t last_creation_time;
 public:
     Position();
-    Position(double x, double y, double depth, double yaw);
+    Position(float x, float y, float depth, float yaw);
 
     Position(Mat RTmatrix);
+
     bool emptyPosition = false;
     bool isDesiredPosition = false;
     Mat rvecs, tvecs, RTMatrix;
@@ -34,9 +35,9 @@ public:
     clock_t creation_time;
     clock_t time_since_last_positon;
     
-    double x,y,depth;
-    double ele, azi, tilt;
-    double angle_in_frame();
+    float x,y,z;
+    float ele, azi, tilt;
+    float angle_in_frame();
 
     bool A();
     bool B();

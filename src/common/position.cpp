@@ -8,27 +8,29 @@ Position::Position(){
     emptyPosition = true;
 }
 
-Position::Position(double x, double y, double depth, double yaw){
+Position::Position(float x, float y, float z, float yaw){
     isDesiredPosition = true;
     this->x = x;
     this->y = y;
-    this->depth = depth;
+    this->z = z;
     this->azi = yaw;
 }
 
-Position::Position(Mat RTMatrix) {
+Position::Position(Mat RTMatrixs) {
     creation_time = clock();
     time_since_last_positon = creation_time - last_creation_time;
     last_creation_time = creation_time;
     emptyPosition = false;
 
-    this->RTMatrix = RTMatrix(Range(0, 3), Range(0, 4));
-    tvecs = RTMatrix(Range(0, 3), Range(3, 4));
-    rotMat = RTMatrix(Range(0, 3), Range(0, 3));
+    RTMatrix = RTMatrixs(Range(0, 3), Range(0, 4));
+    tvecs = RTMatrixs(Range(0, 3), Range(3, 4));
+    rotMat = RTMatrixs(Range(0, 3), Range(0, 3));
+
+    x = tvecs.at<float>(0); z = tvecs.at<float>(1); y = tvecs.at<float>(2);
 
     Mat cameraMatrix,rotMatrix,transVect,rotMatrixX,rotMatrixY,rotMatrixZ;
 
-    decomposeProjectionMatrix( this->RTMatrix,
+    decomposeProjectionMatrix( RTMatrix,
                                cameraMatrix,
                                rotMatrix,
                                transVect,
@@ -38,11 +40,8 @@ Position::Position(Mat RTMatrix) {
                                eulersAngles);
 
     worldPos = -rotMat.inv() * tvecs;
-
-    float* _t = tvecs.ptr<float>();
-    x = _t[0]; y = _t[1]; depth = _t[2];
     
-    float* _eA = eulersAngles.ptr<float>();
+    double* _eA = eulersAngles.ptr<double>();
     ele  = _eA[0]; azi  = _eA[1]; tilt = _eA[2];
 }
 
@@ -51,9 +50,9 @@ string Position::getInfoString(){
     output << std::fixed;
     output << std::setprecision(5);
 
-    output << x << ',' << y << ',' << depth << ',';
+    output << x << ',' << y << ',' << z << ',';
     output << ele << ',' << azi << ',' << tilt << ',';
-    output << worldPos.at<double>(0) << ',' << worldPos.at<double>(1) << ',' << worldPos.at<double>(2) << endl;
+    output << worldPos.at<float>(0) << ',' << worldPos.at<float>(1) << ',' << worldPos.at<float>(2) << endl;
     return output.str();
 }
 
@@ -62,12 +61,12 @@ string Position::getBasicString(){
     output << std::fixed;
     output << std::setprecision(5);
 
-    output << x << ',' << y << ',' << depth << ',' << azi << endl;
+    output << x << ',' << y << ',' << z << ',' << azi << endl;
     return output.str();
 }
 
-double Position::angle_in_frame(){
-    return atan(x/depth) * 180/3.14;
+float Position::angle_in_frame(){
+    return atan(x/z) * 180/3.14;
 }
 
 bool Position::A(){
@@ -76,7 +75,7 @@ bool Position::A(){
 }
 bool Position::B(){
     //Target Within 6 m depth
-    return depth < 6;
+    return y < 6;
 }
 bool Position::C(){
     //Target Azimuthal Angle <60 deg
@@ -84,7 +83,7 @@ bool Position::C(){
 }
 bool Position::D(){
     //Within 2m depth and Target zimuthal angle < 10 deg
-    return (azi < 10 && depth < 2);
+    return (azi < 10 && y < 2);
 }
 bool Position::E(){
     //Sensor Contact
