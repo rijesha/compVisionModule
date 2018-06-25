@@ -53,7 +53,7 @@ class CameraCapture():
 
     def startCamera(self):
         #self.cam = cv2.VideoCapture(self.camID)
-        self.cam = cv2.VideoCapture("v4l2src device=/dev/video1 ! video/x-raw, framerate=30/1, width=1280, height=960, format=YUYV ! videoconvert ! appsink")
+        self.cam = cv2.VideoCapture("v4l2src device=/dev/video1 ! video/x-raw,format=GRAY8,width=1280,height=960,framerate=10/1 ! videoconvert ! appsink")
         time.sleep(0.05)
 
         if (self.cam.isOpened()== False): 

@@ -88,7 +88,7 @@ return Position();
 }
 
 Position DataAcquisitionState::computeDesiredPosition(Position cp){
-    return Position(cp.x, cp.y, cp.depth, cp.azi);
+    return Position(cp.x, cp.y, cp.z, cp.azi);
 }
 
 Position PullOutState::computeDesiredPosition(Position cp){
