@@ -1,3 +1,6 @@
 [submodule "libs/mavlink-interface"]
 	path = libs/mavlink-interface
 	url = https://github.com/rijesha/mavlink-interface.git
+[submodule "libs/camera-v4l2"]
+	path = libs/camera-v4l2
+	url = https://github.com/rijesha/camera-v4l2.git
