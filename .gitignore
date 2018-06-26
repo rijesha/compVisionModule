@@ -27,3 +27,4 @@ src/aruco/*.avi
 TestData.csv
 src/mavlink_control/mavlink_control
 src/uav_sensor_deploy/deploy
+libs/aruco/bin/*

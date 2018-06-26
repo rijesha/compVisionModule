@@ -6,7 +6,7 @@
 #include <ctime>
 #include <chrono>
 #include <cstring>
-//#include <iostream.h>
+#include <fstream>
 #include <time.h>
 #include <common/aruco_processor.h>
 #include <unistd.h>

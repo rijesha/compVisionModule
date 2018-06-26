@@ -6,12 +6,15 @@
 #include <ctime>
 #include <chrono>
 #include <cstring>
-//#include <iostream.h>
+#include <iostream>
+#include <fstream>
 #include <time.h>
 #include <common/aruco_processor.h>
 #include <unistd.h>
+#include <camera-v4l2/camera.h>
 
 using namespace cv;
+using namespace std;
 
 ofstream testFile, timingFile;
 string testFileFolder;
@@ -26,10 +29,16 @@ Mat original;
 
 ArUcoProcessor arProc;
 Position p;
+Camera camera;
+
+int width;
+int height;
 
 void processImage(){
     arProc.foundMarkers = false;
-    vCap.read(original);
+    Image image1 = camera.captureFrame();
+    image = Mat(height, width, CV_8UC3, image1.data);
+    
     imageAcquisitionTime = clock();
     if ( !original.data )
     {
@@ -61,19 +70,20 @@ int main(int argc, const char** argv )
     aruco::CameraParameters CamParam;
     CamParam.readFromXMLFile(ap.calib_file_path);
 
-    int width = CamParam.CamSize.width;
-    int height = CamParam.CamSize.height;
-
-    vCap = VideoCapture("v4l2src device=/dev/video1 ! video/x-raw,format=GRAY8,width=1280,height=960,framerate=30/1 ! videoconvert ! appsink");
-    cout << "openeded device" << endl;
+    width = CamParam.CamSize.width;
+    height = CamParam.CamSize.height;
+    
+    camera = Camera("/dev/video1", width, height);
+    Image image1 = camera.captureFrame();
+    cout << "opened device" << endl;
     
     ui = UndistortImage(CamParam);
     arProc = ArUcoProcessor(CamParam, TARGET_WIDTH);
 
-    vCap.read(image);
+    image = Mat(height, width, CV_8UC3, image1.data);
 
     if (ap.saveVideo){
-        writer = cv::VideoWriter("out.avi", VideoWriter::fourcc('M','J','P','G'), 24, image.size());
+        writer = cv::VideoWriter("out.avi", CV_FOURCC('M','J','P','G'), 24, image.size());
     }
 
     string userinput;

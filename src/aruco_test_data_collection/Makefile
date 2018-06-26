@@ -4,8 +4,8 @@ MAKEFLAGS += -j
 
 #-Imavlink-interface
 # Names and flags
-INC_DIR = -I. -I../../libs/mavlink-interface/mavlink_c_library_v1/common -I.. -I../../libs
-CPPSOURCES += $(wildcard ../../libs/mavlink-interface/*.cpp) $(wildcard ../common/*.cpp)
+INC_DIR = -I. -I../../libs/mavlink-interface/mavlink_c_library_v1/common -I.. -I../../libs -I../../libs/camera-v4l2
+CPPSOURCES += $(wildcard ../../libs/mavlink-interface/*.cpp) $(wildcard ../../libs/camera-v4l2/camera.cpp) $(wildcard ../common/*.cpp)
 
 COMMON_OBJECTS = $(CPPSOURCES:.cpp=.o)
 
@@ -18,7 +18,7 @@ OPENCV = `pkg-config opencv --cflags --libs `
 
 
 LIBS = $(OPENCV)
-LIBS += -L../../libs/aruco/lib -laruco 
+LIBS += -L../../libs/aruco/lib -laruco  -L../../libs/camera-v4l2
 LIBS += -lboost_system -lboost_filesystem
 
 
