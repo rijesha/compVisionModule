@@ -14,7 +14,7 @@ private:
  
 public:
     CVMArgumentParser(int argc, const char** argv, bool requireCalib, bool requireOutputFile, bool requireInputFile, bool requireSize);
-    int deviceID;
+    string deviceID;
     int height;
     int width;
     bool saveData;

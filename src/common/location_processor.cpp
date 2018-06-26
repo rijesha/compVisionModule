@@ -1,19 +1,15 @@
 #include "location_processor.hpp"
 
-LocationProcessor::LocationProcessor(string calib_file_path, int device_id){
+LocationProcessor::LocationProcessor(string calib_file_path, string device_id){
         
     FileStorage fs(calib_file_path, FileStorage::READ);
     Mat cameraMatrix2, distCoeffs2; 
-    int width, height;
     fs["camera_matrix"] >> cameraMatrix2;
     fs["distortion_coefficients"] >> distCoeffs2;
     fs["image_width"] >> width;
     fs["image_height"] >> height;
-    
-    vCap = VideoCapture(device_id);
-    vCap.set(CV_CAP_PROP_FRAME_WIDTH,width);
-    vCap.set(CV_CAP_PROP_FRAME_HEIGHT,height);
-    
+
+    camera = Camera(device_id, width, height);
     CameraParameters camparams(cameraMatrix2, distCoeffs2, Size(width, height));
 
     arProc = ArUcoProcessor(camparams, TARGET_WIDTH);
@@ -21,7 +17,8 @@ LocationProcessor::LocationProcessor(string calib_file_path, int device_id){
 
 Position LocationProcessor::processImage(void){
     arProc.foundMarkers = false;
-    vCap.read(original);
+    Image image1 = camera.captureFrame();
+    original = Mat(height, width, CV_8UC3, image1.data);
     imageAcquisitionTime = clock();
     if ( !original.data )
     {

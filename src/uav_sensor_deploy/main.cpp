@@ -27,12 +27,12 @@ int main(int argc, const char** argv){
     Position desired_position;
     while (count < 8){
         current_position = lp.processImage();
-        pc.update_current_position(current_position.x, current_position.y, current_position.depth, current_position.azi * 3.14/180);
+        pc.update_current_position(current_position.x, current_position.y, current_position.z, current_position.azi * 3.14/180);
 
         ns = ns->returnNextState(current_position);
         
         desired_position = ns->computeDesiredPosition(current_position);
-        pc.update_desired_position(desired_position.x, desired_position.y, desired_position.depth, desired_position.azi * 3.14/180);
+        pc.update_desired_position(desired_position.x, desired_position.y, desired_position.z, desired_position.azi * 3.14/180);
 
         count++;
     }

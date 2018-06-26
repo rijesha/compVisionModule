@@ -13,6 +13,8 @@
 #include <time.h>
 #include <common/aruco_processor.h>
 #include <unistd.h>
+#include <camera-v4l2/camera.h>
+
 
 using namespace std;
 using namespace cv;
@@ -21,14 +23,15 @@ class LocationProcessor
 {
 private:
     clock_t imageAcquisitionTime, markerDetectionTime, posecalculationTime, drawingImageTime, savingImageTime;
-    VideoCapture vCap;
+    Camera camera;
     UndistortImage ui;
     Mat image;
     Mat original;
     ArUcoProcessor arProc;
+    int width, height;
     
 public:
-    LocationProcessor(string calib_file_path, int device_id);
+    LocationProcessor(string calib_file_path, string device_id);
     Position processImage(void);
 };
 

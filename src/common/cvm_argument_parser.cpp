@@ -22,10 +22,10 @@ CVMArgumentParser::CVMArgumentParser(int argc, const char** argv, bool requireCa
     calib_file_path = parser.retrieve<string>("c");
     cout << calib_file_path << endl;
 
-    deviceID = 1;
+    deviceID = "/dev/video0";
     string devicestring = parser.retrieve<string>("d");
     if (devicestring.length() != 0)
-        deviceID =stoi(devicestring);
+        deviceID = devicestring;
     
     height = 960;
     string heightstring = parser.retrieve<string>("h");
