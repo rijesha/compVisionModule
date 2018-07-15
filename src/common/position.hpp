@@ -30,7 +30,7 @@ public:
     Mat eulersAngles;
     
     Mat rotMat;
-    Mat worldPos;
+    //Mat worldPos;
     string getInfoString();
     string getBasicString();
     clock_t creation_time;
@@ -38,6 +38,7 @@ public:
     
     float x,y,z;
     float ele, azi, tilt;
+    float w_x, w_y, w_z;
     float angle_in_frame();
 
     bool A();

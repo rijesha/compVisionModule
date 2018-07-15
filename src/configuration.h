@@ -9,6 +9,6 @@ using namespace aruco;
 #define PRINT_INFO_STRING
 #define DISPLAY_IMAGE 1
 
-#define TARGET_WIDTH 0.150
+#define TARGET_WIDTH 0.148
 
 #endif /* CONFIGURATION_H */

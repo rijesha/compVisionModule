@@ -9,18 +9,11 @@ using namespace std;
 using namespace cv;
 using namespace aruco;
 
-struct CameraParametersLocal {
-    int width;
-    int height;
-    Mat camera_matrix;
-    Mat dist_coefs;
-    Mat new_camera_matrix;
-};
-
 class UndistortImage
 {
 private:
     CameraParameters camparams;
+    Mat new_camera_matrix;
 public:
     UndistortImage();
     UndistortImage(CameraParameters camparams);

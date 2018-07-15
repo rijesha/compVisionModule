@@ -29,15 +29,15 @@ Mat original;
 
 ArUcoProcessor arProc;
 Position p;
-Camera camera;
+Camera * camera;
 
 int width;
 int height;
 
 void processImage(){
     arProc.foundMarkers = false;
-    Image image1 = camera.captureFrame();
-    image = Mat(height, width, CV_8UC3, image1.data);
+    Image image1 = camera->captureFrame();
+    original = Mat(height, width, CV_8UC1, image1.data);
     
     imageAcquisitionTime = clock();
     if ( !original.data )
@@ -72,15 +72,16 @@ int main(int argc, const char** argv )
 
     width = CamParam.CamSize.width;
     height = CamParam.CamSize.height;
+    cout << width << "x" << height << endl;
     
-    camera = Camera("/dev/video1", width, height);
-    Image image1 = camera.captureFrame();
+    camera = new Camera(ap.deviceID, width, height, true, 10, 20);
+    Image image1 = camera->captureFrame();
     cout << "opened device" << endl;
     
     ui = UndistortImage(CamParam);
     arProc = ArUcoProcessor(CamParam, TARGET_WIDTH);
 
-    image = Mat(height, width, CV_8UC3, image1.data);
+    image = Mat(height, width, CV_8UC1, image1.data);
 
     if (ap.saveVideo){
         writer = cv::VideoWriter("out.avi", CV_FOURCC('M','J','P','G'), 24, image.size());
@@ -91,7 +92,7 @@ int main(int argc, const char** argv )
     int smallcount = 0;
     bool targetReady = false;
     int clearBuffer = 0;
-    int overallCount = 10900;
+    int overallCount = 24000;
     int veryoverallCout = 0;
 
 
@@ -161,8 +162,8 @@ int main(int argc, const char** argv )
                 testFile << overallCount << ',' << count << ',' << userinput << ',';
                 testFile << p.getInfoString();
                 cout << "SAVING measurement : " << count << endl;
-                imwrite( "testData/raw/" + to_string(overallCount) + ".jpg", original );
-                imwrite( "testData/undistorted/" + to_string(overallCount) + ".jpg", image );
+                imwrite( "testData/raw/" + to_string(overallCount) + ".png", original );
+                imwrite( "testData/undistorted/" + to_string(overallCount) + ".png", image );
                 savingImageTime = clock();
                 if (smallcount == 10) {
                     targetReady = false;
@@ -183,8 +184,8 @@ int main(int argc, const char** argv )
             
             stringstream timingData;
             timingData << arProc.foundMarkers << ','  << (arProc.foundMarkers && ap.saveData)  << ',' << mdTime /CLOCKS_PER_SEC  << ',' ;
-            timingData << pcTime /CLOCKS_PER_SEC << ',' <<  diTime/CLOCKS_PER_SEC << ',' << siTime/CLOCKS_PER_SEC << ',' << arProc.tvecs[0][2] << endl;
-            cout << timingData.str();
+            timingData << pcTime /CLOCKS_PER_SEC << ',' <<  diTime/CLOCKS_PER_SEC << ',' << siTime/CLOCKS_PER_SEC << ',' << p.y << endl;
+            //cout << timingData.str();
             timingFile << veryoverallCout << ',' << overallCount << ',' << timingData.str();
         }
         

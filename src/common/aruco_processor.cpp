@@ -63,7 +63,7 @@ int sign(int x) {
 Position ArUcoProcessor::calculatePose(){
     Position p;
     if (foundMarkers){
-        pose_tracker->estimatePose(detectedMarker,camparams, 0.12);
+        pose_tracker->estimatePose(detectedMarker,camparams, this->targetSize, 1.0);
         Mat RTmatrix = pose_tracker->getRTMatrix();
         if (!RTmatrix.empty()){
             p = Position(pose_tracker->getRTMatrix());    

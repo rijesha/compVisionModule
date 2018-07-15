@@ -11,6 +11,7 @@
 #include <common/aruco_processor.h>
 #include <unistd.h>
 #include "boost/filesystem.hpp"
+#include "csv.h"
 using namespace boost::filesystem;
 
 using namespace cv;
@@ -30,48 +31,76 @@ int multipleMarkerCount = 0;
 string current_file;
 Position p;
 
-void processImage(Mat fun){
+void processImage(Mat original){
     arProc.foundMarkers = false;
-    arProc.processFrame(fun);
     
-    if (arProc.markerIds.size() > 1){
-        cout << "MULTIPLE MARKERS: " <<  arProc.markerIds.size() << endl;
-        cout << arProc.markerIds[0] <<' ' << arProc.markerIds[1] << endl;
-        cout << current_file << endl;
-        p = arProc.calculatePose();
-        cout << p.getInfoString();
+    imageAcquisitionTime = clock();
+    if ( !original.data )
+    {
+        printf("No image data \n");
     }
-    
-    //
-    Position p = arProc.calculatePose();
-    image = arProc.drawMarkersAndAxis(fun);
+
+    arProc.processFrame(original);
+    markerDetectionTime = clock();
+    p = arProc.calculatePose();
+    posecalculationTime = clock();
+    cvtColor(original, image, CV_GRAY2BGR );
+    image = arProc.drawMarkersAndAxis(image);
+    drawingImageTime = clock();
 }
+
+int width;
+int height;
 
 int main(int argc, const char** argv )
 {   
     CVMArgumentParser ap(argc, argv, true, false, true, false);
     
-    FileStorage fs(ap.calib_file_path, FileStorage::READ);
-    Mat cameraMatrix2, distCoeffs2; 
-    int width, height;
-    fs["cameraMatrix"] >> cameraMatrix2;
-    fs["distCoeffs"] >> distCoeffs2;
-    fs["image_width"] >> width;
-    fs["image_height"] >> height;
-    
+    aruco::CameraParameters CamParam;
+    CamParam.readFromXMLFile(ap.calib_file_path);
 
-    CameraParameters camparams;
+    width = CamParam.CamSize.width;
+    height = CamParam.CamSize.height;
+    cout << width << "x" << height << endl;
 
-    //camparams.width = width;
-    //camparams.height = height;
-    //camparams.camera_matrix = cameraMatrix2;
-    //camparams.dist_coefs = distCoeffs2;
+    timingFile = ofstream("timeDataFolder.csv", ofstream::out);
+    timingFile << "veryoverallCout, overallCount, foundMarker, savedImage, markerDetectionTime, posecalculationTime, drawingImageTime, savingImageTime, depth" << endl;
 
-    //cout << camparams.camera_matrix <<endl;
-    //cout << camparams.dist_coefs << endl;
+    ui = UndistortImage(CamParam);
+    arProc = ArUcoProcessor(CamParam, TARGET_WIDTH);
 
-    ui = UndistortImage(camparams);
-    arProc = ArUcoProcessor(camparams, TARGET_WIDTH);
+    io::CSVReader<14> in(ap.inputpath);
+    in.read_header(io::ignore_extra_column, "imgnum", "count", "depth", "azimuth", "camera azimuth", "tvec1", "tvec2", "tvec3", "rvec1", "rvec2", "rvec3", "wpos1", "wpos2", "wpos3");
+    double imgnum, count, depth, azimuth, camera_azimuth, tvec1, tvec2, tvec3, rvec1, rvec2, rvec3, wpos1, wpos2, wpos3;
+    while(in.read_row(imgnum, count, depth, azimuth, camera_azimuth, tvec1, tvec2, tvec3, rvec1, rvec2, rvec3, wpos1, wpos2, wpos3)){
+        cout << imgnum << endl;
+        current_file = "testData/raw/" + to_string((int)imgnum) + ".png";
+        Mat fun = imread(current_file, CV_LOAD_IMAGE_GRAYSCALE);
+        cout << current_file << endl;
+        if(! fun.data )                              // Check for invalid input
+        {
+            cout <<  "Could not open or find the image" << std::endl ;
+        }
+        processImage(fun);
+
+        float mdTime = markerDetectionTime - imageAcquisitionTime;
+        float pcTime = posecalculationTime - markerDetectionTime ;
+        float diTime = drawingImageTime - posecalculationTime;
+        float siTime = savingImageTime - drawingImageTime;
+        
+        stringstream timingData;
+        timingData << arProc.foundMarkers << ','  << (arProc.foundMarkers && ap.saveData)  << ',' << mdTime /CLOCKS_PER_SEC  << ',' ;
+        timingData << pcTime /CLOCKS_PER_SEC << ',' <<  diTime/CLOCKS_PER_SEC << ',' << siTime/CLOCKS_PER_SEC << ',' << p.y << endl;
+        //cout << timingData.str();
+        timingFile << imgnum << ',' << timingData.str();
+
+
+        imshow( "Display window", image);
+        char c = waitKey(1);
+        if (c == 27 || c == 113){
+            break;
+        }
+    }
 
     cout << "Iterating" << endl;
     path p(ap.inputpath);
@@ -81,7 +110,7 @@ int main(int argc, const char** argv )
     {
         if (is_regular_file(itr->path())) {
             current_file = itr->path().string();
-            Mat fun = imread(current_file, CV_LOAD_IMAGE_COLOR);
+            Mat fun = imread(current_file, CV_LOAD_IMAGE_GRAYSCALE);
             cout << current_file << endl;
             if(! fun.data )                              // Check for invalid input
             {

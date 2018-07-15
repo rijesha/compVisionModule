@@ -39,8 +39,11 @@ Position::Position(Mat RTMatrixs) {
                                rotMatrixZ,
                                eulersAngles);
 
-    worldPos = -rotMat.inv() * tvecs;
-    
+
+    Mat worldPos(-rotMat.inv() * tvecs);
+    float* _wp = worldPos.ptr<float>();
+    w_x  = _wp[0]; w_y = _wp[1]; w_z  = _wp[2];
+
     double* _eA = eulersAngles.ptr<double>();
     ele  = _eA[0]; azi  = _eA[1]; tilt = _eA[2];
 }
@@ -52,7 +55,7 @@ string Position::getInfoString(){
 
     output << x << ',' << y << ',' << z << ',';
     output << ele << ',' << azi << ',' << tilt << ',';
-    output << worldPos.at<float>(0) << ',' << worldPos.at<float>(1) << ',' << worldPos.at<float>(2) << endl;
+    output << w_x << ',' << w_y << ',' << w_z << endl;
     return output.str();
 }
 
