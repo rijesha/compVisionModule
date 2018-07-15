@@ -90,45 +90,13 @@ int main(int argc, const char** argv )
         
         stringstream timingData;
         timingData << arProc.foundMarkers << ','  << (arProc.foundMarkers && ap.saveData)  << ',' << mdTime /CLOCKS_PER_SEC  << ',' ;
-        timingData << pcTime /CLOCKS_PER_SEC << ',' <<  diTime/CLOCKS_PER_SEC << ',' << siTime/CLOCKS_PER_SEC << ',' << p.y << endl;
+        timingData << pcTime /CLOCKS_PER_SEC << ',' <<  diTime/CLOCKS_PER_SEC << ',' << siTime/CLOCKS_PER_SEC << ',' << p.y << ',' << p.azi << endl;
         //cout << timingData.str();
         timingFile << imgnum << ',' << timingData.str();
 
-
-        imshow( "Display window", image);
-        char c = waitKey(1);
-        if (c == 27 || c == 113){
-            break;
-        }
     }
+    timingFile.close();
 
-    cout << "Iterating" << endl;
-    path p(ap.inputpath);
-    directory_iterator end_itr;
-
-    for (directory_iterator itr(p); itr != end_itr; ++itr)
-    {
-        if (is_regular_file(itr->path())) {
-            current_file = itr->path().string();
-            Mat fun = imread(current_file, CV_LOAD_IMAGE_GRAYSCALE);
-            cout << current_file << endl;
-            if(! fun.data )                              // Check for invalid input
-            {
-                cout <<  "Could not open or find the image" << std::endl ;
-            }
-            processImage(fun);
-
-            
-            imshow( "Display window", fun);
-            imshow( "Display window2", image);
-            char c = waitKey(10000);
-            if (c == 27 || c == 113){
-                break;
-            }
-            //cout << current_file << endl;
-        }
-    }
-    
 
     return 0;
 }
