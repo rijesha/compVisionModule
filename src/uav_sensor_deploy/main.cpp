@@ -6,20 +6,27 @@
 #include <common/msg_queue.hpp>
 #include <mavlink-interface/position_controller.h>
 #include <mavlink-interface/multithreaded_interface.h>
+#include "states.hpp"
 
 bool shutdown = false;
 
-int main(int argc, const char** argv){
-    CVMArgumentParser ap(argc, argv, true, false, false, false);
+NavigationalState<State> * ap = new AutoPilotState();
+NavigationalState<State> * ia = new InitialApproach();
+NavigationalState<State> * fa = new FinalApproach();
+NavigationalState<State> * da = new DataAcquisitionState();
+NavigationalState<State> * po = new PullOutState();
+Position_Controller * pc;
 
-    LocationProcessor lp = LocationProcessor(ap.calib_file_path, ap.deviceID);
-    NavigationalState *ns = new AutoPilotState(); 
+int main(int argc, const char** argv){
+    CVMArgumentParser argparse(argc, argv, true, false, false, false);
+
+    LocationProcessor lp = LocationProcessor(argparse.calib_file_path, argparse.deviceID);
+    NavigationalState<State> *ns = ap; 
     
     Multithreaded_Interface mti;
     mti.start("/dev/ttyUSB0", 57600);
 
-    Position_Controller pc(&mti);
-    ns->pc = &pc;
+    pc = new Position_Controller(&mti);
     
     int count = 0;
  
@@ -27,12 +34,12 @@ int main(int argc, const char** argv){
     Position desired_position;
     while (count < 8){
         current_position = lp.processImage();
-        pc.update_current_position(current_position.x, current_position.y, current_position.z, current_position.azi * 3.14/180);
+        pc->update_current_position(current_position.x, current_position.y, current_position.z, current_position.azi * 3.14/180);
 
         ns = ns->returnNextState(current_position);
         
         desired_position = ns->computeDesiredPosition(current_position);
-        pc.update_desired_position(desired_position.x, desired_position.y, desired_position.z, desired_position.azi * 3.14/180);
+        pc->update_desired_position(desired_position.x, desired_position.y, desired_position.z, desired_position.azi * 3.14/180);
 
         count++;
     }

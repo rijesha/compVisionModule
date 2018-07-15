@@ -5,7 +5,7 @@
 #include <stdio.h>
 #include <opencv2/opencv.hpp>
 #include <common/undistort_image.h>
-#include "configuration.h"
+#include "../configuration.h"
 #include <ctime>
 #include <chrono>
 #include <cstring>
