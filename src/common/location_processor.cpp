@@ -2,23 +2,27 @@
 
 LocationProcessor::LocationProcessor(string calib_file_path, string device_id){
         
-    FileStorage fs(calib_file_path, FileStorage::READ);
-    Mat cameraMatrix2, distCoeffs2; 
-    fs["camera_matrix"] >> cameraMatrix2;
-    fs["distortion_coefficients"] >> distCoeffs2;
-    fs["image_width"] >> width;
-    fs["image_height"] >> height;
+    aruco::CameraParameters CamParam;
+    CamParam.readFromXMLFile(calib_file_path);
 
-    camera = Camera(device_id, width, height);
-    CameraParameters camparams(cameraMatrix2, distCoeffs2, Size(width, height));
+    width = CamParam.CamSize.width;
+    height = CamParam.CamSize.height;
+    cout << width << "x" << height << endl;
+    
+    camera = new Camera(device_id, width, height, true, 10, 20);
+    Image image1 = camera->captureFrame();
+    cout << "opened device" << endl;
+    
+    arProc = ArUcoProcessor(CamParam, TARGET_WIDTH);
 
-    arProc = ArUcoProcessor(camparams, TARGET_WIDTH);
 }
 
 Position LocationProcessor::processImage(void){
     arProc.foundMarkers = false;
-    Image image1 = camera.captureFrame();
-    original = Mat(height, width, CV_8UC3, image1.data);
+    
+    Image image1 = camera->captureFrame();
+    original = Mat(height, width, CV_8UC1, image1.data);
+
     imageAcquisitionTime = clock();
     if ( !original.data )
     {
