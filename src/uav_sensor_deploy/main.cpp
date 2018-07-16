@@ -24,7 +24,7 @@ int main(int argc, const char** argv){
     NavigationalState<State> *ns = ap; 
     
     Multithreaded_Interface mti;
-    mti.start("/dev/ttyUSB0", 57600);
+    mti.start("/dev/ttyS1", 57600);
 
     pc = new Position_Controller(&mti);
     
@@ -34,13 +34,16 @@ int main(int argc, const char** argv){
     Position desired_position;
     while (count < 8){
         current_position = lp.processImage();
-        pc->update_current_position(current_position.x, current_position.y, current_position.z, current_position.azi * 3.14/180);
+        if (!current_position.emptyPosition){
+            pc->update_current_position(current_position.w_x, current_position.w_z, -current_position.w_y, current_position.azi * 3.14/180);
 
-        ns = ns->returnNextState(current_position);
+            ns = ns->returnNextState(current_position);
         
-        desired_position = ns->computeDesiredPosition(current_position);
-        pc->update_desired_position(desired_position.x, desired_position.y, desired_position.z, desired_position.azi * 3.14/180);
+            desired_position = ns->computeDesiredPosition(current_position);
+            pc->update_desired_position(desired_position.x, desired_position.y, desired_position.z, desired_position.azi * 3.14/180);
 
+        }
+        
         count++;
     }
     mti.shutdown();
