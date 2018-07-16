@@ -17,6 +17,7 @@ NavigationalState<State> * da = new DataAcquisitionState();
 NavigationalState<State> * po = new PullOutState();
 Position_Controller * pc;
 
+
 int main(int argc, const char** argv){
     CVMArgumentParser argparse(argc, argv, true, false, false, false);
 
@@ -32,10 +33,11 @@ int main(int argc, const char** argv){
  
     Position current_position;
     Position desired_position;
-    while (count < 8){
+    while (true){
         current_position = lp.processImage();
         if (!current_position.emptyPosition){
-            pc->update_current_position(current_position.w_x, current_position.w_z, -current_position.w_y, current_position.azi * 3.14/180);
+            pc->update_current_position(current_position.w_x, current_position.w_z, -current_position.w_y, - current_position.azi * 3.14/180);
+            cout << current_position.w_x << " " << current_position.w_z<< " " <<-current_position.w_y << endl;
 
             ns = ns->returnNextState(current_position);
         
