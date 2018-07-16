@@ -26,7 +26,7 @@ Position::Position(Mat RTMatrixs) {
     tvecs = RTMatrixs(Range(0, 3), Range(3, 4));
     rotMat = RTMatrixs(Range(0, 3), Range(0, 3));
 
-    x = tvecs.at<float>(0); z = tvecs.at<float>(1); y = tvecs.at<float>(2);
+    x = tvecs.at<float>(0); y = tvecs.at<float>(1); z = tvecs.at<float>(2);
 
     Mat cameraMatrix,rotMatrix,transVect,rotMatrixX,rotMatrixY,rotMatrixZ;
 
