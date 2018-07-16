@@ -23,7 +23,7 @@ class LocationProcessor
 {
 private:
     clock_t imageAcquisitionTime, markerDetectionTime, posecalculationTime, drawingImageTime, savingImageTime;
-    Camera camera;
+    Camera * camera;
     UndistortImage ui;
     Mat image;
     Mat original;
