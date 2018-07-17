@@ -79,7 +79,7 @@ class NormalApproach : public NavigationalState<State>
     {
         double angle_in_frame = cp.angle_in_frame();
 
-        float aruco_z = (abs(cp.w_x) * 2 + (cp.w_z - FINAL_Z_ARUCO)) * .3;
+        float aruco_z = ((abs(cp.w_x) * 2 + (cp.w_z - FINAL_Z_ARUCO)) * .3) + FINAL_Z_ARUCO;
 
         return Position(0, FINAL_Y_ARUCO, aruco_z, angle_in_frame);
     }
