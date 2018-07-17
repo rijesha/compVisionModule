@@ -79,16 +79,16 @@ class NormalApproach : public NavigationalState<State>
     {
         double angle_in_frame = cp.angle_in_frame();
 
-        float z = (abs(cp.w_x) * 2 + cp.w_z) * .3;
+        float aruco_z = (abs(cp.w_x) * 2 + (cp.w_z - FINAL_Z_ARUCO)) * .3;
 
-        return Position(0, 0, z, angle_in_frame);
+        return Position(0, FINAL_Y_ARUCO, aruco_z, angle_in_frame);
     }
 
     NavigationalState *returnNextState(Position cp)
     {
         if (!cp.emptyPosition)
         {
-            if (cp.w_z < (FINAL_Y + .05))
+            if (cp.w_z < (FINAL_Z_ARUCO + .05))
             {
                 startedDataAcquisition = clock();
                 return da;
@@ -125,7 +125,7 @@ class DataAcquisitionState : public NavigationalState<State>
 
     Position computeDesiredPosition(Position cp)
     {
-        return Position(0, 0, FINAL_Y, 0);
+        return Position(0, FINAL_Y_ARUCO, FINAL_Z_ARUCO, 0);
     }
 };
 
