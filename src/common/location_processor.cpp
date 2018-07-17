@@ -10,7 +10,7 @@ LocationProcessor::LocationProcessor(string calib_file_path, string device_id){
     cout << width << "x" << height << endl;
     
     camera = new Camera(device_id, width, height, true, 10, 20);
-    Image image1 = camera->captureFrame();
+    image1 = camera->captureFrame();
     cout << "opened device" << endl;
     
     arProc = ArUcoProcessor(CamParam, TARGET_WIDTH);
@@ -20,7 +20,7 @@ LocationProcessor::LocationProcessor(string calib_file_path, string device_id){
 Position LocationProcessor::processImage(void){
     arProc.foundMarkers = false;
     
-    Image image1 = camera->captureFrame();
+    image1 = camera->captureFrame();
     original = Mat(height, width, CV_8UC1, image1.data);
 
     imageAcquisitionTime = clock();

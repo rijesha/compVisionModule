@@ -9,10 +9,12 @@
 #include "states.hpp"
 #include <iostream>
 #include <fstream>
+#include <ctime>
 
 bool shutdown = false;
 clock_t lastDetectedTime = clock();
 clock_t startedDataAcquisition = clock();
+time_t t;
 
 NavigationalState<State> *ap = new AutoPilotState();
 NavigationalState<State> *na = new NormalApproach();
@@ -89,8 +91,8 @@ int main(int argc, const char **argv)
     while (true)
     {
         current_position = lp.processImage();
-        imwrite("captured/" + to_string(count) + ".png", lp.original);
-        logFile << current_position.getInfoString();
+        //imwrite("captured/" + to_string(count) + ".jpg", lp.original);
+        logFile << time(0) << ',' << current_position.getInfoString();
 
         if (!current_position.emptyPosition)
         {
@@ -101,7 +103,7 @@ int main(int argc, const char **argv)
 
         ns = ns->returnNextState(current_position);
         currentState = ns->currentState();
-
+        cout << currentState << endl;
         if (currentState == DA)
         {
             serial_port._write_port(&enable_magnet, 1);

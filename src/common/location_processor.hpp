@@ -26,6 +26,7 @@ private:
     Camera * camera;
     UndistortImage ui;
     Mat image;
+    Image image1;
     ArUcoProcessor arProc;
     int width, height;
     
