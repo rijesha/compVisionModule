@@ -20,7 +20,7 @@ private:
     static clock_t last_creation_time;
 public:
     Position();
-    Position(float x, float y, float depth, float yaw);
+    Position(float x, float y, float z, float yaw);
 
     Position(Mat RTmatrix);
 
@@ -40,13 +40,7 @@ public:
     float ele, azi, tilt;
     float w_x, w_y, w_z;
     float angle_in_frame();
-
-    bool A();
-    bool B();
-    bool C();
-    bool D();
-    bool E();
-    bool F();
+    
 };
 
 #endif 

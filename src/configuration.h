@@ -11,4 +11,6 @@ using namespace aruco;
 
 #define TARGET_WIDTH 0.148
 
+#define FINAL_Y 1.35
+
 #endif /* CONFIGURATION_H */

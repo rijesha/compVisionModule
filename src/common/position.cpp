@@ -69,30 +69,6 @@ string Position::getBasicString(){
 }
 
 float Position::angle_in_frame(){
-    return atan(x/z) * 180/3.14;
+    return atan(x/y) * 180/3.14;
 }
 
-bool Position::A(){
-    //Target Detection Failed for X seconds
-    return time_since_last_positon > RESET_TIME*CLOCKS_PER_SEC;
-}
-bool Position::B(){
-    //Target Within 6 m depth
-    return y < 6;
-}
-bool Position::C(){
-    //Target Azimuthal Angle <60 deg
-    return azi < 60;
-}
-bool Position::D(){
-    //Within 2m depth and Target zimuthal angle < 10 deg
-    return (azi < 10 && y < 2);
-}
-bool Position::E(){
-    //Sensor Contact
-    return false;
-}
-bool Position::F(){
-    //Data Acquisition Complete
-    return false;
-}
