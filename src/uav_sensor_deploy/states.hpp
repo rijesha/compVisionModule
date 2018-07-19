@@ -57,7 +57,7 @@ class AutoPilotState : public NavigationalState<State>
         {
             if ((cp.z < 6) && (abs(cp.azi) < 60) && (cp.x < 6))
             {
-                return na;
+                return xt;
                 //return xt;
             }
         }
@@ -157,9 +157,14 @@ class CrossTest : public NavigationalState<State>
     clock_t crossTime = clock();
 
     Position stateA = Position(0, 0, 4, 0);
-    Position stateC = Position(2, 0, 3, 0);
+    //Position stateC = Position(2, 0, 3, 0);
+    //Position stateB = Position(0, 0, 2, 0);
+    //Position stateD = Position(-2, 0, 3, 0);
+
+    Position stateC = Position(0, 0, 4, 0);
     Position stateB = Position(0, 0, 2, 0);
-    Position stateD = Position(-2, 0, 3, 0);
+    Position stateD = Position(0, 0, 2, 0);
+
 
     Position *currentPosition = &stateA;
 
@@ -207,7 +212,6 @@ class CrossTest : public NavigationalState<State>
                 break;
             }
         }
-
         return *currentPosition;
     }
 };
