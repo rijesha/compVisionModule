@@ -69,6 +69,9 @@ string Position::getBasicString(){
 }
 
 float Position::angle_in_frame(){
-    return atan(x/y) * 180/3.14;
+    if (!emptyPosition)
+        return atan(x/z) * 180/3.14;
+    else
+        return 0;
 }
 

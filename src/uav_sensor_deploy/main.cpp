@@ -126,8 +126,7 @@ int main(int argc, const char **argv)
             pc->toggle_offboard_control(true);
 
         desired_position = ns->computeDesiredPosition(current_position);
-        pc->update_desired_position(desired_position.x, desired_position.z, -desired_position.y, desired_position.azi * 3.14 / 180);
-
+        pc->update_desired_position(desired_position.x, desired_position.z, -desired_position.y, (-current_position.azi+desired_position.azi) * 3.14 / 180);
         lastState = ns->currentState();
         count++;
     }
