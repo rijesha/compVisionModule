@@ -20,7 +20,7 @@ LIBS += -L../../libs/aruco/lib -laruco
 # Targets
 all: $(CPPSOURCES) $(EXECUTABLE)
 
-$(EXECUTABLE): $(OBJECTS)
+$(EXECUTABLE): $(OBJECTS) states.hpp
 	$(CC) -pthread $(OBJECTS) -o $@ $(LIBS)
 
 .c.o:

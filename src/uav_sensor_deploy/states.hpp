@@ -57,8 +57,8 @@ class AutoPilotState : public NavigationalState<State>
         {
             if ((cp.z < 6) && (abs(cp.azi) < 60) && (cp.x < 6))
             {
-                return xt;
                 //return xt;
+                return na;
             }
         }
         return this;
