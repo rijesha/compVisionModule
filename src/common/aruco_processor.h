@@ -17,7 +17,7 @@ using namespace aruco;
 
 class ArUcoProcessor
 {
-private:
+  private:
     Ptr<Dictionary> dictionary;
     Ptr<MarkerDetector> detector;
     Ptr<MarkerPoseTracker> pose_tracker;
@@ -25,21 +25,24 @@ private:
     CameraParameters camparams;
     float targetSize;
     clock_t lastMarkerTime;
-public:
+    bool positiveYaw();
+
+  public:
     ArUcoProcessor();
-    ArUcoProcessor(CameraParameters camparams, float targetSize);
-    ArUcoProcessor(CameraParameters camparams, float targetSize, Ptr<MarkerDetector> detectorParameters);
+    ArUcoProcessor(CameraParameters camparams, float targetSize, UndistortImage ui);
+    ArUcoProcessor(CameraParameters camparams, float targetSize, Ptr<MarkerDetector> detectorParameters, UndistortImage ui);
 
     void changeCornerRefinementWindowSize(int);
     void processFrame(Mat image, int markerID = 19);
     Position calculatePose();
     Mat drawMarkersAndAxis(Mat image, bool drawAxis = true);
 
-    vector< int > markerIds;
-    vector< vector<Point2f> > rejectedCandidates;
-    vector< Vec3d > rvecs, tvecs;
+    vector<int> markerIds;
+    vector<vector<Point2f>> rejectedCandidates;
+    vector<Vec3d> rvecs, tvecs;
     Vec3d eulersAngles;
     bool foundMarkers;
+    UndistortImage ui;
 
     vector<Marker> detectedMarkers;
     Marker detectedMarker;
