@@ -4,3 +4,6 @@
 [submodule "libs/camera-v4l2"]
 	path = libs/camera-v4l2
 	url = https://github.com/rijesha/camera-v4l2.git
+[submodule "libs/aruco"]
+	path = libs/aruco
+	url = https://github.com/rijesha/aruco.git

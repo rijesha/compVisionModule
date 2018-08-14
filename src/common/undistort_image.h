@@ -18,6 +18,7 @@ public:
     UndistortImage();
     UndistortImage(CameraParameters camparams);
     void undistortAcquiredImage(Mat img, Mat *dstImg);
+    Marker undistortMarkerPoints(Marker src_pts);
 };
 
 #endif /* UNDISTORTIMAGE_H */

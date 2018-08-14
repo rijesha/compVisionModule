@@ -67,7 +67,7 @@ int main(int argc, const char** argv )
     timingFile << "veryoverallCout, overallCount, foundMarker, savedImage, markerDetectionTime, posecalculationTime, drawingImageTime, savingImageTime, depth" << endl;
 
     ui = UndistortImage(CamParam);
-    arProc = ArUcoProcessor(CamParam, TARGET_WIDTH);
+    arProc = ArUcoProcessor(CamParam, TARGET_WIDTH, ui);
 
     io::CSVReader<14> in(ap.inputpath);
     in.read_header(io::ignore_extra_column, "imgnum", "count", "depth", "azimuth", "camera azimuth", "tvec1", "tvec2", "tvec3", "rvec1", "rvec2", "rvec3", "wpos1", "wpos2", "wpos3");

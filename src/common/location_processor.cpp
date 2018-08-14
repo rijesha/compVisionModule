@@ -13,7 +13,7 @@ LocationProcessor::LocationProcessor(string calib_file_path, string device_id){
     image1 = camera->captureFrame();
     cout << "opened device" << endl;
     
-    arProc = ArUcoProcessor(CamParam, TARGET_WIDTH);
+    arProc = ArUcoProcessor(CamParam, TARGET_WIDTH, ui);
 
 }
 
