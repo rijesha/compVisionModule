@@ -97,7 +97,7 @@ int main(int argc, const char **argv)
         if (!current_position.emptyPosition)
         {
             lastDetectedTime = clock();
-            pc->update_current_position(current_position.w_x, current_position.w_z, -current_position.w_y, -current_position.azi * 3.14 / 180);
+            pc->update_current_position(current_position.w_x, current_position.w_z, -current_position.w_y, -current_position.azi * 3.14 / 180 + TARGET_ANGLE_RAD);
             //cout << current_position.w_x << " " << current_position.w_z << " " << -current_position.w_y << endl;
         }
 
@@ -126,7 +126,7 @@ int main(int argc, const char **argv)
             pc->toggle_offboard_control(true);
 
         desired_position = ns->computeDesiredPosition(current_position);
-        pc->update_desired_position(desired_position.x, desired_position.z, -desired_position.y, (-current_position.azi+desired_position.azi) * 3.14 / 180);
+        pc->update_desired_position(desired_position.x, desired_position.z, -desired_position.y, (-current_position.azi+desired_position.azi) * 3.14 / 180 + TARGET_ANGLE_RAD);
         lastState = ns->currentState();
         count++;
     }

@@ -11,6 +11,10 @@ using namespace aruco;
 
 #define TARGET_WIDTH 0.148
 
+#define TARGET_ANGLE -90
+#define TARGET_ANGLE_RAD TARGET_ANGLE*3.14/180
+
+
 #define FINAL_Z_ARUCO 1.08
 #define FINAL_Y_ARUCO .05
 
