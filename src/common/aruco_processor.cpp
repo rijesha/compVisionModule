@@ -73,12 +73,32 @@ Position ArUcoProcessor::calculatePose()
     Position p;
     if (foundMarkers)
     {   
+        cout << "really starting" << endl;
         if (positiveYaw()) {
+
+            float test1[] = {2.9024532, 0, -1.2022355};
+            Mat p_rvec(1,3,CV_32F,test1);
+
+            float test2[] = {1, 1, 1};
+            Mat p_tvec(1,3,CV_32F,test2);
+
+            cout << p_rvec.type() << CV_32F << endl;
+            cout << p_rvec << endl;
+            pose_tracker->estimatePoseWithHint(detectedMarker, camparams, this->targetSize, p_rvec, p_tvec);
             cout << "Positive YAW ";
+
         } else {
+            float test1[] = {2.9024532, 0, 1.2022355};
+            Mat n_rvec(1,3,CV_32F,test1);
+
+            float test2[] = {1, 1, 1};
+            Mat n_tvec(1,3,CV_32F,test2);
+
+            cout << n_rvec.type() << CV_32F << endl;
+            pose_tracker->estimatePoseWithHint(detectedMarker, camparams, this->targetSize, n_rvec, n_tvec);
             cout << "Negative YAW ";
         }
-        pose_tracker->estimatePose(detectedMarker, camparams, this->targetSize, 1.0);
+        cout << "really ending" << endl;
         Mat RTmatrix = pose_tracker->getRTMatrix();
         cout << "RVEC  " << endl;
         cout << pose_tracker->getRvec() << endl;
