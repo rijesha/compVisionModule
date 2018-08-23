@@ -1,6 +1,6 @@
 #include "location_processor.hpp"
 
-LocationProcessor::LocationProcessor(string calib_file_path, string device_id){
+LocationProcessor::LocationProcessor(string calib_file_path, string device_id, int gain, int exposure){
         
     aruco::CameraParameters CamParam;
     CamParam.readFromXMLFile(calib_file_path);
@@ -9,7 +9,7 @@ LocationProcessor::LocationProcessor(string calib_file_path, string device_id){
     height = CamParam.CamSize.height;
     cout << width << "x" << height << endl;
     
-    camera = new Camera(device_id, width, height, true, 10, 20);
+    camera = new Camera(device_id, width, height, true, gain, exposure);
     image1 = camera->captureFrame();
     cout << "opened device" << endl;
     

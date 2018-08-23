@@ -74,21 +74,21 @@ Position ArUcoProcessor::calculatePose()
     if (foundMarkers)
     {   
         if (positiveYaw()) {
-            cout << "Positive YAW ";
+           // cout << "Positive YAW ";
         } else {
-            cout << "Negative YAW ";
+          //  cout << "Negative YAW ";
         }
         pose_tracker->estimatePose(detectedMarker, camparams, this->targetSize, 1.0);
         Mat RTmatrix = pose_tracker->getRTMatrix();
-        cout << "RVEC  " << endl;
-        cout << pose_tracker->getRvec() << endl;
-        cout << "done RVEC" << endl;
+       // cout << "RVEC  " << endl;
+        //cout << pose_tracker->getRvec() << endl;
+        //cout << "done RVEC" << endl;
         if (!RTmatrix.empty())
         {
             p = Position(RTmatrix);
             eulersAngles = p.eulersAngles;
         }
-        cout << p.azi << endl;
+        //cout << p.azi << endl;
         return p;
     }
     return p;

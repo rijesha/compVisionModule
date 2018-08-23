@@ -66,7 +66,7 @@ int main(int argc, const char **argv)
     CVMArgumentParser argparse(argc, argv, true, false, false, false);
     logFile.open("logfile.csv");
 
-    LocationProcessor lp = LocationProcessor(argparse.calib_file_path, argparse.deviceID);
+    LocationProcessor lp = LocationProcessor(argparse.calib_file_path, argparse.deviceID, 10, 20);
     NavigationalState<State> *ns = ap;
 
     Multithreaded_Interface mti;
@@ -87,6 +87,9 @@ int main(int argc, const char **argv)
     State currentState = AP;
 
     bool firstDA = true;
+    float current_yaw;
+    float desired_yaw;
+    float lastyaw = 0;
 
     while (true)
     {
@@ -97,7 +100,16 @@ int main(int argc, const char **argv)
         if (!current_position.emptyPosition)
         {
             lastDetectedTime = clock();
-            pc->update_current_position(current_position.w_x, current_position.w_z, -current_position.w_y, -current_position.azi * 3.14 / 180 + TARGET_ANGLE_RAD);
+            //cout << "current position azi " << -current_position.azi << endl;
+            lastyaw = pc->getLastAttitudeYaw();
+            cout << "angle of uav " << lastyaw *180/3.14 /*+ -current_position.azi*/ << endl;
+
+            
+            cout << current_position.w_z << " " << current_position.w_x << endl;
+            float x_new = -current_position.w_z * cos(lastyaw) - current_position.w_x * sin(lastyaw);
+            float y_new = -current_position.w_z * sin(lastyaw) + current_position.w_x * cos(lastyaw);
+            
+            pc->update_current_position(x_new , y_new, -current_position.w_y, pc->getLastAttitudeYaw());
             //cout << current_position.w_x << " " << current_position.w_z << " " << -current_position.w_y << endl;
         }
 
@@ -126,7 +138,27 @@ int main(int argc, const char **argv)
             pc->toggle_offboard_control(true);
 
         desired_position = ns->computeDesiredPosition(current_position);
-        pc->update_desired_position(desired_position.x, desired_position.z, -desired_position.y, (-current_position.azi+desired_position.azi) * 3.14 / 180 + TARGET_ANGLE_RAD);
+        cout << "angle in frame " << desired_position.azi << endl; 
+        //cout << "desired angle " << -current_position.azi + desired_position.azi << endl;
+        float desired = desired_position.azi +  pc->getLastAttitudeYaw() *180/3.14;
+        if (desired < -180) {
+            desired = desired + 360;
+        }
+        else if (desired > 180){
+            desired = desired - 360;
+        }
+        cout << "desired angle global " << desired << endl;
+/*
+        float t_yaw = (desired_yaw-current_yaw);
+        if (t_yaw > 3.14){
+            t_yaw = t_yaw - 6.28;
+        } 
+        cout << "here is t_yaw: ";
+        cout << t_yaw << endl;*/
+        float x_new = -desired_position.w_z * cos(lastyaw) - desired_position.w_x * sin(lastyaw);
+        float y_new = -desired_position.w_z * sin(lastyaw) + desired_position.w_x * cos(lastyaw);
+            
+        pc->update_desired_position(x_new, y_new, -desired_position.y, desired * 3.14/180);
         lastState = ns->currentState();
         count++;
     }
