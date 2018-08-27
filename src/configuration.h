@@ -9,7 +9,7 @@ using namespace aruco;
 #define PRINT_INFO_STRING
 #define DISPLAY_IMAGE 1
 
-#define TARGET_WIDTH 0.148
+#define TARGET_WIDTH 0.158
 
 #define TARGET_ANGLE -90
 #define TARGET_ANGLE_RAD TARGET_ANGLE*3.14/180

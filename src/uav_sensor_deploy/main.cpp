@@ -155,9 +155,12 @@ int main(int argc, const char **argv)
         } 
         cout << "here is t_yaw: ";
         cout << t_yaw << endl;*/
-        float x_new = -desired_position.w_z * cos(lastyaw) - desired_position.w_x * sin(lastyaw);
-        float y_new = -desired_position.w_z * sin(lastyaw) + desired_position.w_x * cos(lastyaw);
-            
+        cout << "x_desired_before: " << desired_position.z << "y_desired_before: " << desired_position.x << endl;
+        float x_new = -desired_position.z * cos(lastyaw) - desired_position.x * sin(lastyaw);
+        float y_new = -desired_position.z * sin(lastyaw) + desired_position.x * cos(lastyaw);
+
+        cout << "x_desired_after: " << x_new << "y_desired_after: " << y_new << "z_esired_after" << -desired_position.y <<endl;
+    
         pc->update_desired_position(x_new, y_new, -desired_position.y, desired * 3.14/180);
         lastState = ns->currentState();
         count++;
