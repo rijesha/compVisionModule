@@ -9,7 +9,7 @@ CPPSOURCES += $(wildcard *.cpp) $(wildcard ../../libs/mavlink-interface/*.cpp) $
 
 OBJECTS = $(CPPSOURCES:.cpp=.o)
 EXECUTABLE = deploy
-CFLAGS = -c -Wall -g $(INC_DIR)  
+CFLAGS = -c -Wall -O2 $(INC_DIR) 
 OPENCV = `pkg-config opencv --cflags --libs `
 
 
