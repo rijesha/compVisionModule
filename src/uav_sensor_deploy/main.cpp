@@ -12,6 +12,7 @@
 #include <ctime>
 
 bool shutdown = false;
+clock_t startimageCaputre = clock();
 clock_t lastDetectedTime = clock();
 clock_t startedDataAcquisition = clock();
 time_t t;
@@ -72,11 +73,13 @@ int main(int argc, const char **argv)
     Multithreaded_Interface mti;
     mti.start("/dev/ttyS1", 57600);
 
+    /*
     serial_port.uart_name = "/dev/ttyACM0";
     serial_port.baudrate = 57600;
     serial_port.start();
     start_reader_thread();
-
+    */
+   
     pc = new Position_Controller(&mti);
 
     int count = 0;
@@ -95,6 +98,7 @@ int main(int argc, const char **argv)
 
     while (true)
     {
+        startimageCaputre = clock();
         current_position = lp.processImage();
         //imwrite("captured/" + to_string(count) + ".jpg", lp.original);
         logFile << time(0) << ',' << current_position.getInfoString();
@@ -114,13 +118,14 @@ int main(int argc, const char **argv)
                 cout << current_position.w_z << " " << current_position.w_x << endl;
                 cout << "world_z: " << -current_position.w_y << " z in frame: " << -current_position.y << endl;
             }
-            pc->update_current_position(x_new, y_new, -current_position.w_y, lastyaw);
+            pc->update_current_position(x_new, y_new, -current_position.w_y, lastyaw, startimageCaputre);
             //cout << current_position.w_x << " " << current_position.w_z << " " << -current_position.w_y << endl;
         }
 
         ns = ns->returnNextState(current_position);
         currentState = ns->currentState();
         
+        /*
         downsample++;
         if (currentState == DA)
         {   
@@ -151,11 +156,15 @@ int main(int argc, const char **argv)
             }
                 
         }
+        */
 
+
+        /*
         if (currentState == AP && lastState != AP)
             pc->toggle_offboard_control(false);
         else if (lastState == AP && currentState != AP)
             pc->toggle_offboard_control(true);
+        */
 
         desired_position = ns->computeDesiredPosition(current_position);
         float desired = desired_position.azi + lastyaw * 180 / 3.14;
@@ -181,7 +190,7 @@ int main(int argc, const char **argv)
             //cout << "desired angle " << -current_position.azi + desired_position.azi << endl;
             cout << "desired angle global " << desired << endl;
             cout << "x_desired_before: " << desired_position.z << "y_desired_before: " << desired_position.x << endl;
-            cout << "x_desired_after: " << x_new << "y_desired_after: " << y_new << "z_esired_after" << -desired_position.y << endl;
+            cout << "x_desired_after: " << x_new << "y_desired_after: " << y_new << "z_desired_after" << -desired_position.y << endl;
         }
         if (argparse.saveTiming)
         {
