@@ -100,7 +100,7 @@ int main(int argc, const char **argv)
     {
         startimageCaputre = clock();
         current_position = lp.processImage();
-        //imwrite("captured/" + to_string(count) + ".jpg", lp.original);
+        imwrite("captured/" + to_string(count) + ".jpg", lp.original);
         logFile << time(0) << ',' << current_position.getInfoString();
 
         if (!current_position.emptyPosition)
