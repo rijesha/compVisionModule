@@ -7,3 +7,6 @@
 [submodule "libs/aruco"]
 	path = libs/aruco
 	url = https://github.com/rijesha/aruco.git
+[submodule "libs/attitude_controller"]
+	path = libs/attitude_controller
+	url = https://github.com/rijesha/attitude_controller.git

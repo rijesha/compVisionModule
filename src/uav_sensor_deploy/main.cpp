@@ -10,6 +10,9 @@
 #include <iostream>
 #include <fstream>
 #include <ctime>
+#include "attitude_controller.h"
+
+#define DEFAULT_SPEED_UP 0.010 //in m/s. (10cm/s)
 
 bool shutdown = false;
 clock_t startimageCaputre = clock();
@@ -24,8 +27,10 @@ NavigationalState<State> *po = new PullOutState();
 
 NavigationalState<State> *xt = new CrossTest();
 NavigationalState<State> *ct = new CircleTest();
+NavigationalState<State> *ph = new PositionHold();
 
 Position_Controller *pc;
+AttitudeController *ac;
 Serial_Port serial_port;
 
 char enable_magnet = 'e';
@@ -81,6 +86,8 @@ int main(int argc, const char **argv)
     */
    
     pc = new Position_Controller(&mti);
+    ac = new AttitudeController;
+
 
     int count = 0;
 
@@ -101,27 +108,27 @@ int main(int argc, const char **argv)
         startimageCaputre = clock();
         current_position = lp.processImage();
         imwrite("captured/" + to_string(count) + ".jpg", lp.original);
-        logFile << time(0) << ',' << current_position.getInfoString();
+        
 
+        /*
         if (!current_position.emptyPosition)
         {
             lastDetectedTime = clock();
             //cout << "current position azi " << -current_position.azi << endl;
             lastyaw = pc->getLastAttitudeYaw();
-
-            float x_new = -current_position.w_z * cos(lastyaw) - current_position.w_x * sin(lastyaw);
-            float y_new = -current_position.w_z * sin(lastyaw) + current_position.w_x * cos(lastyaw);
-
+            
             if (!argparse.quiet)
             {
-                cout << "angle of uav " << lastyaw * 180 / 3.14 /*+ -current_position.azi*/ << endl;
+                cout << "angle of uav " << lastyaw * 180 / 3.14 << endl;
                 cout << current_position.w_z << " " << current_position.w_x << endl;
                 cout << "world_z: " << -current_position.w_y << " z in frame: " << -current_position.y << endl;
             }
-            pc->update_current_position(x_new, y_new, -current_position.w_y, lastyaw, startimageCaputre);
+
+            //pc->update_current_position(x_new, y_new, -current_position.w_y, lastyaw, startimageCaputre);
             //cout << current_position.w_x << " " << current_position.w_z << " " << -current_position.w_y << endl;
         }
-
+        */
+        
         ns = ns->returnNextState(current_position);
         currentState = ns->currentState();
         
@@ -166,31 +173,35 @@ int main(int argc, const char **argv)
             pc->toggle_offboard_control(true);
         */
 
-        desired_position = ns->computeDesiredPosition(current_position);
-        float desired = desired_position.azi + lastyaw * 180 / 3.14;
-        if (desired < -180)
-        {
-            desired = desired + 360;
-        }
-        else if (desired > 180)
-        {
-            desired = desired - 360;
-        }
-        float x_new = -desired_position.z * cos(lastyaw) - desired_position.x * sin(lastyaw);
-        float y_new = -desired_position.z * sin(lastyaw) + desired_position.x * cos(lastyaw);
+       
 
-        pc->update_desired_position(x_new, y_new, -desired_position.y, desired * 3.14 / 180);
+        desired_position = ns->computeDesiredPosition(current_position);
+
+        ac->run_loop({current_position.w_x, current_position.w_y, current_position.w_z}, {desired_position.x, desired_position.y, desired_position.z});
+
+        ac->acceleration_to_attitude(-ac->acc_desi.z, -ac->acc_desi.x, current_position.azi);
+
+        float rel_vert_vel = (ac->get_desired_velocity().y/DEFAULT_SPEED_UP);
+        float yaw_rate = current_position.azi * 0.1;
+        pc->update_attitude_target(ac->pitch_target, ac->roll_target, ac->yaw_target, rel_vert_vel, yaw_rate, true);
         lastState = currentState;
+        logFile << time(0) << ',' << ac->get_state_string() << endl;
         count++;
 
         if (!argparse.quiet)
         {
+            cout << ac->get_state_string() << endl;
+            /*
             cout << currentState << endl;
             cout << "angle in frame " << desired_position.azi << endl;
+            cout << "current angle global " << desired << endl;
+            cout << "x_current: " << desired_position.z << "y_current: " << desired_position.x << endl;
+
             //cout << "desired angle " << -current_position.azi + desired_position.azi << endl;
             cout << "desired angle global " << desired << endl;
             cout << "x_desired_before: " << desired_position.z << "y_desired_before: " << desired_position.x << endl;
             cout << "x_desired_after: " << x_new << "y_desired_after: " << y_new << "z_desired_after" << -desired_position.y << endl;
+            */
         }
         if (argparse.saveTiming)
         {

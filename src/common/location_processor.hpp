@@ -27,13 +27,13 @@ private:
     UndistortImage ui;
     Mat image;
     Image image1;
-    ArUcoProcessor arProc;
     int width, height;
     
 public:
     LocationProcessor(string calib_file_path, string device_id, int gain, int exposure);
     Position processImage(void);
     Mat original;
+    ArUcoProcessor arProc;
 };
 
 #endif /* ARUCO_PROCESSOR_H */

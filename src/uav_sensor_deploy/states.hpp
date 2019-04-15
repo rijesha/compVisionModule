@@ -22,7 +22,8 @@ enum State
     DA,
     PO,
     XT,
-    CT
+    CT,
+    PH
 };
 
 extern clock_t lastDetectedTime;
@@ -35,6 +36,7 @@ extern NavigationalState<State> *po;
 
 extern NavigationalState<State> *xt;
 extern NavigationalState<State> *ct;
+extern NavigationalState<State> *ph;
 
 bool detectionFailedFor(float seconds)
 {
@@ -58,7 +60,7 @@ class AutoPilotState : public NavigationalState<State>
             if ((cp.z < 6) && (abs(cp.azi) < 60) && (cp.x < 6))
             {
                 //return xt;
-                return na;
+                return ph;
             }
         }
         return this;
@@ -66,7 +68,7 @@ class AutoPilotState : public NavigationalState<State>
 
     Position computeDesiredPosition(Position cp)
     {
-        return Position(0, 0, 4, 0);
+        return Position(0, 0, 2, 0);
     }
 };
 
@@ -229,6 +231,22 @@ class CircleTest : public NavigationalState<State>
     Position computeDesiredPosition(Position cp)
     {
         return Position(0, 0, 6.5, 0);
+    }
+};
+
+class PositionHold : public NavigationalState<State>
+{
+  public:
+    State currentState() const override { return PH; }
+
+    NavigationalState *returnNextState(Position cp)
+    {
+        return this;
+    }
+
+    Position computeDesiredPosition(Position cp)
+    {
+        return Position(0, 0, 2.0, 0);
     }
 };
 

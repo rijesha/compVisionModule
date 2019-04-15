@@ -4,8 +4,8 @@ MAKEFLAGS += -j
 
 #-Imavlink-interface
 # Names and flags
-INC_DIR = -I. -I../../libs/mavlink-interface/mavlink_c_library_v1/common -I.. -I../../libs -I../../libs/camera-v4l2
-CPPSOURCES += $(wildcard *.cpp) $(wildcard ../../libs/mavlink-interface/*.cpp) $(wildcard ../common/*.cpp) $(wildcard ../../libs/camera-v4l2/camera.cpp)
+INC_DIR = -I. -I../../libs/mavlink-interface/mavlink_c_library_v1/common -I.. -I../../libs -I../../libs/camera-v4l2 -I../../libs/attitude_controller
+CPPSOURCES += $(wildcard *.cpp) $(wildcard ../../libs/mavlink-interface/*.cpp) $(wildcard ../common/*.cpp) $(wildcard ../../libs/camera-v4l2/camera.cpp) $(wildcard ../../libs/attitude_controller/*.cpp)
 
 OBJECTS = $(CPPSOURCES:.cpp=.o)
 EXECUTABLE = deploy
