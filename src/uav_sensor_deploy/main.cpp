@@ -69,6 +69,9 @@ void start_reader_thread()
 
 int main(int argc, const char **argv)
 {
+    cout << std::fixed << std::showpoint;
+    cout << std::setprecision(3);
+
     CVMArgumentParser argparse(argc, argv, true, false, false, false);
     logFile.open("logfile.csv");
 
@@ -186,7 +189,7 @@ int main(int argc, const char **argv)
 
         float rel_vert_vel = (ac->get_desired_velocity().y/DEFAULT_SPEED_UP);
 
-        float yaw_rate = -current_position.angle_in_frame * 0.4;
+        float yaw_rate = -current_position.angle_in_frame() * 0.4;
 
         if (!ac->reinitialize_state){
             pc->update_attitude_target(ac->pitch_target, ac->roll_target, ac->yaw_target, rel_vert_vel, yaw_rate, true);
@@ -198,10 +201,13 @@ int main(int argc, const char **argv)
 
         if (!argparse.quiet)
         {
-            cout << ac->get_state_string() << endl << endl;
-            cout << ac->forward_acc << ',' << ac->right_acc << ',';
-            cout << current_position.azi << ','; 
-            cout << ac->rot_forward_acc << ',' << ac->rot_right_acc << ',';
+            //cout << ac->get_state_string() << endl << endl;
+            cout << ac->forward_acc << ',' << ac->right_acc << ',   ' << ' ';
+
+            cout << current_position.azi << ',   ' << ' '; 
+
+            cout << ac->rot_forward_acc << ',' << ac->rot_right_acc << ',   ' << ' ';
+            
             cout << yaw_rate << ',' << rel_vert_vel << endl << endl;
             /*
             cout << currentState << endl;
