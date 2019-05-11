@@ -12,7 +12,7 @@
 #include <ctime>
 #include "attitude_controller.h"
 
-#define DEFAULT_SPEED_UP 0.10 //in m/s. (10cm/s)
+#define DEFAULT_SPEED_UP 0.20 //in m/s. (10cm/s)
 
 bool shutdown = false;
 clock_t startimageCaputre = clock();
@@ -72,7 +72,7 @@ int main(int argc, const char **argv)
     CVMArgumentParser argparse(argc, argv, true, false, false, false);
     logFile.open("logfile.csv");
 
-    LocationProcessor lp = LocationProcessor(argparse.calib_file_path, argparse.deviceID, 10, 20);
+    LocationProcessor lp = LocationProcessor(argparse.calib_file_path, argparse.deviceID, 15, 20);
     NavigationalState<State> *ns = ap;
 
     Multithreaded_Interface mti;
@@ -107,8 +107,11 @@ int main(int argc, const char **argv)
     {
         startimageCaputre = clock();
         current_position = lp.processImage();
-        imwrite("captured/" + to_string(count) + ".jpg", lp.original);
-        
+
+	    if (argparse.saveVideo){
+            imwrite("captured/" + to_string(count) + ".jpg", lp.original);
+            imwrite("captured/" + to_string(count) + "marked.jpg", lp.arProc.drawMarkersAndAxis(lp.original));
+        }        
 
         /*
         if (!current_position.emptyPosition)
@@ -179,8 +182,7 @@ int main(int argc, const char **argv)
 
         ac->run_loop({current_position.w_x, current_position.w_y, current_position.w_z}, {desired_position.x, desired_position.y, desired_position.z});
 
-        ac->acceleration_to_attitude(-ac->acc_desi.z, ac->acc_desi.x, current_position.azi);
-
+        ac->acceleration_to_attitude(-ac->acc_desi.z, ac->acc_desi.x, -current_position.azi);
 
         float rel_vert_vel = (ac->get_desired_velocity().y/DEFAULT_SPEED_UP);
 
@@ -196,7 +198,11 @@ int main(int argc, const char **argv)
 
         if (!argparse.quiet)
         {
-            cout << ac->get_state_string() << endl;
+            cout << ac->get_state_string() << endl << endl;
+            cout << ac->forward_acc << ',' << ac->right_acc << ',';
+            cout << current_position.azi << ','; 
+            cout << ac->rot_forward_acc << ',' << ac->rot_right_acc << ',';
+            cout << yaw_rate << ',' << rel_vert_vel << endl << endl;
             /*
             cout << currentState << endl;
             cout << "angle in frame " << desired_position.azi << endl;
