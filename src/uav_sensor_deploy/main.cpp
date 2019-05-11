@@ -12,7 +12,7 @@
 #include <ctime>
 #include "attitude_controller.h"
 
-#define DEFAULT_SPEED_UP 0.010 //in m/s. (10cm/s)
+#define DEFAULT_SPEED_UP 0.10 //in m/s. (10cm/s)
 
 bool shutdown = false;
 clock_t startimageCaputre = clock();
@@ -179,11 +179,17 @@ int main(int argc, const char **argv)
 
         ac->run_loop({current_position.w_x, current_position.w_y, current_position.w_z}, {desired_position.x, desired_position.y, desired_position.z});
 
-        ac->acceleration_to_attitude(-ac->acc_desi.z, -ac->acc_desi.x, current_position.azi);
+        ac->acceleration_to_attitude(-ac->acc_desi.z, ac->acc_desi.x, current_position.azi);
+
 
         float rel_vert_vel = (ac->get_desired_velocity().y/DEFAULT_SPEED_UP);
-        float yaw_rate = current_position.azi * 0.1;
-        pc->update_attitude_target(ac->pitch_target, ac->roll_target, ac->yaw_target, rel_vert_vel, yaw_rate, true);
+
+        float yaw_rate = -current_position.angle_in_frame * 0.4;
+
+        if (!ac->reinitialize_state){
+            pc->update_attitude_target(ac->pitch_target, ac->roll_target, ac->yaw_target, rel_vert_vel, yaw_rate, true);
+        }
+        
         lastState = currentState;
         logFile << time(0) << ',' << ac->get_state_string() << endl;
         count++;
