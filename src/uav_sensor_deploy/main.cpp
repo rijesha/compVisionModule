@@ -40,6 +40,11 @@ bool running = true;
 ofstream vibration_file;
 ofstream logFile;
 
+mavlink_message_t hil_actuator_controls_message;
+mavlink_hil_actuator_controls_t hil_actuator_controls;
+
+int send_mavlink_debug = 0;
+
 thread read_th;
 
 void reader_thread()
@@ -194,6 +199,34 @@ int main(int argc, const char **argv)
         if (!ac->reinitialize_state){
             pc->update_attitude_target(ac->pitch_target, ac->roll_target, ac->yaw_target, rel_vert_vel, yaw_rate, true);
         }
+
+        send_mavlink_debug++;
+        if (send_mavlink_debug == 5){
+            send_mavlink_debug = 0;
+            hil_actuator_controls.controls[0] = current_position.w_x;
+            hil_actuator_controls.controls[1] = current_position.w_y;
+            hil_actuator_controls.controls[2] = current_position.w_z;
+            hil_actuator_controls.controls[3] = desired_position.x;
+            hil_actuator_controls.controls[4] = desired_position.y;
+            hil_actuator_controls.controls[5] = desired_position.z;
+            hil_actuator_controls.controls[6] = ac->get_desired_velocity().x;
+            hil_actuator_controls.controls[7] = ac->get_desired_velocity().y;
+            hil_actuator_controls.controls[8] = ac->get_desired_velocity().z;
+            hil_actuator_controls.controls[9] = ac->acc_desi.x;
+            hil_actuator_controls.controls[10] = ac->acc_desi.y;
+            hil_actuator_controls.controls[11] = ac->acc_desi.z;
+            hil_actuator_controls.controls[12] = current_position.azi;
+            hil_actuator_controls.controls[13] = current_position.angle_in_frame();
+
+	        mavlink_msg_hil_actuator_controls_encode(0, 0, &hil_actuator_controls_message, &hil_actuator_controls);
+            pc->mti->write_message(hil_actuator_controls_message);
+        }
+
+        
+        //mavlink_message_t attitude_target_message;
+        
+
+        //HIL_ACTUATOR_CONTROLS
         
         lastState = currentState;
         logFile << time(0) << ',' << ac->get_state_string() << endl;
