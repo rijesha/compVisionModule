@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <opencv2/opencv.hpp>
 #include <common/undistort_image.h>
-#include "../configuration.h"
+#include "common/configuration.h"
 #include <common/cvm_argument_parser.hpp>
 #include <ctime>
 #include <chrono>
@@ -16,7 +16,7 @@ using namespace boost::filesystem;
 
 using namespace cv;
 
-ofstream testFile, timingFile;
+boost::filesystem::ofstream testFile, timingFile;
 string testFileFolder;
 
 clock_t imageAcquisitionTime, markerDetectionTime, posecalculationTime, drawingImageTime, savingImageTime;
@@ -44,7 +44,7 @@ void processImage(Mat original){
     markerDetectionTime = clock();
     p = arProc.calculatePose();
     posecalculationTime = clock();
-    cvtColor(original, image, CV_GRAY2BGR );
+    cvtColor(original, image, COLOR_GRAY2BGR );
     image = arProc.drawMarkersAndAxis(image);
     drawingImageTime = clock();
 }
@@ -63,7 +63,7 @@ int main(int argc, const char** argv )
     height = CamParam.CamSize.height;
     cout << width << "x" << height << endl;
 
-    timingFile = ofstream("timeDataFolder.csv", ofstream::out);
+    timingFile = boost::filesystem::ofstream("timeDataFolder.csv", std::ios_base::out);
     timingFile << "veryoverallCout, overallCount, foundMarker, savedImage, markerDetectionTime, posecalculationTime, drawingImageTime, savingImageTime, depth" << endl;
 
     ui = UndistortImage(CamParam);
@@ -75,7 +75,7 @@ int main(int argc, const char** argv )
     while(in.read_row(imgnum, count, depth, azimuth, camera_azimuth, tvec1, tvec2, tvec3, rvec1, rvec2, rvec3, wpos1, wpos2, wpos3)){
         cout << imgnum << endl;
         current_file = "testData/raw/" + to_string((int)imgnum) + ".png";
-        Mat fun = imread(current_file, CV_LOAD_IMAGE_GRAYSCALE);
+        Mat fun = imread(current_file, IMREAD_GRAYSCALE);
         cout << current_file << endl;
         if(! fun.data )                              // Check for invalid input
         {

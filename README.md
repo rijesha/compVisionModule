@@ -8,12 +8,9 @@ mkdir release
 cd release
 cmake -D CMAKE_BUILD_TYPE=RELEASE  -DBUILD_opencv_java=OFF -D WITH_CUDA=OFF -D INSTALL_C_EXAMPLES=OFF -DBUILD_opencv_cnn_3dobj=OFF -D INSTALL_PYTHON_EXAMPLES=OFF -DBUILD_opencv_dnn_modern=OFF -D BUILD_EXAMPLES=OFF -D BUILD_TESTS=OFF -D BUILD_PERF_TESTS=OFF -D BUILD_FAT_JAVA_LIB=OFF -D CMAKE_INSTALL_PREFIX=/usr/local -D BUILD_opencv_python=OFF -DOpenCV_DIR=OpenCVConfig.cmake ..
 make
-make install
+sudo make install
 ```
 
-After building openCV. build aruco. Modify the location for the opencv release directory in build_aruco.
-```
-git submodule update --init --recursive
-./build_aruco
-export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$(pwd)/libs/aruco/release/src/
-```
+sudo apt-get install libboost-filesystem-dev
+
+then you can build like any other cmake project from the main directory.

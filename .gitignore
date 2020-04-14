@@ -6,15 +6,6 @@ python/1280x960 calib data/
 python/2592x1944 calib data/
 python/640x480 calib data/
 latencyTest
-cpp/5mpz/
-cpp/TestData.csv
-cpp/lots of data/
-cpp/old/
-cpp/testData
-cpp/timeData.csv
-src/deploy
-src/aruco/timeData.csv
-src/aruco/translations/
 5mpz/
 folderAnalyzer
 lots of data/
@@ -22,8 +13,5 @@ old/
 testData/
 test_data_collection
 python/*.jpg
-src/aruco/*.avi
 TestData.csv
-src/mavlink_control/mavlink_control
-src/uav_sensor_deploy/deploy
-libs/aruco/bin/*
+build/*

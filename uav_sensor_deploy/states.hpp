@@ -9,7 +9,7 @@
 #include <time.h>
 #include <unistd.h>
 #include <common/position.hpp>
-#include <mavlink-interface/position_controller.h>
+#include <position_controller.h>
 #include <common/navigational_state.hpp>
 
 using namespace std;

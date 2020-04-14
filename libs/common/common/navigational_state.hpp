@@ -9,7 +9,7 @@
 #include <time.h>
 #include <unistd.h>
 #include "aruco_processor.h"
-#include <mavlink-interface/position_controller.h>
+#include <position_controller.h>
 
 using namespace std;
 

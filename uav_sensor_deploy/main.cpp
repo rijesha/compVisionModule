@@ -4,8 +4,8 @@
 #include <common/position.hpp>
 #include <thread>
 #include <common/msg_queue.hpp>
-#include <mavlink-interface/position_controller.h>
-#include <mavlink-interface/multithreaded_interface.h>
+#include <position_controller.h>
+#include <multithreaded_interface.h>
 #include "states.hpp"
 #include <iostream>
 #include <fstream>
@@ -229,19 +229,19 @@ int main(int argc, const char **argv)
         //HIL_ACTUATOR_CONTROLS
         
         lastState = currentState;
-        logFile << time(0) << ',' << ac->get_state_string() << endl;
+        logFile << time(0) << "," << ac->get_state_string() << endl;
         count++;
 
         if (!argparse.quiet)
         {
             //cout << ac->get_state_string() << endl << endl;
-            cout << ac->forward_acc << ',' << ac->right_acc << ',   ' << ' ';
+            cout << ac->forward_acc << "," << ac->right_acc << ",   " << " ";
 
-            cout << current_position.azi << ',   ' << ' '; 
+            cout << current_position.azi << ",   " << " "; 
 
-            cout << ac->rot_forward_acc << ',' << ac->rot_right_acc << ',   ' << ' ';
+            cout << ac->rot_forward_acc << "," << ac->rot_right_acc << ",   " << " ";
             
-            cout << yaw_rate << ',' << rel_vert_vel << endl << endl;
+            cout << yaw_rate << "," << rel_vert_vel << endl << endl;
             /*
             cout << currentState << endl;
             cout << "angle in frame " << desired_position.azi << endl;

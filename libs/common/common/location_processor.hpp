@@ -4,8 +4,8 @@
 #include <iostream>
 #include <stdio.h>
 #include <opencv2/opencv.hpp>
-#include <common/undistort_image.h>
-#include "../configuration.h"
+#include "common/undistort_image.h"
+#include "common/configuration.h"
 #include <ctime>
 #include <chrono>
 #include <cstring>

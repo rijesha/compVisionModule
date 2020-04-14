@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <opencv2/opencv.hpp>
 #include <common/undistort_image.h>
-#include "../configuration.h"
+#include <common/configuration.h"
 #include <common/cvm_argument_parser.hpp>
 #include <ctime>
 #include <chrono>

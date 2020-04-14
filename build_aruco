@@ -1,6 +1,0 @@
-cd libs/aruco
-mkdir build
-cd build
-cmake .. -DOpenCV_DIR=~/opencv/release -DCMAKE_INSTALL_PREFIX=..
-make -j
-make install

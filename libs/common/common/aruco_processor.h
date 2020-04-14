@@ -3,7 +3,7 @@
 
 #include <iostream>
 #include <opencv2/opencv.hpp>
-#include "../../libs/aruco/include/aruco/aruco.h"
+#include "aruco.h"
 #include "undistort_image.h"
 #include "position.hpp"
 #include <ctime>
