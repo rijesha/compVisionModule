@@ -26,6 +26,7 @@ find_package(Threads REQUIRED)
 
 target_link_libraries(${PROJECT_NAME} 
         PRIVATE 
+           -lboost_system
            common
            mavlink-interface
            attitude_controller

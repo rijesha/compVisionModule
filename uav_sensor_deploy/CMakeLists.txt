@@ -30,10 +30,11 @@ find_package(Threads REQUIRED)
 
 target_link_libraries(${PROJECT_NAME} 
         PRIVATE 
+           Threads::Threads
            common
            mavlink-interface
            attitude_controller
            ${OpenCV_LIBS}
-           Threads::Threads
+           
         )
 target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_14)

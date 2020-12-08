@@ -21,7 +21,7 @@ LIBS += -L../../libs/aruco/lib -laruco
 all: $(CPPSOURCES) $(EXECUTABLE)
 
 $(EXECUTABLE): $(OBJECTS) states.hpp
-	$(CC) -pthread $(OBJECTS) -o $@ $(LIBS)
+	$(CC) -pthread $(OBJECTS) -o $@ -lpthread $(LIBS)
 
 .c.o:
 	$(CC) $(CFLAGS) $(INCLUDES) $< -o $@

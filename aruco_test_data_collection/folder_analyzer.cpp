@@ -16,8 +16,8 @@ using namespace boost::filesystem;
 
 using namespace cv;
 
-boost::filesystem::ofstream testFile, timingFile;
-string testFileFolder;
+//boost::filesystem::ofstream testFile;
+//string testFileFolder;
 
 clock_t imageAcquisitionTime, markerDetectionTime, posecalculationTime, drawingImageTime, savingImageTime;
 
@@ -63,7 +63,7 @@ int main(int argc, const char** argv )
     height = CamParam.CamSize.height;
     cout << width << "x" << height << endl;
 
-    timingFile = boost::filesystem::ofstream("timeDataFolder.csv", std::ios_base::out);
+    boost::filesystem::ofstream timingFile("timeDataFolder.csv", std::ios_base::out);
     timingFile << "veryoverallCout, overallCount, foundMarker, savedImage, markerDetectionTime, posecalculationTime, drawingImageTime, savingImageTime, depth" << endl;
 
     ui = UndistortImage(CamParam);

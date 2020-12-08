@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <opencv2/opencv.hpp>
 #include <common/undistort_image.h>
-#include <common/configuration.h"
+#include <common/configuration.h>
 #include <common/cvm_argument_parser.hpp>
 #include <ctime>
 #include <chrono>
@@ -50,7 +50,7 @@ void processImage()
     markerDetectionTime = clock();
     p = arProc.calculatePose();
     posecalculationTime = clock();
-    cvtColor(original, image, CV_GRAY2BGR);
+    cvtColor(original, image, cv::COLOR_GRAY2BGR);
     image = arProc.drawMarkersAndAxis(image);
     drawingImageTime = clock();
 }
@@ -88,7 +88,7 @@ int main(int argc, const char **argv)
 
     if (ap.saveVideo)
     {
-        writer = cv::VideoWriter("out.avi", CV_FOURCC('M', 'J', 'P', 'G'), 24, image.size());
+        writer = cv::VideoWriter("out.avi", cv::VideoWriter::fourcc('M', 'J', 'P', 'G'), 24, image.size());
     }
 
     string userinput;
@@ -123,15 +123,15 @@ int main(int argc, const char **argv)
                 //cout << m[2] << endl;
                 //cout << m[3] << endl;
 
-                putText(undistorted, "1", m[0], FONT_HERSHEY_COMPLEX_SMALL, 3, cvScalar(255, 0, 0), 1, CV_AA);
-                putText(undistorted, "2", m[1], FONT_HERSHEY_COMPLEX_SMALL, 3, cvScalar(255, 255, 0), 1, CV_AA);
-                putText(undistorted, "3", m[2], FONT_HERSHEY_COMPLEX_SMALL, 3, cvScalar(0, 255, 0), 1, CV_AA);
-                putText(undistorted, "4", m[3], FONT_HERSHEY_COMPLEX_SMALL, 3, cvScalar(0, 255, 255), 1, CV_AA);
+                putText(undistorted, "1", m[0], FONT_HERSHEY_COMPLEX_SMALL, 3, Scalar(255, 0, 0), 1, cv::LINE_AA);
+                putText(undistorted, "2", m[1], FONT_HERSHEY_COMPLEX_SMALL, 3, Scalar(255, 255, 0), 1, cv::LINE_AA);
+                putText(undistorted, "3", m[2], FONT_HERSHEY_COMPLEX_SMALL, 3, Scalar(0, 255, 0), 1, cv::LINE_AA);
+                putText(undistorted, "4", m[3], FONT_HERSHEY_COMPLEX_SMALL, 3, Scalar(0, 255, 255), 1, cv::LINE_AA);
 
-                circle(undistorted, m[0], 5, cvScalar(255, 0, 0) );
-                circle(undistorted, m[1], 5, cvScalar(255, 255, 0) );
-                circle(undistorted, m[2], 5, cvScalar(0, 255, 0) );
-                circle(undistorted, m[3], 5, cvScalar(0, 255, 255) );
+                circle(undistorted, m[0], 5, Scalar(255, 0, 0) );
+                circle(undistorted, m[1], 5, Scalar(255, 255, 0) );
+                circle(undistorted, m[2], 5, Scalar(0, 255, 0) );
+                circle(undistorted, m[3], 5, Scalar(0, 255, 255) );
             }            
 
             imshow("Display Image", undistorted);
