@@ -197,7 +197,7 @@ int main(int argc, const char **argv)
         float yaw_rate = -current_position.angle_in_frame() * 0.4;
 
         if (!ac->reinitialize_state){
-            pc->update_attitude_target(ac->pitch_target, ac->roll_target, ac->yaw_target, rel_vert_vel, yaw_rate, true);
+            pc->send_set_attitude_target(ac->pitch_target, ac->roll_target, ac->yaw_target, rel_vert_vel, yaw_rate, true);
         }
 
         send_mavlink_debug++;

@@ -25,3 +25,4 @@ add_subdirectory(libs)
 
 add_subdirectory(uav_sensor_deploy)
 add_subdirectory(aruco_test_data_collection)
+add_subdirectory(simulated_target_system)
