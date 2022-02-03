@@ -79,6 +79,8 @@ void MavlinkServer::onIncomingMsg(const Client &client, const char *msg, size_t 
     if (msgReceived && subscriber_)
     {
         subscriber_(&message);
+    } else {
+        std::cout << "failed \n";
     }
 }
 
@@ -140,6 +142,7 @@ void MavlinkServer::sendMessage(mavlink_message_t *msg)
     mtx.lock();
     size_t len = mavlink_msg_to_send_buffer((uint8_t *)sendBuffer, msg);
     std::string data = base64_encode(std::string(sendBuffer, len));
+    data.append("=");
     server.sendToAllClients(data.c_str(), data.length());
     mtx.unlock();
 }

@@ -180,18 +180,22 @@ void input_thread()
 
 AttitudeController ac;
 
+#include <compVisionModule/mavlink.h>
+
 void mavlinkMessageCallback(mavlink_message_t *msg)
 {
     printf("Got msg %d!\n", msg->msgid);
+    if (msg->msgid == MAVLINK_MSG_ID_Set_Gains)
+    {
+        mavlink_set_gains_t msg;
+    }
 }
 
 int main()
 {
-    cout << "starting server1" << endl;
     MavlinkServer server;
     server.bindMessageSubscriber(mavlinkMessageCallback);
-    cout << server.init << endl;
-    cout << "starting server2" << endl;
+    cout << "Mavlink Server Started" << endl;
 
     int i = 0;
     while (true)

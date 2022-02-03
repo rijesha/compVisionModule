@@ -19,3 +19,6 @@
 [submodule "third_party/opencv"]
 	path = third_party/opencv
 	url = https://github.com/opencv/opencv.git
+[submodule "third_party/mavlink"]
+	path = third_party/mavlink
+	url = https://github.com/mavlink/mavlink.git
