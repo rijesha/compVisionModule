@@ -3,7 +3,6 @@
 #include <common/location_processor.hpp>
 #include <common/position.hpp>
 #include <thread>
-#include <common/msg_queue.hpp>
 #include <position_controller.h>
 #include <multithreaded_interface.h>
 #include "states.hpp"
@@ -14,7 +13,6 @@
 
 #define DEFAULT_SPEED_UP 0.20 //in m/s. (10cm/s)
 
-bool shutdown = false;
 clock_t startimageCaputre = clock();
 clock_t lastDetectedTime = clock();
 clock_t startedDataAcquisition = clock();
@@ -31,46 +29,8 @@ NavigationalState<State> *ph = new PositionHold();
 
 Position_Controller *pc;
 AttitudeController *ac;
-Serial_Port serial_port;
 
-char enable_magnet = 'e';
-char release_magnet = 'r';
-
-bool running = true;
-ofstream vibration_file;
 ofstream logFile;
-
-mavlink_message_t hil_actuator_controls_message;
-mavlink_hil_actuator_controls_t hil_actuator_controls;
-
-int send_mavlink_debug = 0;
-
-thread read_th;
-
-void reader_thread()
-{
-    bool success;
-    vibration_file.open("vib_measure.csv");
-
-    uint8_t nKByte = 0;
-
-    while (running)
-    {
-        success = serial_port._read_port(nKByte);
-        if (success)
-        {
-            vibration_file << nKByte;
-        }
-    }
-    vibration_file.close();
-}
-
-void start_reader_thread()
-{
-    read_th = thread([=]() {
-        reader_thread();
-    });
-}
 
 int main(int argc, const char **argv)
 {
@@ -80,22 +40,22 @@ int main(int argc, const char **argv)
     CVMArgumentParser argparse(argc, argv, true, false, false, false);
     logFile.open("logfile.csv");
 
-    LocationProcessor lp = LocationProcessor(argparse.calib_file_path, argparse.deviceID, 15, 20);
-    NavigationalState<State> *ns = ap;
+    //LocationProcessor lp = LocationProcessor(argparse.calib_file_path, argparse.deviceID, 15, 20);
+    //NavigationalState<State> *ns = ap;
 
-    Multithreaded_Interface mti;
-    mti.start("/dev/ttyS1", 57600);
+    SerialPort pixhawk_serial("/dev/ttyTHS1", 115200);
+    UdpDevice mavproxy_udp("127.0.0.1", 14560);
 
-    /*
-    serial_port.uart_name = "/dev/ttyACM0";
-    serial_port.baudrate = 57600;
-    serial_port.start();
-    start_reader_thread();
-    */
-   
-    pc = new Position_Controller(&mti);
-    ac = new AttitudeController;
+    MultithreadedInterface pixhawk_interface(pixhawk_serial);
+    MultithreadedInterface mavproxy_interface(mavproxy_udp);
 
+    pixhawk_interface.bind_new_msg_callback([&](const mavlink_message_t &msg)
+                                            { mavproxy_interface.write_message(msg); });
+    mavproxy_interface.bind_new_msg_callback([&](const mavlink_message_t &msg)
+                                             { pixhawk_interface.write_message(msg); });
+
+    //pc = new Position_Controller(&mti);
+    //ac = new AttitudeController;
 
     int count = 0;
 
@@ -113,13 +73,13 @@ int main(int argc, const char **argv)
 
     while (true)
     {
-        startimageCaputre = clock();
-        current_position = lp.processImage();
+        //startimageCaputre = clock();
+        //current_position = lp.processImage();
 
-	    if (argparse.saveVideo){
-            imwrite("captured/" + to_string(count) + ".jpg", lp.original);
-            imwrite("captured/" + to_string(count) + "marked.jpg", lp.arProc.drawMarkersAndAxis(lp.original));
-        }        
+        //if (argparse.saveVideo){
+        //    imwrite("captured/" + to_string(count) + ".jpg", lp.original);
+        //    imwrite("captured/" + to_string(count) + "marked.jpg", lp.arProc.drawMarkersAndAxis(lp.original));
+        //}
 
         /*
         if (!current_position.emptyPosition)
@@ -139,10 +99,10 @@ int main(int argc, const char **argv)
             //cout << current_position.w_x << " " << current_position.w_z << " " << -current_position.w_y << endl;
         }
         */
-        
-        ns = ns->returnNextState(current_position);
-        currentState = ns->currentState();
-        
+
+        //ns = ns->returnNextState(current_position);
+        //currentState = ns->currentState();
+
         /*
         downsample++;
         if (currentState == DA)
@@ -176,7 +136,6 @@ int main(int argc, const char **argv)
         }
         */
 
-
         /*
         if (currentState == AP && lastState != AP)
             pc->toggle_offboard_control(false);
@@ -184,8 +143,7 @@ int main(int argc, const char **argv)
             pc->toggle_offboard_control(true);
         */
 
-       
-
+        /*
         desired_position = ns->computeDesiredPosition(current_position);
 
         ac->run_loop({current_position.w_x, current_position.w_y, current_position.w_z}, {desired_position.x, desired_position.y, desired_position.z});
@@ -231,7 +189,8 @@ int main(int argc, const char **argv)
         lastState = currentState;
         logFile << time(0) << "," << ac->get_state_string() << endl;
         count++;
-
+*/
+        /*
         if (!argparse.quiet)
         {
             //cout << ac->get_state_string() << endl << endl;
@@ -252,8 +211,9 @@ int main(int argc, const char **argv)
             cout << "desired angle global " << desired << endl;
             cout << "x_desired_before: " << desired_position.z << "y_desired_before: " << desired_position.x << endl;
             cout << "x_desired_after: " << x_new << "y_desired_after: " << y_new << "z_desired_after" << -desired_position.y << endl;
-            */
-        }
+            //
+        }*/
+        /*
         if (argparse.saveTiming)
         {
             std::chrono::duration<double> elapsed = std::chrono::high_resolution_clock::now() - start;
@@ -261,10 +221,11 @@ int main(int argc, const char **argv)
             std::cout << "Elapsed time: " << elapsed.count() << " s Averge time: " << total_time / count << "s\n";
 
             start = std::chrono::high_resolution_clock::now();
-        }
+        }*/
     }
-    mti.shutdown();
+    pixhawk_interface.shutdown();
+    mavproxy_interface.shutdown();
+
     logFile.close();
-    running = false;
     return -1;
 }

@@ -1,13 +1,5 @@
-#ifndef ARGPARSE_HPP_
-#define ARGPARSE_HPP_
+#pragma once
 
-#if __cplusplus >= 201103L
-#include <unordered_map>
-typedef std::unordered_map<std::string, size_t> IndexMap;
-#else
-#include <map>
-typedef std::map<std::string, size_t> IndexMap;
-#endif
 #include <string>
 #include <vector>
 #include <typeinfo>
@@ -16,6 +8,14 @@ typedef std::map<std::string, size_t> IndexMap;
 #include <iostream>
 #include <cassert>
 #include <algorithm>
+
+#if __cplusplus >= 201103L
+#include <unordered_map>
+typedef std::unordered_map<std::string, size_t> IndexMap;
+#else
+#include <map>
+typedef std::map<std::string, size_t> IndexMap;
+#endif
 
 /*! @class ArgumentParser
  *  @brief A simple command-line argument parser based on the design of
@@ -431,4 +431,3 @@ public:
         }
     }
 };
-#endif
