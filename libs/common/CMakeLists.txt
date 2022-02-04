@@ -13,7 +13,6 @@ target_sources(${PROJECT_NAME}
         common/aruco_processor.h
         common/cvm_argument_parser.hpp
         common/location_processor.hpp
-        common/msg_queue.hpp
         common/navigational_state.hpp
         common/position.hpp
         common/undistort_image.h

@@ -3,7 +3,6 @@
 #include <common/location_processor.hpp>
 #include <common/position.hpp>
 #include <thread>
-#include <position_controller.h>
 #include <multithreaded_interface.h>
 #include "states.hpp"
 #include <iostream>
@@ -27,7 +26,7 @@ NavigationalState<State> *xt = new CrossTest();
 NavigationalState<State> *ct = new CircleTest();
 NavigationalState<State> *ph = new PositionHold();
 
-Position_Controller *pc;
+//Position_Controller *pc;
 AttitudeController *ac;
 
 ofstream logFile;
@@ -73,6 +72,7 @@ int main(int argc, const char **argv)
 
     while (true)
     {
+		sleep(10);
         //startimageCaputre = clock();
         //current_position = lp.processImage();
 

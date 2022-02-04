@@ -9,7 +9,6 @@
 #include <time.h>
 #include <unistd.h>
 #include <common/position.hpp>
-#include <position_controller.h>
 #include <common/navigational_state.hpp>
 
 using namespace std;
