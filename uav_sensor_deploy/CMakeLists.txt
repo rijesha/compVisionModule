@@ -13,14 +13,12 @@ target_sources(${PROJECT_NAME}
                 states.hpp
 )
 
-
 find_package(OpenCV REQUIRED)
 message(STATUS "OpenCV library status:")
 message(STATUS "    config: ${OpenCV_DIR}")
 message(STATUS "    version: ${OpenCV_VERSION}")
 message(STATUS "    libraries: ${OpenCV_LIBS}")
 message(STATUS "    include path: ${OpenCV_INCLUDE_DIRS}")
-
 
 SET(ARUCO_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/../third_party/aruco/src/ )
 include_directories(${ARUCO_INCLUDE_DIRS})
@@ -34,6 +32,7 @@ target_link_libraries(${PROJECT_NAME}
            common
            mavlink-interface
            attitude_controller
+           camera_realsense
            ${OpenCV_LIBS}
            
         )

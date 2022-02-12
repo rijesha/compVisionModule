@@ -9,6 +9,7 @@
 #include <fstream>
 #include <ctime>
 #include "attitude_controller.h"
+#include "camera_realsense.h"
 
 #define DEFAULT_SPEED_UP 0.20 //in m/s. (10cm/s)
 
@@ -53,6 +54,7 @@ int main(int argc, const char **argv)
     mavproxy_interface.bind_new_msg_callback([&](const mavlink_message_t &msg)
                                              { pixhawk_interface.write_message(msg); });
 
+	CameraRealsense camera;
     //pc = new Position_Controller(&mti);
     //ac = new AttitudeController;
 
