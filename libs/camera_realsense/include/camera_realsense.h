@@ -8,33 +8,32 @@
 #include <vector>
 
 struct RealSenseImageData {
-  const void* data_ptr;
+  const uint8_t* raw_ptr;
   int width, height;
 };
 
-struct RealsensePtrData {
+struct RealsenseData {
   int frame_index;
   rs2_vector gyro_data{};
   rs2_vector accel_data{};
   rs2_pose pose_data{};
-  RealSenseImageData frame_data1{};
-  RealSenseImageData frame_data2{};
-  bool gyro_updated, accel_updated, pose_updated, frame_1_updated,
-      frame_2_updated;
+  RealSenseImageData frame1{};
+  RealSenseImageData frame2{};
+  bool gyro_updated{}, accel_updated{}, pose_updated{}, frame1_updated{},
+      frame2_updated{};
 };
 
-typedef std::function<void(const RealsensePtrData& data)>
-    RealsensePtrDataCallback;
+typedef std::function<void(const RealsenseData& data)> RealsenseDataCallback;
 
 class CameraRealsense {
  public:
   CameraRealsense();
 
   void shutdown();
-  void bind_data_callback(RealsensePtrDataCallback);
+  void bind_data_callback(RealsenseDataCallback);
 
  private:
-  std::vector<RealsensePtrDataCallback> data_callbacks_;
+  std::vector<RealsenseDataCallback> data_callbacks_;
 
   rs2::pipeline pipe;
 
