@@ -33,35 +33,40 @@ clock_t startedDataAcquisition;
 ofstream logFile;
 int i = 0;
 
-void processRealsenseData(const RealsenseData &data) {
-  if (data.frame1_updated) {
-    std::vector<uint8_t> data_vector(
-        data.frame1.raw_ptr,
-        data.frame1.raw_ptr + data.frame1.height * data.frame1.width);
+class DataHandler {
+ public:
+  DataHandler(){};
 
-    Mat image(Size(data.frame1.width, data.frame1.height), CV_8UC1,
-              data_vector.data());
-    if ((std::chrono::high_resolution_clock::now() - start1).count() >
-        10000000000) {
-      printf("10s has happened %d %ld \n", i,
-             (std::chrono::high_resolution_clock::now() - start1).count());
-      start1 = std::chrono::high_resolution_clock::now();
-      i = 0;
+  void process_realsense_data(const RealsenseData &data) {
+    if (data.frame1_updated) {
+      std::vector<uint8_t> data_vector(
+          data.frame1.raw_ptr,
+          data.frame1.raw_ptr + data.frame1.height * data.frame1.width);
+
+      Mat image(Size(data.frame1.width, data.frame1.height), CV_8UC1,
+                data_vector.data());
+      if ((std::chrono::high_resolution_clock::now() - start1).count() >
+          10000000000) {
+        printf("10s has happened %d %ld \n", i,
+               (std::chrono::high_resolution_clock::now() - start1).count());
+        start1 = std::chrono::high_resolution_clock::now();
+        i = 0;
+      }
+
+      // imwrite(std::to_string(i) + "test.png", image);
     }
+    if (data.frame2_updated) {
+      std::vector<uint8_t> data_vector(
+          data.frame2.raw_ptr,
+          data.frame2.raw_ptr + data.frame2.height * data.frame2.width);
 
-    // imwrite(std::to_string(i) + "test.png", image);
+      Mat image(Size(data.frame2.width, data.frame2.height), CV_8UC1,
+                data_vector.data());
+      // imwrite(std::to_string(i) + "test_2.png", image);
+    }
+    i++;
   }
-  if (data.frame2_updated) {
-    std::vector<uint8_t> data_vector(
-        data.frame2.raw_ptr,
-        data.frame2.raw_ptr + data.frame2.height * data.frame2.width);
-
-    Mat image(Size(data.frame2.width, data.frame2.height), CV_8UC1,
-              data_vector.data());
-    // imwrite(std::to_string(i) + "test_2.png", image);
-  }
-  i++;
-}
+};
 
 int main(int argc, const char **argv) {
   cout << std::fixed << std::showpoint;
@@ -86,9 +91,11 @@ int main(int argc, const char **argv) {
     pixhawk_interface.write_message(msg);
   });
 
+  DataHandler handler;
+
   CameraRealsense camera;
   camera.bind_data_callback(
-      [&](const RealsenseData &data) { processRealsenseData(data); });
+      [&](const RealsenseData &data) { handler.process_realsense_data(data); });
 
   // pc = new Position_Controller(&mti);
   // ac = new AttitudeController;
