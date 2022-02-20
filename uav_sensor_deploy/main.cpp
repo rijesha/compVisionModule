@@ -8,8 +8,8 @@
 #include <fstream>
 #include <iostream>
 #include <thread>
-#include "position_controller.h"
 #include "camera_realsense.h"
+#include "position_controller.h"
 #include "states.hpp"
 
 constexpr float target_width{0.158};
@@ -34,11 +34,25 @@ ofstream logFile;
 int i = 0;
 
 class DataHandler {
+ private:
   ArUcoProcessor &aruco_processor_;
+  std::mutex new_position_available_mutex_;
+  std::condition_variable new_position_available_;
+  Position current_position_;
 
  public:
   DataHandler(ArUcoProcessor &aruco_processor)
       : aruco_processor_(aruco_processor){};
+
+  std::optional<Position> wait_for_new_position(float time) {
+    std::unique_lock<mutex> lock(new_position_available_mutex_);
+    if (new_position_available_.wait_for(lock, time * 1s,
+                                         [] { return i == 1; })) {
+      return current_position_;
+    } else {
+      return {};
+    }
+  }
 
   void process_realsense_data(const RealsenseData &data) {
     if (data.frame1_updated) {
@@ -48,7 +62,12 @@ class DataHandler {
 
       Mat image(Size(data.frame1.width, data.frame1.height), CV_8UC1,
                 data_vector.data());
-      auto p = aruco_processor_.process_raw_frame(image);
+      auto optional_position = aruco_processor_.process_raw_frame(image);
+      if (optional_position.has_value()) {
+        current_position_ = optional_position.value();
+        new_position_available_.notify_all();
+      }
+
       if ((std::chrono::high_resolution_clock::now() - start1).count() >
           10000000000) {
         printf("10s has happened %d %ld \n", i,
@@ -99,13 +118,23 @@ int main(int argc, const char **argv) {
 
   ArUcoProcessor aruco_processor(cam_param, target_width);
   PositionController pc;
-  
+
   DataHandler handler{aruco_processor};
 
   CameraRealsense camera;
   camera.bind_data_callback(
       [&](const RealsenseData &data) { handler.process_realsense_data(data); });
 
+  while (true) {
+    auto result = handler.wait_for_new_position(.5);
+    if (result.has_value()) {
+      // Do something with result.value
+
+      // wait for new position data
+    } else {
+      // do something else to kick out of autopilot mode
+    }
+  }
 
   int count = 0;
   Position current_position;
