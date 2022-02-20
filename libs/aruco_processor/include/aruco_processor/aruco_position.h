@@ -13,25 +13,6 @@ using namespace std;
 using namespace cv;
 using namespace aruco;
 
-/*
-PositionAndYawVector target_ned_vector;
-
-float convert_target_tvec_to_angle(Vector3f t_vec) {
-  return -atan2f(t_vec.x, t_vec.y) * (180.0f / M_PI);
-}
-
-void convert_target_vectors_to_ned_centred_on_target(Vector3f t_vec,
-                                                     Vector3f wp_vec) {
-  target_ned_vector.x = -wp_vec.z;
-  target_ned_vector.y = wp_vec.x;
-  target_ned_vector.z = wp_vec.y;
-  target_ned_vector.yaw = convert_target_tvec_to_angle(t_vec);
-}
-
-void got_new_target_data() {
-  convert_target_vectors_to_ned_centred_on_target(target_tv, target_wp);
-}
-*/
 class ArucoPosition {
  private:
   static clock_t last_creation_time;
@@ -52,5 +33,7 @@ class ArucoPosition {
   float x = 0, y = 0, z = 0;
   float ele = 0, azi = 0, tilt = 0;
   float w_x = 0, w_y = 0, w_z = 0;
-  float angle_in_frame();
+  PositionAndYawVector target_ned_vector;
+
+  float get_yaw_from_target_centre();
 };

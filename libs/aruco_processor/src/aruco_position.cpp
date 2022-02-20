@@ -34,6 +34,12 @@ ArucoPosition::ArucoPosition(Mat RTMatrixs) {
   ele = _eA[0];
   azi = _eA[1];
   tilt = _eA[2];
+
+  target_ned_vector = {-w_z, w_x, w_y, azi};
+}
+
+float ArucoPosition::get_yaw_from_target_centre() {
+  return -atan2f(x, y) * (180.0f / static_cast<float>(M_PI));
 }
 
 string ArucoPosition::get_info_string() {
@@ -55,5 +61,3 @@ string ArucoPosition::get_basic_string() {
   output << x << ',' << y << ',' << z << ',' << azi << endl;
   return output.str();
 }
-
-float ArucoPosition::angle_in_frame() { return atan(x / z) * 180 / 3.14; }

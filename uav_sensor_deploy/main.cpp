@@ -1,7 +1,8 @@
+#include <aruco_processor/aruco_position.h>
 #include <aruco_processor/aruco_processor.h>
 #include <common/configuration.h>
 #include <multithreaded_interface.h>
-#include <aruco_processor/aruco_position.h>
+#include <position_control_helper.h>
 #include <common/cvm_argument_parser.hpp>
 #include <common/navigational_state.hpp>
 #include <ctime>
@@ -125,13 +126,26 @@ int main(int argc, const char **argv) {
   camera.bind_data_callback(
       [&](const RealsenseData &data) { handler.process_realsense_data(data); });
 
+  Vector3f desired_position;
   while (true) {
     auto result = handler.wait_for_new_position(.5);
     if (result.has_value()) {
-      // Do something with result.value
+      auto state =
+          pc.run_loop(result.value().target_ned_vector, desired_position);
 
-      // wait for new position data
+      auto desired_angles = pc.acceleration_to_attitude(
+          state.acceleration_desired.x, state.acceleration_desired.y,
+          result.value().target_ned_vector.yaw);
+
+      auto desired_yaw_rate =
+          pc.get_yaw_rate(result.value().get_yaw_from_target_centre(), 0);
+
+      send_set_attitude_target(pixhawk_interface, desired_angles.y, desired_angles.x, 0,
+                               -state.velocity_desired.z / default_speed_up,
+                               desired_yaw_rate, true);
+
     } else {
+      enable_offboard_control(pixhawk_interface, false);
       // do something else to kick out of autopilot mode
     }
   }
