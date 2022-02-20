@@ -1,6 +1,7 @@
+#include <common/aruco_processor.h>
+#include <common/configuration.h>
 #include <multithreaded_interface.h>
 #include <common/cvm_argument_parser.hpp>
-#include <common/location_processor.hpp>
 #include <common/navigational_state.hpp>
 #include <common/position.hpp>
 #include <ctime>
@@ -11,7 +12,8 @@
 #include "camera_realsense.h"
 #include "states.hpp"
 
-#define DEFAULT_SPEED_UP 0.20  // in m/s. (10cm/s)
+constexpr float target_width{0.158};
+constexpr float default_speed_up{0.20};  // in m/s. (10cm/s)
 
 NavigationalState<State> *ap = new AutoPilotState();
 NavigationalState<State> *na = new NormalApproach();
@@ -34,8 +36,11 @@ ofstream logFile;
 int i = 0;
 
 class DataHandler {
+  ArUcoProcessor &aruco_processor_;
+
  public:
-  DataHandler(){};
+  DataHandler(ArUcoProcessor &aruco_processor)
+      : aruco_processor_(aruco_processor){};
 
   void process_realsense_data(const RealsenseData &data) {
     if (data.frame1_updated) {
@@ -45,6 +50,7 @@ class DataHandler {
 
       Mat image(Size(data.frame1.width, data.frame1.height), CV_8UC1,
                 data_vector.data());
+      auto p = aruco_processor_.process_raw_frame(image);
       if ((std::chrono::high_resolution_clock::now() - start1).count() >
           10000000000) {
         printf("10s has happened %d %ld \n", i,
@@ -75,8 +81,10 @@ int main(int argc, const char **argv) {
   CVMArgumentParser argparse(argc, argv, true, false, false, false);
   logFile.open("logfile.csv");
 
-  // LocationProcessor lp = LocationProcessor(argparse.calib_file_path,
-  // argparse.deviceID, 15, 20); NavigationalState<State> *ns = ap;
+  aruco::CameraParameters cam_param;
+  cam_param.readFromXMLFile(argparse.calib_file_path);
+
+  // NavigationalState<State> *ns = ap;
 
   SerialPort pixhawk_serial("/dev/ttyTHS1", 115200);
   UdpDevice mavproxy_udp("127.0.0.1", 14560);
@@ -91,7 +99,9 @@ int main(int argc, const char **argv) {
     pixhawk_interface.write_message(msg);
   });
 
-  DataHandler handler;
+  ArUcoProcessor aruco_processor(cam_param, target_width);
+
+  DataHandler handler{aruco_processor};
 
   CameraRealsense camera;
   camera.bind_data_callback(
@@ -135,15 +145,15 @@ int main(int argc, const char **argv) {
         if (!argparse.quiet)
         {
             cout << "angle of uav " << lastyaw * 180 / 3.14 << endl;
-            cout << current_position.w_z << " " << current_position.w_x << endl;
-            cout << "world_z: " << -current_position.w_y << " z in frame: " <<
+            cout << current_position.w_z << " " << current_position.w_x <<
+    endl; cout << "world_z: " << -current_position.w_y << " z in frame: " <<
     -current_position.y << endl;
         }
 
         //pc->update_current_position(x_new, y_new, -current_position.w_y,
     lastyaw, startimageCaputre);
-        //cout << current_position.w_x << " " << current_position.w_z << " " <<
-    -current_position.w_y << endl;
+        //cout << current_position.w_x << " " << current_position.w_z << " "
+    << -current_position.w_y << endl;
     }
     */
 
@@ -225,7 +235,8 @@ int main(int argc, const char **argv) {
         hil_actuator_controls.controls[10] = ac->acc_desi.y;
         hil_actuator_controls.controls[11] = ac->acc_desi.z;
         hil_actuator_controls.controls[12] = current_position.azi;
-        hil_actuator_controls.controls[13] = current_position.angle_in_frame();
+        hil_actuator_controls.controls[13] =
+    current_position.angle_in_frame();
 
             mavlink_msg_hil_actuator_controls_encode(0, 0,
     &hil_actuator_controls_message, &hil_actuator_controls);
@@ -262,8 +273,8 @@ int main(int argc, const char **argv) {
     desired_position.x << endl;
 
         //cout << "desired angle " << -current_position.azi +
-    desired_position.azi << endl; cout << "desired angle global " << desired <<
-    endl; cout << "x_desired_before: " << desired_position.z <<
+    desired_position.azi << endl; cout << "desired angle global " << desired
+    << endl; cout << "x_desired_before: " << desired_position.z <<
     "y_desired_before: " << desired_position.x << endl; cout <<
     "x_desired_after: " << x_new << "y_desired_after: " << y_new <<
     "z_desired_after" << -desired_position.y << endl;

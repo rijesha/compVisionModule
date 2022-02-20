@@ -12,7 +12,6 @@ target_sources(${PROJECT_NAME}
     PUBLIC
         common/aruco_processor.h
         common/cvm_argument_parser.hpp
-        common/location_processor.hpp
         common/navigational_state.hpp
         common/position.hpp
         common/undistort_image.h
@@ -20,7 +19,6 @@ target_sources(${PROJECT_NAME}
     PRIVATE
         common/aruco_processor.cpp
         common/cvm_argument_parser.cpp
-        common/location_processor.cpp
         common/position.cpp
         common/undistort_image.cpp
 )
@@ -38,5 +36,6 @@ target_link_libraries(${PROJECT_NAME}
 PUBLIC
         argparse
         aruco
-        camera-v4l2
 )
+
+target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_17)

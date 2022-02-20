@@ -1,51 +1,36 @@
-#ifndef ARUCO_PROCESSOR_H
-#define ARUCO_PROCESSOR_H
+#pragma once
 
+#include <stdlib.h>
 #include <iostream>
 #include <opencv2/opencv.hpp>
+#include <optional>
 #include "aruco.h"
-#include "undistort_image.h"
 #include "position.hpp"
-#include <ctime>
-#include <chrono>
+#include "undistort_image.h"
 
 using namespace std;
 using namespace cv;
 using namespace aruco;
 
-#define RESET_TIME 1 //seconds
+class ArUcoProcessor {
+ private:
+  Ptr<Dictionary> dictionary;
+  Ptr<MarkerDetector> detector;
+  Ptr<MarkerPoseTracker> pose_tracker;
 
-class ArUcoProcessor
-{
-  private:
-    Ptr<Dictionary> dictionary;
-    Ptr<MarkerDetector> detector;
-    Ptr<MarkerPoseTracker> pose_tracker;
-    bool vecsUpdated;
-    CameraParameters camparams;
-    float targetSize;
-    clock_t lastMarkerTime;
-    bool positiveYaw();
+  CameraParameters cam_params_;
+  float target_size_;
+  Position calculate_pose(Marker& marker);
 
-  public:
-    ArUcoProcessor();
-    ArUcoProcessor(CameraParameters camparams, float targetSize, UndistortImage ui);
-    ArUcoProcessor(CameraParameters camparams, float targetSize, Ptr<MarkerDetector> detectorParameters, UndistortImage ui);
+ public:
+  ArUcoProcessor(CameraParameters cam_params, float targetSize);
+  ArUcoProcessor(CameraParameters cam_params, float targetSize,
+                 Ptr<MarkerDetector> detectorParameters);
 
-    void changeCornerRefinementWindowSize(int);
-    void processFrame(Mat image, int markerID = 19);
-    Position calculatePose();
-    Mat drawMarkersAndAxis(Mat image, bool drawAxis = true);
+  std::optional<Position> process_raw_frame(Mat image, int markerID = 19);
+  Mat draw_markers_and_axis(Mat image, Marker marker);
 
-    vector<int> markerIds;
-    vector<vector<Point2f>> rejectedCandidates;
-    vector<Vec3d> rvecs, tvecs;
-    Vec3d eulersAngles;
-    bool foundMarkers;
-    UndistortImage ui;
-
-    vector<Marker> detectedMarkers;
-    Marker detectedMarker;
+  vector<vector<Point2f>> rejectedCandidates;
+  vector<Vec3d> rvecs, tvecs;
+  Vec3d eulersAngles;
 };
-
-#endif /* ARUCO_PROCESSOR_H */

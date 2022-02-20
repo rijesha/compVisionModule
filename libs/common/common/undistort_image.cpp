@@ -1,18 +1,20 @@
 #include "undistort_image.h"
 
-UndistortImage::UndistortImage(){}
-
-UndistortImage::UndistortImage(CameraParameters camparams){
-    this->camparams = camparams;
-    this->new_camera_matrix = getOptimalNewCameraMatrix(camparams.CameraMatrix, camparams.Distorsion, camparams.CamSize, 1, camparams.CamSize);
+UndistortImage::UndistortImage(CameraParameters& camparams)
+    : cam_params_(camparams) {
+  new_camera_matrix_ = getOptimalNewCameraMatrix(
+      cam_params_.CameraMatrix, cam_params_.Distorsion, cam_params_.CamSize, 1,
+      cam_params_.CamSize);
 }
 
-void UndistortImage::undistortAcquiredImage(Mat img, Mat *dstImg){
-    undistort(img, *dstImg, camparams.CameraMatrix, camparams.Distorsion, this->new_camera_matrix);
+void UndistortImage::undistort_acquired_image(Mat img, Mat* dstImg) {
+  undistort(img, *dstImg, cam_params_.CameraMatrix, cam_params_.Distorsion,
+            new_camera_matrix_);
 }
 
-Marker UndistortImage::undistortMarkerPoints(Marker src_pts){
-    Marker dst_pts = Marker();
-    undistortPoints(src_pts, dst_pts, camparams.CameraMatrix, camparams.Distorsion, Mat(), this->new_camera_matrix);
-    return dst_pts;
+Marker UndistortImage::undistort_marker_points(Marker src_pts) {
+  Marker dst_pts = Marker();
+  undistortPoints(src_pts, dst_pts, cam_params_.CameraMatrix,
+                  cam_params_.Distorsion, Mat(), new_camera_matrix_);
+  return dst_pts;
 }

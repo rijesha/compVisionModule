@@ -1,5 +1,4 @@
-#ifndef UNDISTORTIMAGE_H
-#define UNDISTORTIMAGE_H
+#pragma once
 
 #include <iostream>
 #include <opencv2/opencv.hpp>
@@ -9,16 +8,13 @@ using namespace std;
 using namespace cv;
 using namespace aruco;
 
-class UndistortImage
-{
-private:
-    CameraParameters camparams;
-    Mat new_camera_matrix;
-public:
-    UndistortImage();
-    UndistortImage(CameraParameters camparams);
-    void undistortAcquiredImage(Mat img, Mat *dstImg);
-    Marker undistortMarkerPoints(Marker src_pts);
-};
+class UndistortImage {
+ private:
+  CameraParameters& cam_params_;
+  Mat new_camera_matrix_;
 
-#endif /* UNDISTORTIMAGE_H */
+ public:
+  UndistortImage(CameraParameters& cam_params);
+  void undistort_acquired_image(Mat img, Mat* dstImg);
+  Marker undistort_marker_points(Marker src_pts);
+};
