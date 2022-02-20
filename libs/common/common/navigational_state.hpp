@@ -1,24 +1,20 @@
-#ifndef NAVIGATIONAL_STATE_H
-#define NAVIGATIONAL_STATE_H
+#pragma once
 
-#include <iostream>
 #include <stdio.h>
-#include <ctime>
-#include <chrono>
-#include <cstring>
 #include <time.h>
 #include <unistd.h>
-#include "aruco_processor.h"
+#include <chrono>
+#include <cstring>
+#include <ctime>
+#include <iostream>
+#include "position.hpp"
 
 using namespace std;
 
-template <class E> 
-class NavigationalState
-{
-public:
-    virtual E currentState() const = 0;
-    virtual Position computeDesiredPosition(Position p) = 0;
-    virtual NavigationalState * returnNextState(Position p) = 0;
+template <class E>
+class NavigationalState {
+ public:
+  virtual E current_state() const = 0;
+  virtual Position compute_desired_position(Position p) = 0;
+  virtual NavigationalState* return_next_state(Position p) = 0;
 };
-
-#endif /* NAVIGATIONAL_STATE_H */

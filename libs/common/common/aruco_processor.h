@@ -29,8 +29,4 @@ class ArUcoProcessor {
 
   std::optional<Position> process_raw_frame(Mat image, int markerID = 19);
   Mat draw_markers_and_axis(Mat image, Marker marker);
-
-  vector<vector<Point2f>> rejectedCandidates;
-  vector<Vec3d> rvecs, tvecs;
-  Vec3d eulersAngles;
 };

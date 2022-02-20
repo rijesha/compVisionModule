@@ -1,29 +1,18 @@
-#ifndef TEST_STATE_H
-#define TEST_STATE_H
+#pragma once
 
-#include <iostream>
 #include <stdio.h>
-#include <ctime>
-#include <chrono>
-#include <cstring>
 #include <time.h>
 #include <unistd.h>
-#include <common/position.hpp>
+#include <chrono>
 #include <common/navigational_state.hpp>
+#include <common/position.hpp>
+#include <cstring>
+#include <ctime>
+#include <iostream>
 
 using namespace std;
 
-enum State
-{
-    BASE,
-    AP,
-    NA,
-    DA,
-    PO,
-    XT,
-    CT,
-    PH
-};
+enum State { BASE, AP, NA, DA, PO, XT, CT, PH };
 
 extern clock_t lastDetectedTime;
 extern clock_t startedDataAcquisition;
@@ -37,216 +26,168 @@ extern NavigationalState<State> *xt;
 extern NavigationalState<State> *ct;
 extern NavigationalState<State> *ph;
 
-bool detectionFailedFor(float seconds)
-{
-    return ((clock() - lastDetectedTime) / CLOCKS_PER_SEC) > seconds;
+bool detectionFailedFor(float seconds) {
+  return ((clock() - lastDetectedTime) / CLOCKS_PER_SEC) > seconds;
 };
 
-bool acquiredDataFor(float seconds)
-{
-    return ((clock() - startedDataAcquisition) / CLOCKS_PER_SEC) > seconds;
+bool acquiredDataFor(float seconds) {
+  return ((clock() - startedDataAcquisition) / CLOCKS_PER_SEC) > seconds;
 };
 
-class AutoPilotState : public NavigationalState<State>
-{
-  public:
-    State currentState() const override { return AP; }
+class AutoPilotState : public NavigationalState<State> {
+ public:
+  State current_state() const override { return AP; }
 
-    NavigationalState *returnNextState(Position cp)
-    {
-        if (!cp.emptyPosition)
-        {
-            if ((cp.z < 6) && (abs(cp.azi) < 60) && (cp.x < 6))
-            {
-                //return xt;
-                return ph;
-            }
-        }
-        return this;
+  NavigationalState *return_next_state(Position cp) {
+    if (!cp.empty_position) {
+      if ((cp.z < 6) && (abs(cp.azi) < 60) && (cp.x < 6)) {
+        // return xt;
+        return ph;
+      }
     }
+    return this;
+  }
 
-    Position computeDesiredPosition(Position cp)
-    {
-        return Position(0, 0, 2, 0);
-    }
+  Position compute_desired_position(Position cp) { return Position(0, 0, 2, 0); }
 };
 
-class NormalApproach : public NavigationalState<State>
-{
-  public:
-    State currentState() const override { return NA; }
+class NormalApproach : public NavigationalState<State> {
+ public:
+  State current_state() const override { return NA; }
 
-    Position computeDesiredPosition(Position cp)
-    {
-        double angle_in_frame = cp.angle_in_frame();
+  Position compute_desired_position(Position cp) {
+    double angle_in_frame = cp.angle_in_frame();
 
-        float aruco_z = ((abs(cp.w_x) * 2 + (cp.w_z - FINAL_Z_ARUCO)) * .3) + FINAL_Z_ARUCO;
+    float aruco_z =
+        ((abs(cp.w_x) * 2 + (cp.w_z - FINAL_Z_ARUCO)) * .3) + FINAL_Z_ARUCO;
 
-        return Position(0, FINAL_Y_ARUCO, aruco_z, angle_in_frame);
-    }
+    return Position(0, FINAL_Y_ARUCO, aruco_z, angle_in_frame);
+  }
 
-    NavigationalState *returnNextState(Position cp)
-    {
-        if (!cp.emptyPosition)
-        {
-            if (cp.w_z < (FINAL_Z_ARUCO + .05))
-            {
-                startedDataAcquisition = clock();
-                return da;
-            }
-        }
-        else
-        {
-            if (detectionFailedFor(0.3))
-            {
-                return ap;
-            }
-        }
-        return this;
-    }
-};
-
-class DataAcquisitionState : public NavigationalState<State>
-{
-  public:
-    State currentState() const override { return DA; }
-
-    NavigationalState *returnNextState(Position cp)
-    {
-        if (acquiredDataFor(10))
-        {
-            return po;
-        }
-        else if (cp.emptyPosition && detectionFailedFor(.3))
-        {
-            return po;
-        }
+  NavigationalState *return_next_state(Position cp) {
+    if (!cp.empty_position) {
+      if (cp.w_z < (FINAL_Z_ARUCO + .05)) {
+        startedDataAcquisition = clock();
         return da;
+      }
+    } else {
+      if (detectionFailedFor(0.3)) {
+        return ap;
+      }
     }
-
-    Position computeDesiredPosition(Position cp)
-    {
-        return Position(0, FINAL_Y_ARUCO, FINAL_Z_ARUCO, 0);
-    }
+    return this;
+  }
 };
 
-class PullOutState : public NavigationalState<State>
-{
-  public:
-    State currentState() const override { return PO; }
+class DataAcquisitionState : public NavigationalState<State> {
+ public:
+  State current_state() const override { return DA; }
 
-    NavigationalState *returnNextState(Position cp)
-    {
-        if (cp.emptyPosition && detectionFailedFor(0.5))
-            return ap;
-
-        return this;
+  NavigationalState *return_next_state(Position cp) {
+    if (acquiredDataFor(10)) {
+      return po;
+    } else if (cp.empty_position && detectionFailedFor(.3)) {
+      return po;
     }
+    return da;
+  }
 
-    Position computeDesiredPosition(Position cp)
-    {
-        return Position(0, 0, 4, 0);
-    }
+  Position compute_desired_position(Position cp) {
+    return Position(0, FINAL_Y_ARUCO, FINAL_Z_ARUCO, 0);
+  }
 };
 
-class CrossTest : public NavigationalState<State>
-{
-  public:
-    State currentState() const override { return XT; }
+class PullOutState : public NavigationalState<State> {
+ public:
+  State current_state() const override { return PO; }
 
-    int state = 0;
-    clock_t crossTime = clock();
+  NavigationalState *return_next_state(Position cp) {
+    if (cp.empty_position && detectionFailedFor(0.5)) return ap;
 
-    Position stateA = Position(0, 0, 4, 0);
-    //Position stateC = Position(2, 0, 3, 0);
-    //Position stateB = Position(0, 0, 2, 0);
-    //Position stateD = Position(-2, 0, 3, 0);
+    return this;
+  }
 
-    Position stateC = Position(0, 0, 4, 0);
-    Position stateB = Position(0, 0, 2, 0);
-    Position stateD = Position(0, 0, 2, 0);
-
-
-    Position *currentPosition = &stateA;
-
-    bool greaterThanCrossTime(float seconds)
-    {
-        return ((clock() - crossTime) / CLOCKS_PER_SEC) > seconds;
-    };
-
-    NavigationalState *returnNextState(Position cp)
-    {
-        if (cp.emptyPosition && detectionFailedFor(0.3))
-        {
-            return ap;
-        }
-
-        return this;
-    }
-
-    Position computeDesiredPosition(Position cp)
-    {
-        if (greaterThanCrossTime(10))
-        {
-            crossTime = clock();
-
-            switch (state)
-            {
-            case 0:
-                currentPosition = &stateB;
-                state = 1;
-                break;
-            case 1:
-                currentPosition = &stateC;
-                state = 2;
-                break;
-            case 2:
-                currentPosition = &stateD;
-                state = 3;
-                break;
-            case 3:
-                currentPosition = &stateA;
-                state = 0;
-                break;
-
-            default:
-                break;
-            }
-        }
-        return *currentPosition;
-    }
+  Position compute_desired_position(Position cp) { return Position(0, 0, 4, 0); }
 };
 
-class CircleTest : public NavigationalState<State>
-{
-  public:
-    State currentState() const override { return CT; }
+class CrossTest : public NavigationalState<State> {
+ public:
+  State current_state() const override { return XT; }
 
-    NavigationalState *returnNextState(Position cp)
-    {
-        return this;
+  int state = 0;
+  clock_t crossTime = clock();
+
+  Position stateA = Position(0, 0, 4, 0);
+  // Position stateC = Position(2, 0, 3, 0);
+  // Position stateB = Position(0, 0, 2, 0);
+  // Position stateD = Position(-2, 0, 3, 0);
+
+  Position stateC = Position(0, 0, 4, 0);
+  Position stateB = Position(0, 0, 2, 0);
+  Position stateD = Position(0, 0, 2, 0);
+
+  Position *currentPosition = &stateA;
+
+  bool greaterThanCrossTime(float seconds) {
+    return ((clock() - crossTime) / CLOCKS_PER_SEC) > seconds;
+  };
+
+  NavigationalState *return_next_state(Position cp) {
+    if (cp.empty_position && detectionFailedFor(0.3)) {
+      return ap;
     }
 
-    Position computeDesiredPosition(Position cp)
-    {
-        return Position(0, 0, 6.5, 0);
+    return this;
+  }
+
+  Position compute_desired_position(Position cp) {
+    if (greaterThanCrossTime(10)) {
+      crossTime = clock();
+
+      switch (state) {
+        case 0:
+          currentPosition = &stateB;
+          state = 1;
+          break;
+        case 1:
+          currentPosition = &stateC;
+          state = 2;
+          break;
+        case 2:
+          currentPosition = &stateD;
+          state = 3;
+          break;
+        case 3:
+          currentPosition = &stateA;
+          state = 0;
+          break;
+
+        default:
+          break;
+      }
     }
+    return *currentPosition;
+  }
 };
 
-class PositionHold : public NavigationalState<State>
-{
-  public:
-    State currentState() const override { return PH; }
+class CircleTest : public NavigationalState<State> {
+ public:
+  State current_state() const override { return CT; }
 
-    NavigationalState *returnNextState(Position cp)
-    {
-        return this;
-    }
+  NavigationalState *return_next_state(Position cp) { return this; }
 
-    Position computeDesiredPosition(Position cp)
-    {
-        return Position(0, 0, 2.0, 0);
-    }
+  Position compute_desired_position(Position cp) {
+    return Position(0, 0, 6.5, 0);
+  }
 };
 
-#endif /* TEST_STATE_H */
+class PositionHold : public NavigationalState<State> {
+ public:
+  State current_state() const override { return PH; }
+
+  NavigationalState *return_next_state(Position cp) { return this; }
+
+  Position compute_desired_position(Position cp) {
+    return Position(0, 0, 2.0, 0);
+  }
+};

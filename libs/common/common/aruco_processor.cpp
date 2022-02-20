@@ -1,4 +1,3 @@
-
 #include "aruco_processor.h"
 
 ArUcoProcessor::ArUcoProcessor(CameraParameters cam_params, float target_size)
