@@ -8,7 +8,7 @@
 #include <fstream>
 #include <iostream>
 #include <thread>
-#include "attitude_controller.h"
+#include "position_controller.h"
 #include "camera_realsense.h"
 #include "states.hpp"
 
@@ -24,8 +24,6 @@ NavigationalState<State> *xt = new CrossTest();
 NavigationalState<State> *ct = new CircleTest();
 NavigationalState<State> *ph = new PositionHold();
 
-// Position_Controller *pc;
-AttitudeController *ac;
 std::chrono::time_point<std::chrono::high_resolution_clock> start1 =
     std::chrono::high_resolution_clock::now();
 
@@ -100,18 +98,16 @@ int main(int argc, const char **argv) {
   });
 
   ArUcoProcessor aruco_processor(cam_param, target_width);
-
+  PositionController pc;
+  
   DataHandler handler{aruco_processor};
 
   CameraRealsense camera;
   camera.bind_data_callback(
       [&](const RealsenseData &data) { handler.process_realsense_data(data); });
 
-  // pc = new Position_Controller(&mti);
-  // ac = new AttitudeController;
 
   int count = 0;
-
   Position current_position;
   Position desired_position;
   State lastState = AP;

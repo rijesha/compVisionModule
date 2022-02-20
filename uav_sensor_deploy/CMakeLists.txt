@@ -31,7 +31,7 @@ target_link_libraries(${PROJECT_NAME}
            Threads::Threads
            common
            mavlink-interface
-           attitude_controller
+           position_controller
            camera_realsense
            ${OpenCV_LIBS}
            

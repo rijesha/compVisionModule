@@ -2,7 +2,7 @@
 
 #include <multithreaded_interface.h>
 #include <stdio.h>  // Standard input/output definitions
-#include "attitude_controller.h"
+#include "position_controller.h"
 #include "vector3.h"
 
 SerialPort serial_port("/dev/tnt3", 57600);
@@ -155,7 +155,7 @@ void input_thread() {
   }
 }
 
-AttitudeController ac;
+PositionController ac;
 
 void mavlinkMessageCallback(mavlink_message_t *msg) {
   printf("Got msg %d!\n", msg->msgid);

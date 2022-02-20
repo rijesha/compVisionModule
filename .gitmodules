@@ -16,3 +16,6 @@
 [submodule "third_party/aruco"]
 	path = third_party/aruco
 	url = https://github.com/rijesha/aruco.git
+[submodule "libs/position_controller"]
+	path = libs/position_controller
+	url = https://github.com/rijesha/position_controller.git
