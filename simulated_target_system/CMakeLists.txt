@@ -20,6 +20,5 @@ target_link_libraries(${PROJECT_NAME}
            common
            mavlink-interface
            attitude_controller
-           mavlink-server
         )
 target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_14)
