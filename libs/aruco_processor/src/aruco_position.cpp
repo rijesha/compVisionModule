@@ -1,24 +1,15 @@
-#include "position.hpp"
+#include "aruco_processor/aruco_position.h"
 
 #define RESET_TIME 2
 
-clock_t Position::last_creation_time = clock();
+clock_t ArucoPosition::last_creation_time = clock();
 
-Position::Position() { empty_position = true; }
+ArucoPosition::ArucoPosition() {}
 
-Position::Position(float x, float y, float z, float yaw) {
-  is_desired_position = true;
-  this->x = x;
-  this->y = y;
-  this->z = z;
-  this->azi = yaw;
-}
-
-Position::Position(Mat RTMatrixs) {
+ArucoPosition::ArucoPosition(Mat RTMatrixs) {
   creation_time = clock();
   time_since_last_positon = creation_time - last_creation_time;
   last_creation_time = creation_time;
-  empty_position = false;
 
   RTMatrix = RTMatrixs(Range(0, 3), Range(0, 4));
   tvecs = RTMatrixs(Range(0, 3), Range(3, 4));
@@ -45,7 +36,7 @@ Position::Position(Mat RTMatrixs) {
   tilt = _eA[2];
 }
 
-string Position::get_info_string() {
+string ArucoPosition::get_info_string() {
   stringstream output;
   output << std::fixed;
   output << std::setprecision(5);
@@ -56,7 +47,7 @@ string Position::get_info_string() {
   return output.str();
 }
 
-string Position::get_basic_string() {
+string ArucoPosition::get_basic_string() {
   stringstream output;
   output << std::fixed;
   output << std::setprecision(5);
@@ -65,9 +56,4 @@ string Position::get_basic_string() {
   return output.str();
 }
 
-float Position::angle_in_frame() {
-  if (!empty_position)
-    return atan(x / z) * 180 / 3.14;
-  else
-    return 0;
-}
+float ArucoPosition::angle_in_frame() { return atan(x / z) * 180 / 3.14; }

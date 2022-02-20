@@ -1,4 +1,4 @@
-#include "undistort_image.h"
+#include "aruco_processor/undistort_image.h"
 
 UndistortImage::UndistortImage(CameraParameters& camparams)
     : cam_params_(camparams) {

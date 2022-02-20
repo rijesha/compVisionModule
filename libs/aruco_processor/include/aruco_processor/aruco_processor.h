@@ -5,7 +5,7 @@
 #include <opencv2/opencv.hpp>
 #include <optional>
 #include "aruco.h"
-#include "position.hpp"
+#include "aruco_processor/aruco_position.h"
 #include "undistort_image.h"
 
 using namespace std;
@@ -20,13 +20,13 @@ class ArUcoProcessor {
 
   CameraParameters cam_params_;
   float target_size_;
-  Position calculate_pose(Marker& marker);
+  std::optional<ArucoPosition> calculate_pose(Marker& marker);
 
  public:
   ArUcoProcessor(CameraParameters cam_params, float targetSize);
   ArUcoProcessor(CameraParameters cam_params, float targetSize,
                  Ptr<MarkerDetector> detectorParameters);
 
-  std::optional<Position> process_raw_frame(Mat image, int markerID = 19);
+  std::optional<ArucoPosition> process_raw_frame(Mat image, int markerID = 19);
   Mat draw_markers_and_axis(Mat image, Marker marker);
 };

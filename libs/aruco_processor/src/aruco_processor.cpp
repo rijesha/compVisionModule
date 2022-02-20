@@ -1,4 +1,4 @@
-#include "aruco_processor.h"
+#include "aruco_processor/aruco_processor.h"
 
 ArUcoProcessor::ArUcoProcessor(CameraParameters cam_params, float target_size)
     : cam_params_(cam_params), target_size_(target_size) {
@@ -29,7 +29,7 @@ ArUcoProcessor::ArUcoProcessor(CameraParameters cam_params, float target_size,
   pose_tracker = new MarkerPoseTracker();
 }
 
-std::optional<Position> ArUcoProcessor::process_raw_frame(Mat image,
+std::optional<ArucoPosition> ArUcoProcessor::process_raw_frame(Mat image,
                                                           int markerID) {
   auto detectedMarkers = detector->detect(image);
   for (Marker m : detectedMarkers) {
@@ -40,7 +40,7 @@ std::optional<Position> ArUcoProcessor::process_raw_frame(Mat image,
   return {};
 }
 
-Position ArUcoProcessor::calculate_pose(Marker& marker) {
+std::optional<ArucoPosition> ArUcoProcessor::calculate_pose(Marker& marker) {
   /*
   if (positiveYaw()) {
      // cout << "Positive YAW ";
@@ -53,7 +53,7 @@ Position ArUcoProcessor::calculate_pose(Marker& marker) {
   // cout << pose_tracker->getRvec() << endl;
   // cout << "done RVEC" << endl;
   if (!RTmatrix.empty()) {
-    return Position(RTmatrix);
+    return ArucoPosition(RTmatrix);
   }
   // cout << p.azi << endl;
   return {};

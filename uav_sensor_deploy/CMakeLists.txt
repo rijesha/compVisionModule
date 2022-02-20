@@ -33,6 +33,7 @@ target_link_libraries(${PROJECT_NAME}
            mavlink-interface
            position_controller
            camera_realsense
+           aruco_processor
            ${OpenCV_LIBS}
            
         )
