@@ -1,0 +1,1 @@
+/usr/lib/ccache/c++ CMakeFiles/helloworld.dir/helloworld_autogen/mocs_compilation.cpp.o -o helloworld  -Wl,-rpath,/usr/local/Qt-6.2.3/lib /usr/local/Qt-6.2.3/lib/libQt6Widgets.so.6.2.3 /usr/local/Qt-6.2.3/lib/libQt6Gui.so.6.2.3 /usr/local/Qt-6.2.3/lib/libQt6Core.so.6.2.3 -pthread /usr/lib/x86_64-linux-gnu/libGLX.so /usr/lib/x86_64-linux-gnu/libOpenGL.so 

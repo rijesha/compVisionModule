@@ -12,6 +12,16 @@ IF(NOT CMAKE_BUILD_TYPE)
 			FORCE)
 ENDIF()
 
+option(BUILD_GROUND "Build Ground Component" OFF)
+if(BUILD_GROUND)
+	message(INFO "Building Ground Component.")
+endif()
+
+option(BUILD_REALSENSE "Build Realsense" OFF)
+if(BUILD_REALSENSE)
+	message(INFO "Building realsense.")
+endif()
+
 # set cmake directory
 set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 
@@ -23,6 +33,12 @@ add_subdirectory(third_party)
 # internal libraries
 add_subdirectory(libs)
 
-add_subdirectory(uav_sensor_deploy)
+if(BUILD_REALSENSE)
+	add_subdirectory(uav_sensor_deploy)
+endif()
+
 add_subdirectory(aruco_test_data_collection)
 add_subdirectory(simulated_target_system)
+if(BUILD_GROUND)
+	add_subdirectory(ground_component)
+endif()
