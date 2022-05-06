@@ -24,9 +24,7 @@ class ArUcoProcessor {
 
  public:
   ArUcoProcessor(CameraParameters cam_params, float targetSize);
-  ArUcoProcessor(CameraParameters cam_params, float targetSize,
-                 Ptr<MarkerDetector> detectorParameters);
 
-  std::optional<ArucoPosition> process_raw_frame(Mat image, int markerID = 19);
+  std::optional<ArucoPosition> process_raw_frame(Mat image, int markerID);
   Mat draw_markers_and_axis(Mat image, Marker marker);
 };

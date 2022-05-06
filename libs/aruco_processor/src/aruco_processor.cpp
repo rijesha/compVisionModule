@@ -21,16 +21,8 @@ ArUcoProcessor::ArUcoProcessor(CameraParameters cam_params, float target_size)
   // detectorParameters->adaptiveThreshWinSizeMax = 17;
 }
 
-ArUcoProcessor::ArUcoProcessor(CameraParameters cam_params, float target_size,
-                               Ptr<MarkerDetector> detectorParameters)
-    : cam_params_(cam_params), target_size_(target_size) {
-  // this->dictionary = getPredefinedDictionary(dictionaryName);
-  // this->detectorParameters = detectorParameters;
-  pose_tracker = new MarkerPoseTracker();
-}
-
 std::optional<ArucoPosition> ArUcoProcessor::process_raw_frame(Mat image,
-                                                          int markerID) {
+                                                               int markerID) {
   auto detectedMarkers = detector->detect(image);
   for (Marker m : detectedMarkers) {
     if (m.id == markerID) {
@@ -47,11 +39,20 @@ std::optional<ArucoPosition> ArUcoProcessor::calculate_pose(Marker& marker) {
   } else {
     //  cout << "Negative YAW ";
   }*/
-  pose_tracker->estimatePose(marker, cam_params_, target_size_, 1.0);
+  auto res = pose_tracker->estimatePose(marker, cam_params_, target_size_, 10.0);
   Mat RTmatrix = pose_tracker->getRTMatrix();
-  // cout << "RVEC  " << endl;
-  // cout << pose_tracker->getRvec() << endl;
-  // cout << "done RVEC" << endl;
+  /*
+  if (res) {
+    cout << "RT MAT " << pose_tracker->getRTMatrix() << endl;
+  }
+  
+  cout << "RVEC  " << endl;
+  cout << res << endl;
+  cout << marker.Rvec << endl;
+  cout << marker.Tvec << endl;
+  // cout << marker.getTransformMatrix() << endl;
+  cout << "done RVEC" << endl;
+  */
   if (!RTmatrix.empty()) {
     return ArucoPosition(RTmatrix);
   }

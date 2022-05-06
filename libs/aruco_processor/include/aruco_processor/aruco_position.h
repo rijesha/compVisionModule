@@ -27,6 +27,7 @@ class ArucoPosition {
   Mat rotMat;
   string get_info_string();
   string get_basic_string();
+  string get_uav_string();
   clock_t creation_time;
   clock_t time_since_last_positon;
 
