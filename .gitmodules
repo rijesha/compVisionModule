@@ -19,3 +19,6 @@
 [submodule "libs/position_controller"]
 	path = libs/position_controller
 	url = https://github.com/rijesha/position_controller.git
+[submodule "third_party/mavlink/pymavlink"]
+	path = third_party/mavlink/pymavlink
+	url = https://github.com/ardupilot/pymavlink.git

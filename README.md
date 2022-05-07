@@ -14,3 +14,7 @@ sudo make install
 sudo apt-get install libboost-filesystem-dev
 
 then you can build like any other cmake project from the main directory.
+
+install mavlink:
+cd into third_party/mavlink/pymavlink
+'python setup.py install --user

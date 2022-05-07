@@ -1585,6 +1585,61 @@
       <field type="float" name="rpm1">RPM Sensor1.</field>
       <field type="float" name="rpm2">RPM Sensor2.</field>
     </message>
+
+    <message id="402" name="SET_CONTROL_GAINS">
+      <description>Setting Control gains for UAV</description>
+      <field type="float" name="pos_pgain">pos_pgain</field>
+      <field type="float" name="pos_pgain_z">pos_pgain_z</field>
+      <field type="float" name="vel_pgain">vel_pgain</field>
+      <field type="float" name="vel_igain">vel_igain</field>
+      <field type="float" name="vel_pgain_z">vel_pgain_z</field>
+      <field type="float" name="vel_igain_z">vel_igain_z</field>
+      <field type="float" name="yaw_pgain">yaw_pgain</field>
+    </message>
+
+    <message id="403" name="CONTROL_GAINS">
+      <description>Receiving Control gains for UAV</description>
+      <field type="float" name="pos_pgain">pos_pgain</field>
+      <field type="float" name="pos_pgain_z">pos_pgain_z</field>
+      <field type="float" name="vel_pgain">vel_pgain</field>
+      <field type="float" name="vel_igain">vel_igain</field>
+      <field type="float" name="vel_pgain_z">vel_pgain_z</field>
+      <field type="float" name="vel_igain_z">vel_igain_z</field>
+      <field type="float" name="yaw_pgain">yaw_pgain</field>
+    </message>
+
+    <message id="404" name="TARGET_NED">
+      <description>receving targets for UAV</description>
+      <field type="float" name="north">north </field>
+      <field type="float" name="east">east </field>
+      <field type="float" name="down">down </field>
+      <field type="float" name="yaw">yaw in degrees</field>
+      <field type="float" name="angle_in_frame">angle_in_frame in degrees</field>
+      <field type="float" name="desired_north">desired_north </field>
+      <field type="float" name="desired_east">desired_east </field>
+      <field type="float" name="desired_down">desired_down </field>
+      <field type="float" name="desired_angle_in_frame">desired_angle_in_frame in degrees</field>
+    </message>
+
+    <message id="405" name="SET_TARGET_NED">
+      <description>setting targets for uav</description>
+      <field type="float" name="desired_north">desired_north </field>
+      <field type="float" name="desired_east">desired_east </field>
+      <field type="float" name="desired_down">desired_down </field>
+      <field type="float" name="desired_angle_in_frame">desired_angle_in_frame in degrees</field>
+    </message>
+
+    <message id="406" name="CONTROL_TARGETS">
+      <description>control loop targets</description>
+      <field type="float" name="vel_n">vel_n </field>
+      <field type="float" name="vel_e">vel_e </field>
+      <field type="float" name="vel_d">vel_d </field>
+      <field type="float" name="acc_n">acc_n </field>
+      <field type="float" name="acc_e">acc_e </field>
+      <field type="float" name="acc_d">acc_d </field>
+      <field type="float" name="roll">roll in degrees</field>
+      <field type="float" name="pitch">pitch in degrees</field>
+    </message>
     <!-- ardupilot specific mavlink2 messages starting at 11000-->
     <message id="11000" name="DEVICE_OP_READ">
       <description>Read registers for a device.</description>
