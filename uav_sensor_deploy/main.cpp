@@ -159,6 +159,10 @@ int main(int argc, const char **argv) {
     while (true) {
       std::this_thread::sleep_for(500ms);
       mavlink_message_t msg;
+      cout << "looping throught thread" << endl;
+      mavlink_attitude_t att;
+      mavlink_msg_attitude_encode(1, 0, &msg, &att);
+      mavproxy_interface.write_message(msg);
 
       mavlink_control_gains_t gains;
       gains.pos_pgain = pc.get_pos_pgain();
@@ -230,8 +234,8 @@ int main(int argc, const char **argv) {
           pc.get_yaw_rate(result.value().get_yaw_from_target_centre(),
                           mav_handler.get_desired_angle_in_frame());
 
-      cout << "p_: " << desired_angles.y << "r_: " << desired_angles.x
-           << "y_: " << desired_yaw_rate << endl;
+      // cout << "p_: " << desired_angles.y << "r_: " << desired_angles.x
+      //    << "y_: " << desired_yaw_rate << endl;
 
       if (mav_handler.is_valid()) {
         send_set_attitude_target(pixhawk_interface, desired_angles.y,

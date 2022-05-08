@@ -17,7 +17,7 @@ then you can build like any other cmake project from the main directory.
 
 install mavlink:
 cd into third_party/mavlink/pymavlink
-'python setup.py install --user
+sudo MDEF=`pwd`/../message_definitions pip install .
 
 
 To start mavproxy on ground station
