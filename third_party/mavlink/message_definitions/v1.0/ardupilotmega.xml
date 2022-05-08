@@ -1631,6 +1631,9 @@
 
     <message id="406" name="CONTROL_TARGETS">
       <description>control loop targets</description>
+      <field type="float" name="current_vel_n">vel_n </field>
+      <field type="float" name="current_vel_e">vel_e </field>
+      <field type="float" name="current_vel_d">vel_d </field>
       <field type="float" name="vel_n">vel_n </field>
       <field type="float" name="vel_e">vel_e </field>
       <field type="float" name="vel_d">vel_d </field>
