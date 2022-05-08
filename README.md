@@ -18,3 +18,15 @@ then you can build like any other cmake project from the main directory.
 install mavlink:
 cd into third_party/mavlink/pymavlink
 'python setup.py install --user
+
+
+To start mavproxy on ground station
+
+mavproxy.py --master=udpin:192.168.1.68:14561 --out=udpout:127.0.0.1:14562 --out=udpout:127.0.0.1:14563
+
+the ip adress is the ipaddress of the ground station computer. 14562 is used for QGC and 14563 is used for ground_component
+
+on the rover
+mavproxy.py --master=udpout:127.0.0.1:14560 --out=udpout:192.168.1.68:14561
+
+the ip adress is the ipaddress of the ground station computer. 14560 is used for uav sensor deploy and 14561 is used for mavproxy on the ground station computer

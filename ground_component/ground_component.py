@@ -1,11 +1,15 @@
 import sys
 
-from PySide2.QtCore import QSize, Qt
+from PySide2.QtCore import QSize, Qt, Signal
 from PySide2.QtWidgets import QApplication, QMainWindow, QPushButton, QGridLayout, QVBoxLayout 
 from PySide2.QtWidgets import QFrame, QPushButton, QLabel, QLineEdit, QWidget
+from mavlink_handler import MavlinkHandler
+import threading
 
 # Subclass QMainWindow to customize your application's main window
 class MainWindow(QMainWindow):
+    got_msg_signal = Signal(object)
+    
     def __init__(self):
         super().__init__()
         self.__current_north_label = QLabel("xx")
@@ -57,6 +61,7 @@ class MainWindow(QMainWindow):
         self.__enable_control_gains = QPushButton("Enable Control")
         self.__disable_control_gains = QPushButton("Disable Control")
         self.setWindowTitle("UAV Controller")
+        self.got_msg_signal.connect(self.message_handler)
 
         layout = QGridLayout()
 
@@ -185,21 +190,37 @@ class MainWindow(QMainWindow):
         widget.setLayout(layout)
         return widget
 
-    def update_with_current_ned(self, msg):
-        pass
+    def update_with_target_ned(self, msg):
+        print(msg)
 
-    def update_with_desired_ned(self, msg):
-        pass
+    def update_control_gains(self, msg):
+        print(msg)
 
-    def update_set_control_gains(self, msg):
-        pass
+    def update_control_targets(self,msg):
+        print(msg)
 
-    def update_control_loop_intermediaries(self,msg):
-        pass
+    def message_handler(self,msg):
+        
+        if msg.name == "TARGET_NED":
+            print(msg.name)
+            self.update_with_target_ned(msg)
+        elif msg.name == "CONTROL_GAINS":
+            print(msg.name)
+            self.update_control_gains(msg)
+        elif msg.name == "CONTROL_TARGETS":
+            print(msg.name)
+            self.update_control_targets(msg)
+        elif msg.name == "ATTITUDE":
+            print(msg.name)
+            self.update_control_targets(msg)
 
-app = QApplication(sys.argv)
-
-window = MainWindow()
-window.show()
-
-app.exec_()
+    def on_message_cb(self, msg):
+        self.got_msg_signal.emit(msg)
+        
+if __name__ == '__main__':
+    app = QApplication(sys.argv)
+    window = MainWindow()
+    m = MavlinkHandler('udpin:localhost:14563',window.on_message_cb)
+    window.show()
+    app.exec_()
+    m.shutdown()
