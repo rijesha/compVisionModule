@@ -38,8 +38,8 @@ class DataHandler {
   DataHandler(ArUcoProcessor &aruco_processor)
       : aruco_processor_(aruco_processor){};
 
-  std::optional<ArucoPosition> wait_for_new_position(float timeout) {
-    if (signal.try_acquire_for(timeout * 1s)) {
+  std::optional<ArucoPosition> get_new_position() {
+    if (signal.try_acquire()) {
       return current_position_;
     }
     return {};
@@ -97,11 +97,13 @@ class MavlinkHandler {
   void process_mavlink_message(const mavlink_message_t &msg) {
     switch (msg.msgid) {
       case MAVLINK_MSG_ID_SET_CONTROL_GAINS: {
+        printf("got control gains \n");
         mavlink_msg_set_control_gains_decode(&msg, &desired_gains);
         gains_valid = true;
         break;
       }
       case MAVLINK_MSG_ID_SET_TARGET_NED: {
+        printf("got target ned \n");
         mavlink_msg_set_target_ned_decode(&msg, &desired_ned);
         desired_target_valid = true;
         break;
@@ -147,6 +149,7 @@ int main(int argc, const char **argv) {
   });
   mavproxy_interface.bind_new_msg_callback([&](const mavlink_message_t &msg) {
     pixhawk_interface.write_message(msg);
+    mav_handler.process_mavlink_message(msg);
   });
 
   CameraRealsense camera;
@@ -213,12 +216,13 @@ int main(int argc, const char **argv) {
   });
 
   int count = 0;
+  int missed_count = 0;
 
   std::chrono::steady_clock::time_point loop_time =
       std::chrono::steady_clock::now();
 
   while (true) {
-    auto result = handler.wait_for_new_position(.5);
+    auto result = handler.get_new_position();
     if (result.has_value()) {
       auto gains = mav_handler.get_control_gains();
       pc.set_pos_pgain(gains.pos_pgain);
@@ -252,16 +256,22 @@ int main(int argc, const char **argv) {
       }
       auto current_time = std::chrono::steady_clock::now();
 
-      printf("count %d time %ld \n", count,
-             std::chrono::duration_cast<std::chrono::milliseconds>(
-                 current_time - loop_time)
-                 .count());
+      //printf("count %d time %ld \n", count,
+      //       std::chrono::duration_cast<std::chrono::milliseconds>(
+      //           current_time - loop_time)
+      //           .count());
       loop_time = current_time;
 
       count++;
+      missed_count = 0;
     } else {
-      send_set_attitude_target(pixhawk_interface, 0, 0, 0, 0, 0, true);
-      enable_offboard_control(pixhawk_interface, false);
+      missed_count++;
+      if (missed_count == 250) {
+        missed_count = 0;
+        send_set_attitude_target(pixhawk_interface, 0, 0, 0, 0, 0, true);
+        enable_offboard_control(pixhawk_interface, false);
+      }
+      std::this_thread::sleep_for(4ms);
     }
   }
 
