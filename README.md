@@ -30,3 +30,6 @@ on the rover
 mavproxy.py --master=udpout:127.0.0.1:14560 --out=udpout:192.168.1.68:14561
 
 the ip adress is the ipaddress of the ground station computer. 14560 is used for uav sensor deploy and 14561 is used for mavproxy on the ground station computer
+
+
+ make uav_sensor_deploy -j && ./uav_sensor_deploy/uav_sensor_deploy --calib_file ../data/realsense_calibration/realsense_cam_1.yml
