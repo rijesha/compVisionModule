@@ -14,11 +14,7 @@ using namespace cv;
 using namespace aruco;
 
 class ArucoPosition {
- private:
-  static clock_t last_creation_time;
-
  public:
-  ArucoPosition();
   ArucoPosition(Mat RTmatrix);
 
   Mat rvecs, tvecs, RTMatrix;
@@ -28,8 +24,6 @@ class ArucoPosition {
   string get_info_string();
   string get_basic_string();
   string get_uav_string();
-  clock_t creation_time;
-  clock_t time_since_last_positon;
 
   float x = 0, y = 0, z = 0;
   float ele = 0, azi = 0, tilt = 0;

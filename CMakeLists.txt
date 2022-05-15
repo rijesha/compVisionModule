@@ -6,8 +6,10 @@ project(compVisionModule VERSION 0.1.0
 		DESCRIPTION "Computer Vision Moduel for ARUCO"
 		LANGUAGES C CXX)
 
+set(CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} -Wno-address-of-packed-member")
+
 IF(NOT CMAKE_BUILD_TYPE)
-	set(CMAKE_BUILD_TYPE "MinSizeRel"
+	set(CMAKE_BUILD_TYPE "Release"
 			CACHE STRING "Choose the type of build, options are: Debug Release RelWithDebInfo MinSizeRel."
 			FORCE)
 ENDIF()

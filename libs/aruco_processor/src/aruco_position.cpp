@@ -1,16 +1,6 @@
 #include "aruco_processor/aruco_position.h"
 
-#define RESET_TIME 2
-
-clock_t ArucoPosition::last_creation_time = clock();
-
-ArucoPosition::ArucoPosition() {}
-
 ArucoPosition::ArucoPosition(Mat RTMatrixs) {
-  creation_time = clock();
-  time_since_last_positon = creation_time - last_creation_time;
-  last_creation_time = creation_time;
-
   RTMatrix = RTMatrixs(Range(0, 3), Range(0, 4));
   tvecs = RTMatrixs(Range(0, 3), Range(3, 4));
   rotMat = RTMatrixs(Range(0, 3), Range(0, 3));
