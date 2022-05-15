@@ -2,7 +2,7 @@ import sys, os
 os.environ["MAVLINK20"] = "1"
 from pymavlink import mavutil
 import threading
-#from pymavlink.dialects.v20.copperstone import *
+from pymavlink.dialects.v20.ardupilotmega import *
 
 class MavlinkHandler():
     def __init__(self, connection_string, cb = None):
@@ -15,6 +15,9 @@ class MavlinkHandler():
     
     def shutdown(self):
         self.running = False
+    
+    def send(self, msg):
+        self.m.mav.send(msg)
 
     def read_thread(self):
         while (self.running):
