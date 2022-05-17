@@ -104,10 +104,12 @@ class MainWindow(QMainWindow):
         self.mav.send(msg)
 
     def __enable_control_func(self):
-        pass
+        msg = MAVLink_command_long_message(0,1,MAV_CMD_DO_SET_MODE, False,MAV_MODE_FLAG_CUSTOM_MODE_ENABLED,4,0,0,0,0,0)
+        self.mav.send(msg)
 
     def __disable_control_func(self):
-        pass
+        msg = MAVLink_command_long_message(0,1,MAV_CMD_DO_SET_MODE, False,MAV_MODE_FLAG_CUSTOM_MODE_ENABLED,0,0,0,0,0,0)
+        self.mav.send(msg)
 
     def create_ned_layout(self):
         widget = QWidget()
