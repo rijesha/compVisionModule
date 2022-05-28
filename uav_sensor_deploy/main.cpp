@@ -267,6 +267,8 @@ int main(int argc, const char **argv) {
               << "," << endl;
 
       if (mav_handler.is_valid()) {
+        desired_angles.y = 0;
+        desired_angles.x = 0;
         send_set_attitude_target(pixhawk_interface, desired_angles.y,
                                  desired_angles.x, 0,
                                  -state_.velocity_desired.z / default_speed_up,
