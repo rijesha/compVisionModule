@@ -16,7 +16,7 @@
 #include <opencv2/core.hpp>    // Basic OpenCV structures (cv::Mat)
 #include <opencv2/videoio.hpp> // Video write
 
-constexpr float target_width{0.119};
+constexpr float target_width{0.146};
 constexpr float default_speed_up{0.20}; // in m/s. (10cm/s)
 
 std::chrono::time_point<std::chrono::high_resolution_clock> start1 =
@@ -27,6 +27,8 @@ clock_t startedDataAcquisition;
 
 ofstream logFile;
 VideoWriter outputVideo;
+
+bool automatic_mode_active = false;
 
 class DataHandler
 {
@@ -71,6 +73,12 @@ public:
         cv::putText(image, optional_position.value().second.get_uav_string(),
                     cv::Point(50, 50), cv::FONT_HERSHEY_DUPLEX, 1,
                     cv::Scalar(255, 255, 255), 2, false);
+        if (automatic_mode_active)
+        {
+          cv::putText(image, "Command Active",
+                      cv::Point(50, 100), cv::FONT_HERSHEY_DUPLEX, 1,
+                      cv::Scalar(255, 255, 255), 2, false);
+        }
         image = aruco_processor_.draw_markers_and_axis(image,
                                                        optional_position.value().first);
       }
@@ -107,6 +115,22 @@ public:
     return desired_ned.desired_angle_in_frame;
   };
 
+  void process_ardupilot_message(const mavlink_message_t &msg)
+  {
+    switch (msg.msgid)
+    {
+    case MAVLINK_MSG_ID_HEARTBEAT:
+    {
+      mavlink_heartbeat_t heartbeat_msg;
+      mavlink_msg_heartbeat_decode(&msg, &heartbeat_msg);
+      automatic_mode_active = heartbeat_msg.custom_mode == 20;
+      break;
+    }
+    default:
+      break;
+    }
+  }
+
   void process_mavlink_message(const mavlink_message_t &msg)
   {
     switch (msg.msgid)
@@ -141,7 +165,7 @@ int main(int argc, const char **argv)
 
   CVMArgumentParser argparse(argc, argv, true, false, false, false);
   logFile.open("logfile.csv");
-  logFile << "raw_north, raw_east, raw_down, current_north , current_east, "
+  logFile << "timestamp, control_active, raw_north, raw_east, raw_down, current_north , current_east, "
              "current_down, desired_north , desired_east, desired_down, "
              "vel_north, vel_east, vel_down, desired_vel_north, "
              "desired_vel_east, desired_vel_down, speed_up_ratio, pitch_target, roll_target, yaw_rate "
@@ -272,7 +296,9 @@ int main(int argc, const char **argv)
 
       // cout << "p_: " << desired_angles.y << "r_: " << desired_angles.x
       //    << "y_: " << desired_yaw_rate << endl;
-      logFile << result.value().target_ned_vector.x << ","
+      loop_time = std::chrono::steady_clock::now();
+
+      logFile << std::chrono::duration_cast<std::chrono::milliseconds>(loop_time) << automatic_mode_active << result.value().target_ned_vector.x << ","
               << result.value().target_ned_vector.y << ","
               << result.value().target_ned_vector.z << "," << state_.position.x
               << "," << state_.position.y << "," << state_.position.z << ","
@@ -295,14 +321,6 @@ int main(int argc, const char **argv)
                                  -state_.velocity_desired.z / default_speed_up,
                                  desired_yaw_rate, true);
       }
-      auto current_time = std::chrono::steady_clock::now();
-
-      // printf("count %d time %ld \n", count,
-      //        std::chrono::duration_cast<std::chrono::milliseconds>(
-      //            current_time - loop_time)
-      //            .count());
-      loop_time = current_time;
-
       count++;
       missed_count = 0;
     }

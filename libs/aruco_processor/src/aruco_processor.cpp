@@ -7,7 +7,7 @@ ArUcoProcessor::ArUcoProcessor(CameraParameters cam_params, float target_size)
   detector->setDictionary("ARUCO_MIP_16h3");
   MarkerDetector::Params& params = detector->getParameters();
 
-  params.setDetectionMode(DM_FAST, 0.02);
+  params.setDetectionMode(DM_VIDEO_FAST, 0);
   params.setCornerRefinementMethod(CORNER_LINES);
 
   // this->dictionary = getPredefinedDictionary(dictionaryName);
