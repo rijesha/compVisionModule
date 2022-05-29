@@ -128,7 +128,7 @@ int main(int argc, const char **argv) {
   logFile << "raw_north, raw_east, raw_down, current_north , current_east, "
              "current_down, desired_north , desired_east, desired_down, "
              "vel_north, vel_east, vel_down, desired_vel_north, "
-             "desired_vel_east, desired_vel_down "
+             "desired_vel_east, desired_vel_down, speed_up_ratio, pitch_target, roll_target, yaw_rate "
           << endl;
 
   outputVideo.open("out.avi", VideoWriter::fourcc('M', 'J', 'P', 'G'), 30,
@@ -264,7 +264,9 @@ int main(int argc, const char **argv) {
               << state_.velocity.x << "," << state_.velocity.y << ","
               << state_.velocity.z << "," << state_.velocity_desired.x << ","
               << state_.velocity_desired.y << "," << state_.velocity_desired.z
-              << "," << endl;
+              << "," -state_.velocity_desired.z / default_speed_up
+               << "," << desired_angles.y << "," << desired_angles.x
+                 << "," << desired_yaw_rate << endl;
 
       if (mav_handler.is_valid()) {
         desired_angles.y = 0;
