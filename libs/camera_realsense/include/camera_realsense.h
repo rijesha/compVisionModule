@@ -36,6 +36,7 @@ class CameraRealsense {
   std::vector<RealsenseDataCallback> data_callbacks_;
 
   rs2::pipeline pipe;
+  rs2::config cfg;
 
   std::thread process_thread;
   void process_function();

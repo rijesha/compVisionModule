@@ -55,37 +55,33 @@ public:
     return current_position_;
   }
 
-  void process_realsense_data(const RealsenseData &data)
-  {
-    if (data.frame1_updated)
-    {
-      std::vector<uint8_t> data_vector(
-          data.frame1.raw_ptr,
-          data.frame1.raw_ptr + data.frame1.height * data.frame1.width);
+  void process_realsense_data(const RealsenseData &data) {
+    Mat image(Size(data.frame1.width, data.frame1.height), CV_8UC1,
+              (void *)data.frame1.raw_ptr);
+    Mat image_2(Size(data.frame2.width, data.frame2.height), CV_8UC1,
+                (void *)data.frame2.raw_ptr);
 
-      Mat image_orig(Size(data.frame1.width, data.frame1.height), CV_8UC1,
-                     data_vector.data());
-      cv::Mat image = image_orig.clone();
-      auto optional_position = aruco_processor_.process_raw_frame(image, 17);
-      if (optional_position.has_value())
-      {
-        current_position_ = optional_position.value().second;
-        cv::putText(image, optional_position.value().second.get_uav_string(),
-                    cv::Point(50, 50), cv::FONT_HERSHEY_DUPLEX, 1,
-                    cv::Scalar(255, 255, 255), 2, false);
-        if (automatic_mode_active)
+    auto optional_position = aruco_processor_.process_raw_frame(image, 17);
+    if (optional_position.has_value()) {
+      current_position_ = optional_position.value().second;
+      cout << optional_position.value().second.get_uav_string() << endl;
+      cv::putText(image, optional_position.value().second.get_uav_string(),
+                  cv::Point(50, 50), cv::FONT_HERSHEY_DUPLEX, 1,
+                  cv::Scalar(255, 255, 255), 2, false);
+     if (automatic_mode_active)
         {
           cv::putText(image, "Command Active",
                       cv::Point(50, 100), cv::FONT_HERSHEY_DUPLEX, 1,
                       cv::Scalar(255, 255, 255), 2, false);
         }
-        image = aruco_processor_.draw_markers_and_axis(image,
-                                                       optional_position.value().first);
-      }
-      outputVideo << image;
-      if (optional_position.has_value())
-        signal.release();
+      image = aruco_processor_.draw_markers_and_axis(
+          image, optional_position.value().first);
     }
+
+    Mat dst;
+    cv::hconcat(image, image_2, dst);
+    outputVideo << dst;
+    if (optional_position.has_value()) signal.release();
   }
 };
 
@@ -172,7 +168,7 @@ int main(int argc, const char **argv)
           << endl;
 
   outputVideo.open("out.avi", VideoWriter::fourcc('M', 'J', 'P', 'G'), 30,
-                   Size(848, 800), false);
+                   Size(1696, 800), false);
 
   aruco::CameraParameters cam_param;
   cam_param.readFromXMLFile(argparse.calib_file_path);
@@ -321,6 +317,14 @@ int main(int argc, const char **argv)
                                  -state_.velocity_desired.z / default_speed_up,
                                  desired_yaw_rate, true);
       }
+      auto current_time = std::chrono::steady_clock::now();
+
+      // printf("count %d time %ld \n", count,
+      //        std::chrono::duration_cast<std::chrono::milliseconds>(
+      //            current_time - loop_time)
+      //            .count());
+      loop_time = current_time;
+
       count++;
       missed_count = 0;
     }
