@@ -7,7 +7,7 @@ ArUcoProcessor::ArUcoProcessor(CameraParameters cam_params, float target_size)
   detector->setDictionary("ARUCO_MIP_16h3");
   MarkerDetector::Params& params = detector->getParameters();
 
-  params.setDetectionMode(DM_VIDEO_FAST, 0);
+  params.setDetectionMode(DM_FAST, 0);
   params.setCornerRefinementMethod(CORNER_LINES);
 
   // this->dictionary = getPredefinedDictionary(dictionaryName);
@@ -57,6 +57,7 @@ std::optional<ArucoPosition> ArUcoProcessor::calculate_pose(Marker& marker) {
   // cout << marker.getTransformMatrix() << endl;
   cout << "done RVEC" << endl;
   */
+  
   if (!RTmatrix.empty()) {
     return ArucoPosition(RTmatrix);
   }

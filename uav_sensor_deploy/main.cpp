@@ -11,142 +11,146 @@
 #include <thread>
 #include "camera_realsense.h"
 #include "position_controller.h"
-#include "states.hpp"
 
-#include <opencv2/core.hpp>    // Basic OpenCV structures (cv::Mat)
-#include <opencv2/videoio.hpp> // Video write
+#include <opencv2/core.hpp>     // Basic OpenCV structures (cv::Mat)
+#include <opencv2/videoio.hpp>  // Video write
 
 constexpr float target_width{0.146};
-constexpr float default_speed_up{0.20}; // in m/s. (10cm/s)
+constexpr float default_speed_up{0.20};  // in m/s. (10cm/s)
 
-std::chrono::time_point<std::chrono::high_resolution_clock> start1 =
-    std::chrono::high_resolution_clock::now();
-
-clock_t lastDetectedTime;
-clock_t startedDataAcquisition;
+std::chrono::steady_clock::time_point start_time =
+    std::chrono::steady_clock::now();
 
 ofstream logFile;
 VideoWriter outputVideo;
 
 bool automatic_mode_active = false;
 
-class DataHandler
-{
-private:
+struct aruco_position_frame {
+  ArucoPosition position{false};
+  std::chrono::steady_clock::time_point frame_time;
+  std::chrono::steady_clock::time_point position_time;
+};
+
+class DataHandler {
+ private:
   ArUcoProcessor &aruco_processor_;
   std::binary_semaphore signal{0};
-  std::optional<ArucoPosition> current_position_;
-
-public:
+  aruco_position_frame current_position_;
+  
+ public:
   DataHandler(ArUcoProcessor &aruco_processor)
       : aruco_processor_(aruco_processor){};
 
-  std::optional<ArucoPosition> get_new_position()
-  {
-    if (signal.try_acquire())
-    {
+  std::optional<aruco_position_frame> get_new_position() {
+    if (signal.try_acquire()) {
       return current_position_;
     }
     return {};
   }
 
-  std::optional<ArucoPosition> get_current_position()
-  {
-    return current_position_;
-  }
+  aruco_position_frame get_current_position() { return current_position_; }
 
   void process_realsense_data(const RealsenseData &data) {
+    current_position_.frame_time = data.frame_time;
+
     Mat image(Size(data.frame1.width, data.frame1.height), CV_8UC1,
               (void *)data.frame1.raw_ptr);
     Mat image_2(Size(data.frame2.width, data.frame2.height), CV_8UC1,
                 (void *)data.frame2.raw_ptr);
+    
+    /*count++;
+    if ((count % 25) == 0) {
+      cout << "saving image" << endl;
+      imwrite("cam1_" + to_string(count1) + ".jpg", image);
+      imwrite("cam2_" + to_string(count1) + ".jpg", image_2);
+      count1++;
+    }*/
 
     auto optional_position = aruco_processor_.process_raw_frame(image, 17);
+    current_position_.position_time = std::chrono::steady_clock::now();
+
     if (optional_position.has_value()) {
-      current_position_ = optional_position.value().second;
-      cout << optional_position.value().second.get_uav_string() << endl;
+      current_position_.position = optional_position.value().second;
+      cout << optional_position.value().second.get_uav_string();
       cv::putText(image, optional_position.value().second.get_uav_string(),
                   cv::Point(50, 50), cv::FONT_HERSHEY_DUPLEX, 1,
                   cv::Scalar(255, 255, 255), 2, false);
-     if (automatic_mode_active)
-        {
-          cv::putText(image, "Command Active",
-                      cv::Point(50, 100), cv::FONT_HERSHEY_DUPLEX, 1,
-                      cv::Scalar(255, 255, 255), 2, false);
-        }
+      if (automatic_mode_active) {
+        cv::putText(image, "Command Active", cv::Point(50, 100),
+                    cv::FONT_HERSHEY_DUPLEX, 1, cv::Scalar(255, 255, 255), 2,
+                    false);
+      }
       image = aruco_processor_.draw_markers_and_axis(
           image, optional_position.value().first);
     }
 
     Mat dst;
     cv::hconcat(image, image_2, dst);
+
     outputVideo << dst;
     if (optional_position.has_value()) signal.release();
   }
 };
 
-class MavlinkHandler
-{
-private:
+class MavlinkHandler {
+ private:
   bool gains_valid{};
   bool desired_target_valid{};
   mavlink_set_target_ned_t desired_ned;
   mavlink_set_control_gains_t desired_gains;
 
-public:
+ public:
   MavlinkHandler(){};
 
   bool is_valid() { return gains_valid & desired_target_valid; };
 
   mavlink_set_control_gains_t get_control_gains() { return desired_gains; }
 
-  Vector3f get_desired_position()
-  {
+  Vector3f get_desired_position() {
     return {desired_ned.desired_north, desired_ned.desired_east,
             desired_ned.desired_down};
   };
 
-  float get_desired_angle_in_frame()
-  {
+  float get_desired_angle_in_frame() {
     return desired_ned.desired_angle_in_frame;
   };
 
-  void process_ardupilot_message(const mavlink_message_t &msg)
-  {
-    switch (msg.msgid)
-    {
-    case MAVLINK_MSG_ID_HEARTBEAT:
-    {
-      mavlink_heartbeat_t heartbeat_msg;
-      mavlink_msg_heartbeat_decode(&msg, &heartbeat_msg);
-      automatic_mode_active = heartbeat_msg.custom_mode == 20;
-      break;
-    }
-    default:
-      break;
+  void process_ardupilot_message(const mavlink_message_t &msg) {
+    switch (msg.msgid) {
+      case MAVLINK_MSG_ID_HEARTBEAT: {
+        mavlink_heartbeat_t heartbeat_msg;
+        mavlink_msg_heartbeat_decode(&msg, &heartbeat_msg);
+        automatic_mode_active = heartbeat_msg.custom_mode == 20;
+        break;
+      }
+      default:
+        break;
     }
   }
 
-  void process_mavlink_message(const mavlink_message_t &msg)
-  {
-    switch (msg.msgid)
-    {
-    case MAVLINK_MSG_ID_SET_CONTROL_GAINS:
-    {
-      printf("got control gains \n");
-      mavlink_msg_set_control_gains_decode(&msg, &desired_gains);
-      gains_valid = true;
-      break;
-    }
-    case MAVLINK_MSG_ID_SET_TARGET_NED:
-    {
-      printf("got target ned \n");
-      mavlink_msg_set_target_ned_decode(&msg, &desired_ned);
-      desired_target_valid = true;
-      break;
-    }
-    default:
-      break;
+  void process_mavlink_message(const mavlink_message_t &msg) {
+    switch (msg.msgid) {
+      case MAVLINK_MSG_ID_SET_CONTROL_GAINS: {
+        printf("got control gains \n");
+        mavlink_msg_set_control_gains_decode(&msg, &desired_gains);
+        gains_valid = true;
+        if (gains_valid && desired_target_valid) {
+          printf("Control Enabled \n");
+        }
+        break;
+      }
+      case MAVLINK_MSG_ID_SET_TARGET_NED: {
+        printf("got target ned \n");
+        mavlink_msg_set_target_ned_decode(&msg, &desired_ned);
+        desired_target_valid = true;
+        if (gains_valid && desired_target_valid) {
+          printf("Control Enabled \n");
+        }
+        break;
+      }
+      default:
+        break;
     }
   }
 };
@@ -154,17 +158,20 @@ public:
 MavlinkHandler mav_handler{};
 thread feedback_th;
 
-int main(int argc, const char **argv)
-{
+int main(int argc, const char **argv) {
   cout << std::fixed << std::showpoint;
   cout << std::setprecision(3);
 
   CVMArgumentParser argparse(argc, argv, true, false, false, false);
   logFile.open("logfile.csv");
-  logFile << "timestamp, control_active, raw_north, raw_east, raw_down, current_north , current_east, "
+  logFile << "frame_time, position_time, start_control_time, control_time, "
+             "control_active, "
+             "raw_north, raw_east, raw_down, "
+             "current_north , current_east, "
              "current_down, desired_north , desired_east, desired_down, "
              "vel_north, vel_east, vel_down, desired_vel_north, "
-             "desired_vel_east, desired_vel_down, speed_up_ratio, pitch_target, roll_target, yaw_rate "
+             "desired_vel_east, desired_vel_down, speed_up_ratio, "
+             "pitch_target, roll_target, yaw_rate "
           << endl;
 
   outputVideo.open("out.avi", VideoWriter::fourcc('M', 'J', 'P', 'G'), 30,
@@ -187,22 +194,21 @@ int main(int argc, const char **argv)
   MultithreadedInterface pixhawk_interface(pixhawk_serial);
   MultithreadedInterface mavproxy_interface(mavproxy_udp);
 
-  pixhawk_interface.bind_new_msg_callback([&](const mavlink_message_t &msg)
-                                          { mavproxy_interface.write_message(msg); });
-  mavproxy_interface.bind_new_msg_callback([&](const mavlink_message_t &msg)
-                                           {
+  pixhawk_interface.bind_new_msg_callback([&](const mavlink_message_t &msg) {
+    mavproxy_interface.write_message(msg);
+  });
+  mavproxy_interface.bind_new_msg_callback([&](const mavlink_message_t &msg) {
     pixhawk_interface.write_message(msg);
-    mav_handler.process_mavlink_message(msg); });
+    mav_handler.process_mavlink_message(msg);
+  });
 
   CameraRealsense camera;
   camera.bind_data_callback(
-      [&](const RealsenseData &data)
-      { handler.process_realsense_data(data); });
+      [&](const RealsenseData &data) { handler.process_realsense_data(data); });
 
   printf("Camera Opened\n");
   feedback_th = thread([&pc, &mavproxy_interface, &handler, &state_,
-                        &desired_angles, &desired_yaw_rate]()
-                       {
+                        &desired_angles, &desired_yaw_rate]() {
     while (true) {
       std::this_thread::sleep_for(500ms);
       mavlink_message_t msg;
@@ -223,14 +229,12 @@ int main(int argc, const char **argv)
 
       mavlink_target_ned_t target_ned;
       auto current_pos = handler.get_current_position();
-      if (current_pos.has_value()) {
-        target_ned.north = current_pos.value().target_ned_vector.x;
-        target_ned.east = current_pos.value().target_ned_vector.y;
-        target_ned.down = current_pos.value().target_ned_vector.z;
-        target_ned.yaw = current_pos.value().target_ned_vector.yaw;
-        target_ned.angle_in_frame =
-            current_pos.value().get_yaw_from_target_centre();
-      }
+      target_ned.north = current_pos.position.target_ned_vector.x;
+      target_ned.east = current_pos.position.target_ned_vector.y;
+      target_ned.down = current_pos.position.target_ned_vector.z;
+      target_ned.yaw = current_pos.position.target_ned_vector.yaw;
+      target_ned.angle_in_frame =
+          current_pos.position.get_yaw_from_target_centre();
 
       auto desired_pos = mav_handler.get_desired_position();
       target_ned.desired_north = desired_pos.x;
@@ -256,19 +260,21 @@ int main(int argc, const char **argv)
       control_targets.pitch = desired_angles.x;
       mavlink_msg_control_targets_encode(0, 0, &msg, &control_targets);
       mavproxy_interface.write_message(msg);
-    } });
+    }
+  });
 
   int count = 0;
   int missed_count = 0;
 
-  std::chrono::steady_clock::time_point loop_time =
+  std::chrono::steady_clock::time_point start_control_time =
+      std::chrono::steady_clock::now();
+  std::chrono::steady_clock::time_point control_time =
       std::chrono::steady_clock::now();
 
-  while (true)
-  {
+  while (true) {
     auto result = handler.get_new_position();
-    if (result.has_value())
-    {
+    if (result.has_value()) {
+      start_control_time = std::chrono::steady_clock::now();
       auto gains = mav_handler.get_control_gains();
       pc.set_pos_pgain(gains.pos_pgain);
       pc.set_pos_z_pgain(gains.pos_pgain_z);
@@ -278,38 +284,54 @@ int main(int argc, const char **argv)
       pc.set_vel_z_igain(gains.vel_igain_z);
       pc.set_yaw_gain(gains.yaw_pgain);
 
-      state_ = pc.run_loop(result.value().target_ned_vector,
+      state_ = pc.run_loop(result.value().position.target_ned_vector,
                            mav_handler.get_desired_position());
 
       // cout << result.value().get_uav_string();
       desired_angles = pc.acceleration_to_attitude(
           state_.acceleration_desired.x, state_.acceleration_desired.y,
-          result.value().target_ned_vector.yaw);
+          result.value().position.target_ned_vector.yaw);
 
       desired_yaw_rate =
-          pc.get_yaw_rate(result.value().get_yaw_from_target_centre(),
+          pc.get_yaw_rate(result.value().position.get_yaw_from_target_centre(),
                           mav_handler.get_desired_angle_in_frame());
 
       // cout << "p_: " << desired_angles.y << "r_: " << desired_angles.x
       //    << "y_: " << desired_yaw_rate << endl;
-      loop_time = std::chrono::steady_clock::now();
+      control_time = std::chrono::steady_clock::now();
 
-      logFile << std::chrono::duration_cast<std::chrono::milliseconds>(loop_time) << automatic_mode_active << result.value().target_ned_vector.x << ","
-              << result.value().target_ned_vector.y << ","
-              << result.value().target_ned_vector.z << "," << state_.position.x
-              << "," << state_.position.y << "," << state_.position.z << ","
+      logFile << std::chrono::duration_cast<std::chrono::milliseconds>(
+                     result.value().frame_time - start_time)
+                     .count()
+              << ","
+              << std::chrono::duration_cast<std::chrono::milliseconds>(
+                     result.value().position_time - start_time)
+                     .count()
+              << ","
+              << std::chrono::duration_cast<std::chrono::milliseconds>(
+                     start_control_time - start_time)
+                     .count()
+              << ","
+              << std::chrono::duration_cast<std::chrono::milliseconds>(
+                     control_time - start_time)
+                     .count()
+              << "," << automatic_mode_active << ","
+              << result.value().position.target_ned_vector.x << ","
+              << result.value().position.target_ned_vector.y << ","
+              << result.value().position.target_ned_vector.z << ","
+              << state_.position.x << "," << state_.position.y << ","
+              << state_.position.z << ","
               << mav_handler.get_desired_position().x << ","
               << mav_handler.get_desired_position().y << ","
               << mav_handler.get_desired_position().z << ","
               << state_.velocity.x << "," << state_.velocity.y << ","
               << state_.velocity.z << "," << state_.velocity_desired.x << ","
               << state_.velocity_desired.y << "," << state_.velocity_desired.z
-              << "," << -state_.velocity_desired.z / default_speed_up
-              << "," << desired_angles.y << "," << desired_angles.x
-              << "," << desired_yaw_rate << endl;
+              << "," << -state_.velocity_desired.z / default_speed_up << ","
+              << desired_angles.y << "," << desired_angles.x << ","
+              << desired_yaw_rate << endl;
 
-      if (mav_handler.is_valid())
-      {
+      if (mav_handler.is_valid()) {
         desired_angles.y = 0;
         desired_angles.x = 0;
         send_set_attitude_target(pixhawk_interface, desired_angles.y,
@@ -317,27 +339,17 @@ int main(int argc, const char **argv)
                                  -state_.velocity_desired.z / default_speed_up,
                                  desired_yaw_rate, true);
       }
-      auto current_time = std::chrono::steady_clock::now();
-
-      // printf("count %d time %ld \n", count,
-      //        std::chrono::duration_cast<std::chrono::milliseconds>(
-      //            current_time - loop_time)
-      //            .count());
-      loop_time = current_time;
 
       count++;
       missed_count = 0;
-    }
-    else
-    {
+    } else {
       missed_count++;
-      if (missed_count == 250)
-      {
+      if (missed_count == 250) {
         missed_count = 0;
         send_set_attitude_target(pixhawk_interface, 0, 0, 0, 0, 0, true);
         enable_offboard_control(pixhawk_interface, false);
       }
-      std::this_thread::sleep_for(4ms);
+      std::this_thread::sleep_for(2ms);
     }
   }
 

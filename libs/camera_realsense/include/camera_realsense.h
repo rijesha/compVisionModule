@@ -14,6 +14,8 @@ struct RealSenseImageData {
 
 struct RealsenseData {
   int frame_index;
+  std::chrono::steady_clock::time_point frame_time =
+      std::chrono::steady_clock::now();
   rs2_vector gyro_data{};
   rs2_vector accel_data{};
   rs2_pose pose_data{};

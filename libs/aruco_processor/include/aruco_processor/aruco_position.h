@@ -16,7 +16,9 @@ using namespace aruco;
 class ArucoPosition {
  public:
   ArucoPosition(Mat RTmatrix);
+  ArucoPosition(bool valid);
 
+  bool valid = false;
   Mat rvecs, tvecs, RTMatrix;
   Mat eulersAngles;
 

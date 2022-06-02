@@ -25,11 +25,8 @@ CameraRealsense::CameraRealsense() {
 void CameraRealsense::process_function() {
   int i = 0;
   while (!shutdown_) {
-    RealsenseData data;
-    rs2::frame frame1;
-    rs2::frame frame2;
-
     auto frames = pipe.wait_for_frames();
+    RealsenseData data;
     auto pose_frame = frames.get_pose_frame();
     auto fisheye_frame_1 = frames.get_fisheye_frame(1);
     auto fisheye_frame_2 = frames.get_fisheye_frame(2);

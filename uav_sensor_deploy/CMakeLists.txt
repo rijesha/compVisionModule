@@ -10,7 +10,6 @@ project(uav_sensor_deploy VERSION 1.0
 add_executable(${PROJECT_NAME} main.cpp)
 target_sources(${PROJECT_NAME}
 	PRIVATE
-                states.hpp
 )
 
 find_package(OpenCV REQUIRED)

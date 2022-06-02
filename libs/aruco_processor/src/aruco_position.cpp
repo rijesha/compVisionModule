@@ -1,6 +1,9 @@
 #include "aruco_processor/aruco_position.h"
 
+ArucoPosition::ArucoPosition(bool val) { valid = val; };
+
 ArucoPosition::ArucoPosition(Mat RTMatrixs) {
+  valid = true;
   RTMatrix = RTMatrixs(Range(0, 3), Range(0, 4));
   tvecs = RTMatrixs(Range(0, 3), Range(3, 4));
   rotMat = RTMatrixs(Range(0, 3), Range(0, 3));
@@ -58,7 +61,7 @@ string ArucoPosition::get_uav_string() {
   output << std::setprecision(4);
 
   output << "N: " << target_ned_vector.x << "m E: " << target_ned_vector.y
-         << "m D: " << target_ned_vector.z
-         << "m Yaw: " << target_ned_vector.yaw << endl;
+         << "m D: " << target_ned_vector.z << "m Yaw: " << target_ned_vector.yaw
+         << endl;
   return output.str();
 }
