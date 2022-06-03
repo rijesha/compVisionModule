@@ -177,10 +177,13 @@ int main(int argc, const char **argv) {
   outputVideo.open("out.avi", VideoWriter::fourcc('M', 'J', 'P', 'G'), 30,
                    Size(1696, 800), false);
 
-  aruco::CameraParameters cam_param;
-  cam_param.readFromXMLFile(argparse.calib_file_path);
+  aruco::CameraParameters cam_param_1;
+  aruco::CameraParameters cam_param_2;
+  cam_param_1.readFromXMLFile(argparse.calib_file_path_1);
+  cam_param_2.readFromXMLFile(argparse.calib_file_path_2);
 
-  ArUcoProcessor aruco_processor(cam_param, target_width);
+  ArUcoProcessor aruco_processor(cam_param_1, target_width);
+  
   PositionController pc{3, 0.5};
   PositionControllerState state_;
   Vector3f desired_angles;

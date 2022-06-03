@@ -19,7 +19,8 @@ class CVMArgumentParser {
   bool saveVideo;
   bool saveTiming;
   bool quiet;
-  string calib_file_path;
+  string calib_file_path_1;
+  string calib_file_path_2;
   string inputpath;
   string outputpath;
 };

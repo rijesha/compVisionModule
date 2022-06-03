@@ -5,7 +5,8 @@ CVMArgumentParser::CVMArgumentParser(int argc, const char** argv,
                                      bool requireInputPath, bool requireSize) {
   // make a new ArgumentParser
   ArgumentParser parser;
-  parser.addArgument("-c", "--calib_file", 1, !requireCalib);
+  parser.addArgument("-c1", "--calib_file_1", 1, !requireCalib);
+  parser.addArgument("-c2", "--calib_file_2", 1, !requireCalib);
   parser.addArgument("-d", "--devices", 1, true);
   parser.addArgument("-h", "--height", 1, !requireSize);
   parser.addArgument("-w", "--width", 1, !requireSize);
@@ -21,8 +22,12 @@ CVMArgumentParser::CVMArgumentParser(int argc, const char** argv,
 
   inputpath = parser.retrieve<string>("i");
 
-  calib_file_path = parser.retrieve<string>("c");
-  cout << calib_file_path << endl;
+  calib_file_path_1 = parser.retrieve<string>("c1");
+  cout << calib_file_path_1 << endl;
+  
+  calib_file_path_2 = parser.retrieve<string>("c2");
+  cout << calib_file_path_2 << endl;
+
 
   deviceID = "/dev/video0";
   string devicestring = parser.retrieve<string>("d");
