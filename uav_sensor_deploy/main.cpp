@@ -1,3 +1,4 @@
+#include <aruco_processor/aruco_dual_image_processor.h>
 #include <aruco_processor/aruco_position.h>
 #include <aruco_processor/aruco_processor.h>
 #include <common/configuration.h>
@@ -34,12 +35,12 @@ struct aruco_position_frame {
 
 class DataHandler {
  private:
-  ArUcoProcessor &aruco_processor_;
+  ArUcoDualImageProcessor &aruco_processor_;
   std::binary_semaphore signal{0};
   aruco_position_frame current_position_;
-  
+
  public:
-  DataHandler(ArUcoProcessor &aruco_processor)
+  DataHandler(ArUcoDualImageProcessor &aruco_processor)
       : aruco_processor_(aruco_processor){};
 
   std::optional<aruco_position_frame> get_new_position() {
@@ -58,16 +59,17 @@ class DataHandler {
               (void *)data.frame1.raw_ptr);
     Mat image_2(Size(data.frame2.width, data.frame2.height), CV_8UC1,
                 (void *)data.frame2.raw_ptr);
-    
-    /*count++;
+
+    count++;
     if ((count % 25) == 0) {
       cout << "saving image" << endl;
-      imwrite("cam1_" + to_string(count1) + ".jpg", image);
-      imwrite("cam2_" + to_string(count1) + ".jpg", image_2);
+      imwrite("checker_cam1_" + to_string(count1) + ".jpg", image);
+      imwrite("checker_cam2_" + to_string(count1) + ".jpg", image_2);
       count1++;
-    }*/
+    }
 
-    auto optional_position = aruco_processor_.process_raw_frame(image, 17);
+    auto optional_position =
+        aruco_processor_.process_raw_frame(image, image_2, 17);
     current_position_.position_time = std::chrono::steady_clock::now();
 
     if (optional_position.has_value()) {
@@ -82,7 +84,9 @@ class DataHandler {
                     false);
       }
       image = aruco_processor_.draw_markers_and_axis(
-          image, optional_position.value().first);
+          image, optional_position.value().first.first, 1);
+      image_2 = aruco_processor_.draw_markers_and_axis(
+          image_2, optional_position.value().first.second, 2);
     }
 
     Mat dst;
@@ -182,8 +186,10 @@ int main(int argc, const char **argv) {
   cam_param_1.readFromXMLFile(argparse.calib_file_path_1);
   cam_param_2.readFromXMLFile(argparse.calib_file_path_2);
 
-  ArUcoProcessor aruco_processor(cam_param_1, target_width);
-  
+  // ArUcoProcessor aruco_processor(cam_param_1, target_width);
+  ArUcoDualImageProcessor aruco_processor(cam_param_1, cam_param_2,
+                                          target_width);
+
   PositionController pc{3, 0.5};
   PositionControllerState state_;
   Vector3f desired_angles;

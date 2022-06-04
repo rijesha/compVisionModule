@@ -18,11 +18,13 @@ add_library(${PROJECT_NAME} STATIC)
 set_target_properties(${PROJECT_NAME} PROPERTIES LINKER_LANGUAGE CXX)
 target_sources(${PROJECT_NAME}
     PUBLIC
+        include/aruco_processor/aruco_dual_image_processor.h
         include/aruco_processor/aruco_position.h
 	include/aruco_processor/aruco_processor.h
         include/aruco_processor/undistort_image.h
     PRIVATE
         src/aruco_position.cpp
+	src/aruco_dual_image_processor.cpp
 	src/aruco_processor.cpp
         src/undistort_image.cpp
 )
