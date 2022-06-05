@@ -7,6 +7,7 @@ CVMArgumentParser::CVMArgumentParser(int argc, const char** argv,
   ArgumentParser parser;
   parser.addArgument("-l", "--calib_file_1", 1, !requireCalib);
   parser.addArgument("-r", "--calib_file_2", 1, !requireCalib);
+  parser.addArgument("-f", "--fisheye_calib_file", 1, !requireCalib);
   parser.addArgument("-d", "--devices", 1, true);
   parser.addArgument("-h", "--height", 1, !requireSize);
   parser.addArgument("-w", "--width", 1, !requireSize);
@@ -27,7 +28,8 @@ CVMArgumentParser::CVMArgumentParser(int argc, const char** argv,
   
   calib_file_path_2 = parser.retrieve<string>("r");
   cout << calib_file_path_2 << endl;
-
+  
+  fisheye_calib_file_path = parser.retrieve<string>("f");
 
   deviceID = "/dev/video0";
   string devicestring = parser.retrieve<string>("d");

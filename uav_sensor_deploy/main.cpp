@@ -11,6 +11,7 @@
 #include <semaphore>
 #include <thread>
 #include "camera_realsense.h"
+#include "common/load_fisheye_calibration.h"
 #include "position_controller.h"
 
 #include <opencv2/core.hpp>     // Basic OpenCV structures (cv::Mat)
@@ -38,6 +39,7 @@ class DataHandler {
   ArUcoDualImageProcessor &aruco_processor_;
   std::binary_semaphore signal{0};
   aruco_position_frame current_position_;
+  int count, count1;
 
  public:
   DataHandler(ArUcoDualImageProcessor &aruco_processor)
@@ -60,23 +62,32 @@ class DataHandler {
     Mat image_2(Size(data.frame2.width, data.frame2.height), CV_8UC1,
                 (void *)data.frame2.raw_ptr);
 
+    // image = aruco_processor_.undistort_left_image(image);
+    // image_2 = aruco_processor_.undistort_right_image(image_2);
+
+    /*
     count++;
     if ((count % 25) == 0) {
       cout << "saving image" << endl;
       imwrite("checker_cam1_" + to_string(count1) + ".jpg", image);
       imwrite("checker_cam2_" + to_string(count1) + ".jpg", image_2);
       count1++;
-    }
+    }*/
 
     auto optional_position =
         aruco_processor_.process_raw_frame(image, image_2, 17);
     current_position_.position_time = std::chrono::steady_clock::now();
 
     if (optional_position.has_value()) {
-      current_position_.position = optional_position.value().second;
-      cout << optional_position.value().second.get_uav_string();
-      cv::putText(image, optional_position.value().second.get_uav_string(),
-                  cv::Point(50, 50), cv::FONT_HERSHEY_DUPLEX, 1,
+      current_position_.position = optional_position.value().second.first;
+      cout << optional_position.value().second.first.get_uav_string();
+      cv::putText(image,
+                  optional_position.value().second.first.get_uav_string(),
+                  cv::Point(25, 25), cv::FONT_HERSHEY_DUPLEX, .75,
+                  cv::Scalar(255, 255, 255), 2, false);
+      cv::putText(image_2,
+                  optional_position.value().second.second.get_uav_string(),
+                  cv::Point(25, 25), cv::FONT_HERSHEY_DUPLEX, .75,
                   cv::Scalar(255, 255, 255), 2, false);
       if (automatic_mode_active) {
         cv::putText(image, "Command Active", cv::Point(50, 100),
@@ -181,16 +192,19 @@ int main(int argc, const char **argv) {
   outputVideo.open("out.avi", VideoWriter::fourcc('M', 'J', 'P', 'G'), 30,
                    Size(1696, 800), false);
 
+  auto fisheye_params =
+      readFisheyeParamsFromXMLFile(argparse.fisheye_calib_file_path);
+
   aruco::CameraParameters cam_param_1;
   aruco::CameraParameters cam_param_2;
   cam_param_1.readFromXMLFile(argparse.calib_file_path_1);
   cam_param_2.readFromXMLFile(argparse.calib_file_path_2);
 
   // ArUcoProcessor aruco_processor(cam_param_1, target_width);
-  ArUcoDualImageProcessor aruco_processor(cam_param_1, cam_param_2,
-                                          target_width);
+  ArUcoDualImageProcessor aruco_processor(fisheye_params, cam_param_1,
+                                          cam_param_2, target_width);
 
-  PositionController pc{3, 0.5};
+  PositionController pc{5, 0.5};
   PositionControllerState state_;
   Vector3f desired_angles;
   float desired_yaw_rate;
@@ -205,6 +219,7 @@ int main(int argc, const char **argv) {
 
   pixhawk_interface.bind_new_msg_callback([&](const mavlink_message_t &msg) {
     mavproxy_interface.write_message(msg);
+    mav_handler.process_ardupilot_message(msg);
   });
   mavproxy_interface.bind_new_msg_callback([&](const mavlink_message_t &msg) {
     pixhawk_interface.write_message(msg);
@@ -293,6 +308,10 @@ int main(int argc, const char **argv) {
       pc.set_vel_z_igain(gains.vel_igain_z);
       pc.set_yaw_gain(gains.yaw_pgain);
 
+      if (!automatic_mode_active) {
+        pc.reset_integral();
+      }
+
       state_ = pc.run_loop(result.value().position.target_ned_vector,
                            mav_handler.get_desired_position());
 
@@ -356,7 +375,6 @@ int main(int argc, const char **argv) {
       if (missed_count == 250) {
         missed_count = 0;
         send_set_attitude_target(pixhawk_interface, 0, 0, 0, 0, 0, true);
-        enable_offboard_control(pixhawk_interface, false);
       }
       std::this_thread::sleep_for(2ms);
     }

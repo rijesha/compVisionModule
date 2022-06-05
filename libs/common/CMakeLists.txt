@@ -13,6 +13,7 @@ target_sources(${PROJECT_NAME}
         common/cvm_argument_parser.hpp
         common/navigational_state.hpp
         common/configuration.h
+        common/load_fisheye_calibration.h
     PRIVATE
         common/cvm_argument_parser.cpp
 )
