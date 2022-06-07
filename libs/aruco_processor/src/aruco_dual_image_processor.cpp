@@ -65,7 +65,7 @@ ArUcoDualImageProcessor::process_raw_frame(Mat image1, Mat image2, int markerID)
     auto res =
       pose_tracker->estimatePose(res1.value(), cam_params_, target_size_, 10.0);
     
-    cout << "matrix rvec" << m.rvec[0] << ", "<< m.rvec[1] << ", "<< m.rvec[2] << endl;
+    cout << "matrix calc" << m.rvec[0] << ", "<< m.rvec[1] << ", "<< m.rvec[2] << endl;
     Mat RTmatrix = pose_tracker->getRTMatrix();
     if (!RTmatrix.empty()) {
       return {res1.value(), ArucoPosition(RTmatrix)};
