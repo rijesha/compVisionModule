@@ -10,6 +10,8 @@ CameraRealsense::CameraRealsense() {
   auto fisheye_stream_1 = pipe_profile.get_stream(RS2_STREAM_FISHEYE, 1);
   auto fisheye_intrinsics_1 =
       fisheye_stream_1.as<rs2::video_stream_profile>().get_intrinsics();
+  //std::cout << "f1: " << fisheye_intrinsics_1.fx << " " << fisheye_intrinsics_1.fy
+  //     << std::endl;
   auto body_fisheye_extr_1 = fisheye_stream_1.get_extrinsics_to(
       pipe_profile.get_stream(RS2_STREAM_POSE));
 

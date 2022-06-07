@@ -21,6 +21,7 @@ class CVMArgumentParser {
   bool quiet;
   string calib_file_path_1;
   string calib_file_path_2;
+  string fisheye_calib_file_path;
   string inputpath;
   string outputpath;
 };
