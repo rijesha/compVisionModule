@@ -139,6 +139,10 @@ class MavlinkHandler {
         automatic_mode_active = heartbeat_msg.custom_mode == 20;
         break;
       }
+      case MAVLINK_MSG_ID_ATTITUDE_TARGET: {
+        cout <<  "Got attitude target" << endl;
+        break;
+      }
       default:
         break;
     }
