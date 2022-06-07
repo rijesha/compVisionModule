@@ -284,8 +284,8 @@ int main(int argc, const char **argv) {
       control_targets.acc_n = state_.acceleration_desired.x;
       control_targets.acc_e = state_.acceleration_desired.y;
       control_targets.acc_d = state_.acceleration_desired.z;
-      control_targets.roll = desired_angles.y;
-      control_targets.pitch = desired_angles.x;
+      control_targets.roll = desired_angles.x;
+      control_targets.pitch = desired_angles.y;
       mavlink_msg_control_targets_encode(0, 0, &msg, &control_targets);
       mavproxy_interface.write_message(msg);
     }
